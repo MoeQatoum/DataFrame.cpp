@@ -39,17 +39,16 @@ struct Series
 
   private:
   DataFrameIndex m_idx;
-  size_t         m_length = d_len;
   T              m_d[d_len];
 };
 
-template<typename T, int df_size, int col_len, int row_len>
+template<typename T, std::size_t df_size, std::size_t col_len, std::size_t row_len>
 class StringIndexer;
 
-template<typename T, int df_size, int col_len, int row_len>
+template<typename T, std::size_t df_size, std::size_t col_len, std::size_t row_len>
 class IntegerIndexer;
 
-template<typename T, int df_size, int col_len, int row_len>
+template<typename T, std::size_t df_size, std::size_t col_len, std::size_t row_len>
 class DataFrame
 {
   friend class StringIndexer<T, df_size, col_len, row_len>;
@@ -57,18 +56,18 @@ class DataFrame
 
   public:
   DataFrame(std::array<std::string, col_len> col_names, std::array<std::string, row_len> row_names)
-      : m_col_names(col_names),
-        m_row_names(row_names),
-        loc(this),
-        iloc(this)
+      : loc(this),
+        iloc(this),
+        m_col_names(col_names),
+        m_row_names(row_names)
   {
 
-    for (int i = 0; i < col_len; i++)
+    for (std::size_t i = 0; i < col_len; i++)
     {
-      m_row_idx_map.insert({m_col_names[i], i});
+      m_col_idx_map.insert({m_col_names[i], i});
     }
 
-    for (int i = 0; i < row_len; i++)
+    for (std::size_t i = 0; i < row_len; i++)
     {
       m_row_idx_map.insert({m_row_names[i], i});
     }
@@ -111,7 +110,7 @@ class DataFrame
 
   void print()
   {
-    for (int i = 0; i < col_len; i++)
+    for (std::size_t i = 0; i < col_len; i++)
     {
       if (i == 0)
       {
@@ -127,11 +126,11 @@ class DataFrame
       }
     }
 
-    for (int i = 0; i < (sizeof(m_data) / sizeof(T)); i++)
+    for (std::size_t i = 0; i < (sizeof(m_data) / sizeof(T)); i++)
     {
       if (i % row_len == 0)
       {
-        printf("%3d %5s", ((i + 1) / row_len), m_row_names[i / row_len].c_str());
+        printf("%3lu %5s", ((i + 1) / row_len), m_row_names[i / row_len].c_str());
       }
       printf("%15d", m_data[i]);
       if (((i + 1) % row_len) == 0 && i != 0)
@@ -143,17 +142,17 @@ class DataFrame
   }
 
   private:
-  std::array<std::string, col_len> m_col_names;
-  std::array<std::string, row_len> m_row_names;
-  std::map<std::string, int>       m_col_idx_map;
-  std::map<std::string, int>       m_row_idx_map;
-  int                              m_size_of_col;
-  int                              m_size_of_row;
-  int                              m_data_size;
-  T                                m_data[col_len * row_len]{};
+  std::array<std::string, col_len>   m_col_names;
+  std::array<std::string, row_len>   m_row_names;
+  std::map<std::string, std::size_t> m_col_idx_map;
+  std::map<std::string, std::size_t> m_row_idx_map;
+  std::size_t                        m_size_of_col;
+  std::size_t                        m_size_of_row;
+  std::size_t                        m_data_size;
+  T                                  m_data[df_size]{};
 };
 
-template<typename T, int df_size, int col_len, int row_len>
+template<typename T, std::size_t df_size, std::size_t col_len, std::size_t row_len>
 class StringIndexer
 {
   public:
@@ -161,14 +160,21 @@ class StringIndexer
 
   T& operator[](const std::string& col_name, const std::string& row_name)
   {
-    int col_idx = m_df->m_col_idx_map[col_name];
-    int row_idx = m_df->m_col_idx_map[row_name];
+    assert(m_df->m_col_idx_map.contains(col_name));
+    assert(m_df->m_row_idx_map.contains(row_name));
+
+    std::size_t col_idx = m_df->m_col_idx_map[col_name];
+    std::cout << "col_idx: " << col_idx << "\n";
+    std::size_t row_idx = m_df->m_row_idx_map[row_name];
+    std::cout << "row_idx: " << row_idx << "\n";
 
     assert(0 <= col_idx && col_idx <= (col_len - 1));
     assert(0 <= row_idx && row_idx <= (row_len - 1));
+
     std::cout << m_df->begin() << "\n";
     std::cout << m_df->end() << "\n";
-    T& cell = *(m_df->begin() + ((sizeof(T) * row_len * row_idx)) + (sizeof(T) + col_idx));
+
+    T& cell = *(m_df->begin() + ((row_len * row_idx) + col_idx));
     return cell;
   }
 
@@ -176,18 +182,18 @@ class StringIndexer
   DataFrame<T, df_size, col_len, row_len>* m_df;
 };
 
-template<typename T, int df_size, int col_len, int row_len>
+template<typename T, std::size_t df_size, std::size_t col_len, std::size_t row_len>
 class IntegerIndexer
 {
   public:
   IntegerIndexer(DataFrame<T, df_size, col_len, row_len>* df) : m_df(df) {}
 
-  T& operator[](const int& col_idx, const int& row_idx)
+  T& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
   {
     assert(0 <= col_idx && col_idx <= (col_len - 1));
     assert(0 <= row_idx && row_idx <= (row_len - 1));
 
-    T& cell = *(m_df->begin() + ((sizeof(T) * row_len * row_idx)) + (sizeof(T) + col_idx));
+    T& cell = *(m_df->begin() + ((row_len * row_idx) + col_idx));
     return cell;
   }
 
