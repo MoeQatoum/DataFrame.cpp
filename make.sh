@@ -108,8 +108,7 @@ fi
 cmake --build $BUILD_DIR --target install $JOBS
 if [[ $? -eq 0 ]]; then
   printf "${G}-- Build successful.${W}\n"
-  cp ./.env $INSTALL_PREFIX
-  if [[ $RUN = true && $BUILD_DEBUG_CONSOLE = true ]]; then
+  if [[ $RUN = true ]]; then
     printf "${G}-- Running Application.${W}\n\n"
     cd $INSTALL_PREFIX && ./dataframe
     if [[ $? -eq 1 ]]; then

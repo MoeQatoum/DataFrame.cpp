@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.25.0)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(DATA_FRAME DataFrame CACHE INTERNAL "")
+set(DATA_FRAME dataframe CACHE INTERNAL "")
 
 project(
     ${DATA_FRAME}
@@ -13,8 +13,8 @@ project(
 )
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/*.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/data_frame.h
 )
 
 add_executable(${DATA_FRAME} 
