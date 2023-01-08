@@ -1,0 +1,46 @@
+---
+BasedOnStyle: LLVM
+IndentWidth: 2
+---
+Language: Cpp
+AccessModifierOffset: -4
+AlignArrayOfStructures: Left
+AlignTrailingComments: true
+AlignArrayOfStructures: Right 
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveBitFields: true
+AlignConsecutiveMacros: true
+AlignEscapedNewlines: true
+AllowShortBlocksOnASingleLine: true
+AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: true
+AllowShortEnumsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+BreakBeforeBinaryOperators: All
+AllowAllParametersOfDeclarationOnNextLine: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBraces: Allman 
+ColumnLimit: 120
+ContinuationIndentWidth: 2
+EmptyLineBeforeAccessModifier: Always 
+FixNamespaceComments: true
+IndentPPDirectives: BeforeHash
+IndentWrappedFunctionNames: true
+TabWidth: 2
+NamespaceIndentation: All
+PackConstructorInitializers: CurrentLine
+PointerAlignment: Left
+ReferenceAlignment: Left
+ReflowComments: true
+SeparateDefinitionBlocks: Leave
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+AlwaysBreakTemplateDeclarations: true
+SpaceAfterTemplateKeyword: false
+MaxEmptyLinesToKeep: 1 
+SpacesInLineCommentPrefix:
+  Minimum: 1
+  Maximum: 1
