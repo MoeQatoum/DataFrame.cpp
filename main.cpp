@@ -8,8 +8,17 @@ int main()
 
   DataFrame<int, 100, 10, 10> df(cols, rows);
 
-  df[9, 9] = 666;
-  df[5, 5] = 55;
+  df.iloc[1, 2] = 123123;
+  df.iloc[3, 4] = 123123;
+
+  std::cout << df.iloc[9, 9] << "\n";
+  std::cout << df.iloc[5, 5] << "\n";
+
+  df.loc["col1", "row1"] = 1000;
+  df.loc["col3", "row2"] = 1000;
+
+  df[9 * 9] = 999;
+
   std::cout << df[9 * 9] << "\n";
 
   df.print();
