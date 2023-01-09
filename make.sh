@@ -93,7 +93,7 @@ if [ $CLEAN == true ]; then
 fi
 
 cmake -S . -B $BUILD_DIR \
-  -DBUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES \
+  -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES \
   -DCMAKE_BUILD_TYPE:STRING=$CONFIG \
   -DCMAKE_C_COMPILER=$C_COMPILER \
   -DCMAKE_CXX_COMPILER=$COMPILER \
@@ -108,9 +108,9 @@ fi
 cmake --build $BUILD_DIR --target install $JOBS
 if [[ $? -eq 0 ]]; then
   printf "${G}-- Build successful.${W}\n"
-  if [[ $RUN = true ]]; then
+  if [[ $RUN = true && $BUILD_EXAMPLES = true ]]; then
     printf "${G}-- Running Application.${W}\n\n"
-    cd $INSTALL_PREFIX && ./dataframe
+    cd $INSTALL_PREFIX && ./dataframe-example
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run failed.${W}\n"
       exit 1

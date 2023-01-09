@@ -8,33 +8,37 @@ set(DATA_FRAME dataframe CACHE INTERNAL "")
 project(
     ${DATA_FRAME}
     VERSION 0.1.0
-    DESCRIPTION "DataFrame"
-    LANGUAGES CXX
+    DESCRIPTION "simple dataframe object with python pandas like api, in c++"
+    # LANGUAGES CXX
 )
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/data_frame.h
+    ${CMAKE_CURRENT_LIST_DIR}/dataframe.h
 )
 
-add_executable(${DATA_FRAME} 
+add_library(${DATA_FRAME} INTERFACE
     ${DATA_FRAME_SOURCES} 
 )
 
 # target_link_libraries(${DATA_FRAME} PRIVATE
 # )
 
+target_include_directories(${DATA_FRAME} INTERFACE
+    ${CMAKE_CURRENT_LIST_DIR}
+)
+
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
-    target_compile_options(${DATA_FRAME} PUBLIC
+    target_compile_options(${DATA_FRAME} INTERFACE
         -O3
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
-    target_compile_options(${DATA_FRAME} PUBLIC
+    target_compile_options(${DATA_FRAME} INTERFACE
         -g -Wall -Weverything -Wconversion -Wextra -Wpedantic -O0
     )
 endif()
 
-install(
-    TARGETS ${DATA_FRAME}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
-)
+if(BUILD_CPP_DATA_FRAME_EXAMPLES)
+    message(STATUS "KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK")
+    add_subdirectory(example)
+endif()
+
