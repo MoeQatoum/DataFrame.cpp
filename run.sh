@@ -1,3 +1,3 @@
 #!/bin/bash
 
-./out/dataframe
+./out/dataframe-example
