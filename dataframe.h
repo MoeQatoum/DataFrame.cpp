@@ -65,17 +65,22 @@ struct Series
   T     m_d[N];
 };
 
-template<typename T, std::size_t... Args>
+template<typename df>
 class StringIndexer;
 
-template<typename T, std::size_t... Args>
+template<typename df>
 class IntegralIndexer;
 
 template<typename T, std::size_t N_col, std::size_t N_row>
 class DataFrame
 {
-  friend class StringIndexer<T, N_col, N_row>;
-  friend class IntegralIndexer<T, N_col, N_row>;
+  template<typename>
+  friend class StringIndexer;
+
+  template<typename>
+  friend class IntegralIndexer;
+
+  using ValueType = T;
 
   public:
   DataFrame(std::array<std::string, N_col> col_names, std::array<std::string, N_row> row_names)
@@ -132,7 +137,7 @@ class DataFrame
 
   Cell<T>* end()
   {
-    Cell<T>* end_p = (m_data + size()) - 1;
+    Cell<T>* end_p = m_data + size();
     return end_p;
   }
 
@@ -140,8 +145,8 @@ class DataFrame
   constexpr std::size_t col_size() const { return N_row; };
   constexpr std::size_t row_size() const { return N_col; };
 
-  StringIndexer<T, N_col, N_row>   loc;
-  IntegralIndexer<T, N_col, N_row> iloc;
+  StringIndexer<DataFrame>   loc;
+  IntegralIndexer<DataFrame> iloc;
 
   Series<T&, N_row> get_col();
   Series<T&, N_col> get_raw();
@@ -189,17 +194,20 @@ class DataFrame
   Cell<T>                            m_data[N_col * N_row];
 };
 
-template<typename T, std::size_t... Args>
+template<typename df>
 class StringIndexer
 {
-  friend class DataFrame<T, Args...>;
+  using ValueType = typename df::ValueType;
 
-  StringIndexer(DataFrame<T, Args...>* df) : m_df(df) {}
+  template<typename, std::size_t, std::size_t>
+  friend class DataFrame;
 
-  DataFrame<T, Args...>* m_df;
+  StringIndexer(df* _df) : m_df(_df) {}
+
+  df* m_df;
 
   public:
-  Cell<T>& operator[](const std::string& col_name, const std::string& row_name)
+  Cell<ValueType>& operator[](const std::string& col_name, const std::string& row_name)
   {
     assert(m_df->m_col_idx_map.contains(col_name));
     assert(m_df->m_row_idx_map.contains(row_name));
@@ -211,28 +219,31 @@ class StringIndexer
     assert(0 <= row_idx && row_idx <= (row_len - 1));
 
     // Cell<T>& cell = *(m_df->begin() + ((m_df->row_size * row_idx) + col_idx));
-    Cell<T>& cell = m_df->m_data[(m_df->row_size() * row_idx) + col_idx];
+    Cell<ValueType>& cell = m_df->m_data[(m_df->row_size() * row_idx) + col_idx];
 
     return cell;
   }
 };
 
-template<typename T, std::size_t... Args>
+template<typename df>
 class IntegralIndexer
 {
-  friend class DataFrame<T, Args...>;
+  using ValueType = typename df::ValueType;
 
-  IntegralIndexer(DataFrame<T, Args...>* df) : m_df(df) {}
+  template<typename, std::size_t, std::size_t>
+  friend class DataFrame;
 
-  DataFrame<T, Args...>* m_df;
+  IntegralIndexer(df* _df) : m_df(_df) {}
+
+  df* m_df;
 
   public:
-  Cell<T>& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
+  Cell<ValueType>& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
   {
     assert(0 <= col_idx && col_idx <= (col_len - 1));
     assert(0 <= row_idx && row_idx <= (row_len - 1));
 
-    Cell<T>& cell = *(m_df->begin() + ((m_df->row_size() * row_idx) + col_idx));
+    Cell<ValueType>& cell = *(m_df->begin() + ((m_df->row_size() * row_idx) + col_idx));
     // Cell<T>& cell = m_df->m_data[(m_df->row_size() * row_idx) + col_idx];
     return cell;
   }
