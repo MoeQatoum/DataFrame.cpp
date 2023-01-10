@@ -9,6 +9,7 @@ Y="\033[0;93m"
 num_re='^[0-9]+$'
 
 BUILD_DIR="./build"
+BUILD_EXAMPLES=true
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"

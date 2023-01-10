@@ -43,51 +43,61 @@ struct Cell
 };
 
 template<typename T, int N>
-struct Series
+struct RowSeries
 {
   T& operator[](const int idx)
   {
-    assert(0 <= idx && idx <= (d_len - 1));
+    assert(0 <= idx && idx <= (size() - 1));
     T& item = *(m_d + idx);
     return item;
   }
 
   T at(int idx)
   {
-    assert(0 <= idx && idx <= (d_len - 1));
+    assert(0 <= idx && idx <= (size() - 1));
     return m_d[idx];
   }
 
-  constexpr size_t size() { return N; }
+  constexpr std::size_t size() { return N; }
 
   private:
-  Index m_idx;
-  T     m_d[N];
+  std::array<std::string, N> col_names;
+  Cell<T>                    m_d[N];
 };
 
-template<typename df>
-class StringIndexer;
+template<typename T, int N>
+struct ColumnSeries
+{
+  T& operator[](const int idx)
+  {
+    assert(0 <= idx && idx <= (size() - 1));
+    T& item = *(m_d + idx);
+    return item;
+  }
 
-template<typename df>
-class IntegralIndexer;
+  T at(int idx)
+  {
+    assert(0 <= idx && idx <= (size() - 1));
+    return m_d[idx];
+  }
+
+  constexpr std::size_t size() { return N; }
+
+  private:
+  std::array<std::string, N> row_names;
+  Cell<T>                    m_d[N];
+};
 
 template<typename T, std::size_t N_col, std::size_t N_row>
 class DataFrame
 {
-  template<typename>
-  friend class StringIndexer;
-
-  template<typename>
-  friend class IntegralIndexer;
-
   using ValueType = T;
 
   public:
-  DataFrame(std::array<std::string, N_col> col_names, std::array<std::string, N_row> row_names)
-      : loc(this),
-        iloc(this),
-        m_col_names(col_names),
-        m_row_names(row_names)
+  DataFrame(const std::array<std::string, N_col>& col_names, const std::array<std::string, N_row>& row_names)
+      : m_col_names(col_names),
+        m_row_names(row_names),
+        m_data(new Cell<T>[N_col * N_row])
   {
     for (std::size_t i = 0; i < N_col; i++)
     {
@@ -116,18 +126,50 @@ class DataFrame
     }
   }
 
-  ~DataFrame() {}
+  ~DataFrame() { delete[] m_data; }
 
-  Cell<T>& operator[](const int& idx) { return m_data[idx]; }
+  Cell<T>& operator[](const std::size_t& idx) { return m_data[idx]; }
+
+  const Cell<T>& operator[](const std::size_t& idx) const { return m_data[idx]; }
+
+  Cell<T>& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
+  {
+    assert(0 <= col_idx && col_idx <= (m_df->col_size() - 1));
+    assert(0 <= row_idx && row_idx <= (m_df->row_size() - 1));
+
+    Cell<T>& cell = *(m_data + ((row_size() * row_idx) + col_idx));
+    return cell;
+  }
+
+  Cell<ValueType>& operator[](const std::string& col_name, const std::string& row_name)
+  {
+    assert(m_df->m_col_idx_map.contains(col_name));
+    assert(m_df->m_row_idx_map.contains(row_name));
+
+    std::size_t col_idx = m_col_idx_map[col_name];
+    std::size_t row_idx = m_row_idx_map[row_name];
+
+    assert(0 <= col_idx && col_idx <= (m_df->col_size() - 1));
+    assert(0 <= row_idx && row_idx <= (m_df->row_size() - 1));
+
+    Cell<T>& cell = *(m_data + ((row_size() * row_idx) + col_idx));
+    return cell;
+  }
 
   std::array<std::string, N_col>& col_names() { return m_col_names; }
   std::array<std::string, N_row>& rows_names() { return m_row_names; }
 
-  void update_row(Series<T, N_row> data, int row_idx);
-  void update_col(Series<T, N_col> data, int col_idx);
+  void update_row(RowSeries<T, N_row> data);
+
+  void update_col(ColumnSeries<T, N_col> data);
 
   int get_col_idx(std::string col) { return m_col_idx_map[col]; }
+
   int get_row_idx(std::string row) { return m_row_idx_map[row]; }
+
+  Cell<T>& at(std::size_t idx) { return m_data[idx]; }
+
+  const Cell<T>& at(std::size_t idx) const { return m_data[idx]; }
 
   Cell<T>* begin()
   {
@@ -141,17 +183,15 @@ class DataFrame
     return end_p;
   }
 
-  constexpr std::size_t size() const { return N_col * N_row; };
-  constexpr std::size_t col_size() const { return N_row; };
-  constexpr std::size_t row_size() const { return N_col; };
+  constexpr std::size_t size() const { return N_col * N_row; }
+  constexpr std::size_t col_size() const { return N_row; }
+  constexpr std::size_t row_size() const { return N_col; }
 
-  StringIndexer<DataFrame>   loc;
-  IntegralIndexer<DataFrame> iloc;
+  ColumnSeries<Cell<T>, N_row> get_col();
+  RowSeries<Cell<T>, N_col>    get_raw();
 
-  Series<T&, N_row> get_col();
-  Series<T&, N_col> get_raw();
-  // std::itr       iter_rows();
-  // std::itr       iter_cols();
+  // ColumnIterator    iter_rows();
+  // RowIterator       iter_cols();
 
   void print()
   {
@@ -171,7 +211,7 @@ class DataFrame
       }
     }
 
-    for (std::size_t i = 0; i < (sizeof(m_data) / sizeof(Cell<T>)); i++)
+    for (std::size_t i = 0; i < size(); i++)
     {
       if (i % N_col == 0)
       {
@@ -191,62 +231,7 @@ class DataFrame
   std::array<std::string, N_row>     m_row_names;
   std::map<std::string, std::size_t> m_col_idx_map;
   std::map<std::string, std::size_t> m_row_idx_map;
-  Cell<T>                            m_data[N_col * N_row];
-};
-
-template<typename df>
-class StringIndexer
-{
-  using ValueType = typename df::ValueType;
-
-  template<typename, std::size_t, std::size_t>
-  friend class DataFrame;
-
-  StringIndexer(df* _df) : m_df(_df) {}
-
-  df* m_df;
-
-  public:
-  Cell<ValueType>& operator[](const std::string& col_name, const std::string& row_name)
-  {
-    assert(m_df->m_col_idx_map.contains(col_name));
-    assert(m_df->m_row_idx_map.contains(row_name));
-
-    std::size_t col_idx = m_df->m_col_idx_map[col_name];
-    std::size_t row_idx = m_df->m_row_idx_map[row_name];
-
-    assert(0 <= col_idx && col_idx <= (col_len - 1));
-    assert(0 <= row_idx && row_idx <= (row_len - 1));
-
-    // Cell<T>& cell = *(m_df->begin() + ((m_df->row_size * row_idx) + col_idx));
-    Cell<ValueType>& cell = m_df->m_data[(m_df->row_size() * row_idx) + col_idx];
-
-    return cell;
-  }
-};
-
-template<typename df>
-class IntegralIndexer
-{
-  using ValueType = typename df::ValueType;
-
-  template<typename, std::size_t, std::size_t>
-  friend class DataFrame;
-
-  IntegralIndexer(df* _df) : m_df(_df) {}
-
-  df* m_df;
-
-  public:
-  Cell<ValueType>& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
-  {
-    assert(0 <= col_idx && col_idx <= (col_len - 1));
-    assert(0 <= row_idx && row_idx <= (row_len - 1));
-
-    Cell<ValueType>& cell = *(m_df->begin() + ((m_df->row_size() * row_idx) + col_idx));
-    // Cell<T>& cell = m_df->m_data[(m_df->row_size() * row_idx) + col_idx];
-    return cell;
-  }
+  Cell<T>*                           m_data;
 };
 
 #endif // DATA_FRAME_H
