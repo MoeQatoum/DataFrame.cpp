@@ -22,7 +22,7 @@ struct Index
   friend std::ostream& operator<<(std::ostream& os, const Index& df_idx)
   {
     os << "DatFrameIndex(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
-       << df_idx.row_name << ", " << df_idx.row_idx << ">)";
+       << df_idx.row_name << ", " << df_idx.row_idx << ">)\n";
     return os;
   }
 };
@@ -42,7 +42,7 @@ struct Cell
   }
 };
 
-template<typename T, int N>
+template<typename T, std::size_t N>
 struct RowSeries
 {
   T& operator[](const int idx)
@@ -65,7 +65,7 @@ struct RowSeries
   Cell<T>                    m_d[N];
 };
 
-template<typename T, int N>
+template<typename T, std::size_t N>
 struct ColumnSeries
 {
   T& operator[](const int idx)
@@ -88,10 +88,15 @@ struct ColumnSeries
   Cell<T>                    m_d[N];
 };
 
+template<typename DataFrame>
+class df_Iterator;
+
 template<typename T, std::size_t N_col, std::size_t N_row>
 class DataFrame
 {
+  public:
   using ValueType = T;
+  using Iterator  = df_Iterator<DataFrame>;
 
   public:
   DataFrame(const std::array<std::string, N_col>& col_names, const std::array<std::string, N_row>& row_names)
@@ -128,9 +133,9 @@ class DataFrame
 
   ~DataFrame() { delete[] m_data; }
 
-  Cell<T>& operator[](const std::size_t& idx) { return m_data[idx]; }
+  Cell<T>& operator[](const std::size_t& idx) { return *(m_data + idx); }
 
-  const Cell<T>& operator[](const std::size_t& idx) const { return m_data[idx]; }
+  const Cell<T>& operator[](const std::size_t& idx) const { return *(m_data + idx); }
 
   Cell<T>& operator[](const std::size_t& col_idx, const std::size_t& row_idx)
   {
@@ -171,17 +176,9 @@ class DataFrame
 
   const Cell<T>& at(std::size_t idx) const { return m_data[idx]; }
 
-  Cell<T>* begin()
-  {
-    Cell<T>* begin_p = m_data;
-    return begin_p;
-  }
+  Iterator begin() { return Iterator(m_data); }
 
-  Cell<T>* end()
-  {
-    Cell<T>* end_p = m_data + size();
-    return end_p;
-  }
+  Iterator end() { return Iterator(m_data + size()); }
 
   constexpr std::size_t size() const { return N_col * N_row; }
   constexpr std::size_t col_size() const { return N_row; }
@@ -232,6 +229,50 @@ class DataFrame
   std::map<std::string, std::size_t> m_col_idx_map;
   std::map<std::string, std::size_t> m_row_idx_map;
   Cell<T>*                           m_data;
+};
+
+template<typename DataFrame>
+class df_Iterator
+{
+  using T = typename DataFrame::ValueType;
+
+  public:
+  df_Iterator(Cell<T>* data_p) : m_d(data_p) {}
+
+  Cell<T>& operator*() const { return *m_d; }
+  Cell<T>* operator->() { return m_d; }
+
+  df_Iterator& operator++()
+  {
+    m_d++;
+    return *this;
+  }
+
+  df_Iterator operator++(int)
+  {
+    df_Iterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  df_Iterator& operator--()
+  {
+    m_d--;
+    return *this;
+  }
+
+  df_Iterator operator--(int)
+  {
+    df_Iterator tmp = *this;
+    --(*this);
+    return tmp;
+  }
+
+  friend bool operator==(const df_Iterator& a, const df_Iterator& b) { return a.m_d == b.m_d; };
+  friend bool operator!=(const df_Iterator& a, const df_Iterator& b) { return a.m_d != b.m_d; };
+
+  private:
+  Cell<T>* m_d;
 };
 
 #endif // DATA_FRAME_H
