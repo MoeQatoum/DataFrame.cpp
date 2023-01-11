@@ -9,16 +9,44 @@
 #include <string>
 #include <vector>
 
+template<typename T>
+class DataFrame;
+
 template<typename Iterable>
 class Iterator
 {
   using ValueType = typename Iterable::ValueType;
 
+  template<typename>
+  friend class DataFrameRowIterator;
+
+  template<typename>
+  friend class DataFrameColIterator;
+
   public:
+  Iterator() = default;
+
   Iterator(ValueType* data_p) : m_d(data_p) {}
 
+  Iterator(Iterator& other) : m_d(other.m_d) {}
+
+  Iterator(Iterator&& other) : m_d(other.m_d) {}
+
   ValueType& operator*() const { return *m_d; }
+
   ValueType* operator->() { return m_d; }
+
+  Iterator& operator=(Iterator&& other)
+  {
+    m_d = other.m_d;
+    return *this;
+  }
+
+  Iterator& operator=(Iterator& other)
+  {
+    m_d = other.m_d;
+    return *this;
+  }
 
   Iterator operator+(const std::size_t& off)
   {
@@ -46,7 +74,7 @@ class Iterator
     return *this;
   }
 
-  int operator-(const int& off)
+  Iterator operator-(const int& off)
   {
     Iterator<Iterable> tmp(this->m_d);
     tmp.m_d = tmp.m_d - off;
@@ -82,6 +110,145 @@ class Iterator
 
   private:
   ValueType* m_d;
+};
+
+template<typename Iterable>
+class DataFrameRowIterator
+{
+  using DataFrameIterator = typename Iterable::DataFrameIterator;
+  using RowSeries         = typename Iterable::RowSeries;
+
+  public:
+  DataFrameRowIterator(DataFrameIterator df_begin, std::size_t row_size) : m_df_iterator(df_begin), m_row_size(row_size)
+  {
+  }
+  RowSeries row() { return RowSeries(m_df_iterator, m_df_iterator + m_row_size); }
+
+  DataFrameRowIterator operator+(const std::size_t& off)
+  {
+    DataFrameRowIterator tmp(this->m_df_iterator);
+    tmp.m_df_iterator = tmp.m_df_iterator + off;
+    return tmp;
+  }
+
+  DataFrameRowIterator& operator++()
+  {
+    m_df_iterator = m_df_iterator + m_row_size;
+    return *this;
+  }
+
+  DataFrameRowIterator operator++(int)
+  {
+    DataFrameRowIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  friend bool operator<(const DataFrameRowIterator& lhs, const DataFrameIterator& rhs)
+  {
+    // std::cout << lhs.m_df_iterator << "      " << rhs << "     " << (lhs.m_df_iterator < rhs) << "\n";
+    return lhs.m_df_iterator < rhs;
+  }
+
+  friend bool operator<(const DataFrameIterator& lhs, const DataFrameRowIterator& rhs)
+  {
+    // std::cout << lhs << "      " << rhs.m_df_iterator << "     " << (lhs < rhs.m_df_iterator) << "\n";
+    return lhs < rhs.m_df_iterator;
+  }
+
+  friend bool operator>(const DataFrameRowIterator& lhs, const DataFrameIterator& rhs)
+  {
+    // std::cout << lhs.m_df_iterator << "      " << rhs << "     " << (lhs.m_df_iterator > rhs) << "\n";
+    return lhs.m_df_iterator > rhs;
+  }
+
+  friend bool operator>(const DataFrameIterator& lhs, const DataFrameRowIterator& rhs)
+  {
+    // std::cout << lhs << "      " << rhs.m_df_iterator << "     " << (lhs > rhs.m_df_iterator) << "\n";
+    return lhs > rhs.m_df_iterator;
+  }
+
+  private:
+  DataFrameIterator m_df_iterator;
+  std::size_t       m_row_size;
+};
+
+template<typename Iterable>
+class DataFrameColIterator
+{
+  using ValueType         = typename Iterable::ValueType;
+  using DataFrameIterator = typename Iterable::DataFrameIterator;
+  using ColumnSeries      = typename Iterable::ColumnSeries;
+  using ColIterator       = typename ColumnSeries::Iterator;
+
+  public:
+  DataFrameColIterator(DataFrameIterator df_begin, DataFrameIterator df_end, std::size_t row_size)
+      : m_df_begin(df_begin),
+        m_df_end(df_end),
+        m_current_col_end(df_end - row_size),
+        m_current_col_idx(0),
+        m_row_size(row_size)
+  {
+  }
+  ColumnSeries column() { return ColumnSeries(m_df_begin, m_df_end, m_current_col_idx, m_row_size); }
+
+  DataFrameColIterator operator+(const std::size_t& off)
+  {
+    DataFrameColIterator tmp(this->m_df_begin, this->m_df_end, m_row_size);
+    tmp.m_current_col_idx = m_current_col_idx;
+    tmp.m_current_col_end = m_current_col_end;
+
+    m_current_col_idx = m_current_col_idx + off;
+
+    return tmp;
+  }
+
+  DataFrameColIterator& operator++()
+  {
+    ++m_current_col_idx;
+    ++m_current_col_end;
+    return *this;
+  }
+
+  DataFrameColIterator operator++(int)
+  {
+    DataFrameColIterator tmp = *this;
+    ++(*this);
+    return tmp;
+  }
+
+  friend bool operator<(const DataFrameColIterator& lhs, const DataFrameIterator& rhs)
+  {
+    // std::cout << lhs.m_current_col_end.m_d << "      " << rhs.m_d << "     " << (lhs.m_current_col_end.m_d < rhs.m_d)
+    // << "\n";
+    return lhs.m_current_col_end.m_d < rhs.m_d;
+  }
+
+  friend bool operator<(const DataFrameIterator& lhs, const DataFrameColIterator& rhs)
+  {
+    // std::cout << lhs << "      " << rhs.m_current_col_end << "     " << (lhs.m_d < rhs.m_current_col_end.m_d) <<
+    // "\n";
+    return lhs.m_d < rhs.m_current_col_end.m_d;
+  }
+
+  friend bool operator>(const DataFrameColIterator& lhs, const DataFrameIterator& rhs)
+  {
+    // std::cout << lhs.m_current_col_end << "      " << rhs << "     " << (lhs.m_current_col_end > rhs) << "\n";
+    return lhs.m_current_col_end > rhs;
+  }
+
+  friend bool operator>(const DataFrameIterator& lhs, const DataFrameColIterator& rhs)
+  {
+    // std::cout << lhs << "      " << rhs.m_current_col_end << "     " << (lhs > rhs.m_current_col_end) << "\n";
+    return lhs > rhs.m_current_col_end;
+  }
+
+  private:
+  DataFrameIterator m_df_begin;
+  DataFrameIterator m_df_end;
+  DataFrameIterator m_current_col_end;
+  std::size_t       m_current_col_idx;
+  std::size_t       m_row_size;
 };
 
 struct Index
@@ -129,26 +296,30 @@ template<typename T>
 class DataFrame
 {
   public:
-  using ValueType         = Cell<T>;
-  using DataFrameIterator = Iterator<DataFrame<T>>;
-  using size_t            = std::size_t;
+  using ValueType            = Cell<T>;
+  using RowSeries            = RowSeries<T>;
+  using ColumnSeries         = ColumnSeries<T>;
+  using DataFrameIterator    = Iterator<DataFrame<T>>;
+  using DataFrameRowIterator = DataFrameRowIterator<DataFrame<T>>;
+  using DataFrameColIterator = DataFrameColIterator<DataFrame<T>>;
+  using size_t               = std::size_t;
 
   public:
   DataFrame(const std::vector<std::string>& col_names, const std::vector<std::string>& row_names)
   {
-    m_col_size     = col_names.size();
-    m_row_size     = row_names.size();
-    m_col_count    = m_row_size;
-    m_row_count    = m_col_size;
-    m_current_size = m_col_size * m_row_size;
+    m_col_count    = col_names.size();
+    m_row_count    = row_names.size();
+    m_col_size     = m_row_count;
+    m_row_size     = m_col_count;
+    m_current_size = m_col_count * m_row_count;
     m_d            = new ValueType[m_current_size];
 
-    for (std::size_t i = 0; i < m_col_size; i++)
+    for (std::size_t i = 0; i < m_col_count; i++)
     {
       m_col_idx_map.insert({col_names[i], i});
     }
 
-    for (std::size_t i = 0; i < m_row_size; i++)
+    for (std::size_t i = 0; i < m_row_count; i++)
     {
       m_row_idx_map.insert({row_names[i], i});
     }
@@ -158,15 +329,15 @@ class DataFrame
     // 10 11 12 13 14
     // 15 16 17 18 19
 
-    for (std::size_t i = 0; i < (m_col_size * m_row_size); i++)
+    for (std::size_t i = 0; i < m_current_size; i++)
     {
       m_d[i].idx.global_idx = i;
 
-      m_d[i].idx.col_idx  = i % m_col_size;
-      m_d[i].idx.col_name = col_names[i % m_col_size];
+      m_d[i].idx.col_idx  = i % m_col_count;
+      m_d[i].idx.col_name = col_names[i % m_col_count];
 
-      m_d[i].idx.row_idx  = i / m_col_size;
-      m_d[i].idx.row_name = row_names[i / m_col_size];
+      m_d[i].idx.row_idx  = i / m_col_count;
+      m_d[i].idx.row_name = row_names[i / m_col_count];
     }
   }
 
@@ -200,9 +371,9 @@ class DataFrame
     return cell;
   }
 
-  // void update_row(RowSeries<DataFrame> data);
+  // void update_row(RowSeries data);
 
-  // void update_col(ColumnSeries<DataFrame> data);
+  // void update_col(ColumnSeries data);
 
   std::size_t get_col_idx(std::string col) { return m_col_idx_map[col]; }
 
@@ -241,32 +412,32 @@ class DataFrame
   DataFrameIterator end() { return DataFrameIterator(m_d + size()); }
 
   constexpr size_t size() const { return m_current_size; }
-  constexpr size_t col_size() const { return m_row_size; }
-  constexpr size_t row_size() const { return m_col_size; }
+  constexpr size_t col_size() const { return m_col_size; }
+  constexpr size_t row_size() const { return m_row_size; }
 
   constexpr std::pair<size_t, size_t> shape() const { return {m_col_count, m_row_count}; }
 
-  RowSeries<T> get_raw(std::size_t row_idx)
+  RowSeries get_raw(std::size_t row_idx)
   {
-    DataFrameIterator row_bingen = begin() + (row_idx * row_size());
-    DataFrameIterator row_end    = row_bingen + m_col_size;
-    return RowSeries<T>(row_bingen, row_end);
+    DataFrameIterator row_bingen = begin() + (row_idx * m_row_size);
+    DataFrameIterator row_end    = row_bingen + m_row_size;
+    return RowSeries(row_bingen, row_end);
   }
 
-  ColumnSeries<T> get_col(size_t col_idx) { return ColumnSeries<T>{begin(), end(), col_idx, m_col_count}; }
+  ColumnSeries get_col(size_t col_idx) { return ColumnSeries{begin(), end(), col_idx, m_row_size}; }
 
-  // ColumnIterator    iter_rows();
-  // RowIterator       iter_cols();
+  DataFrameRowIterator iter_rows() { return DataFrameRowIterator(begin(), m_row_size); }
+  DataFrameColIterator iter_cols() { return DataFrameColIterator(begin(), end(), m_row_size); }
 
   void print()
   {
-    for (std::size_t i = 0; i < m_col_size; i++)
+    for (std::size_t i = 0; i < m_col_count; i++)
     {
       if (i == 0)
       {
         printf("%24s", get_col_name(i).value().c_str());
       }
-      else if (i == m_col_size - 1)
+      else if (i == m_col_count - 1)
       {
         printf("%15s\n\n", get_col_name(i).value().c_str());
       }
@@ -278,12 +449,12 @@ class DataFrame
 
     for (std::size_t i = 0; i < size(); i++)
     {
-      if (i % m_col_size == 0)
+      if (i % m_col_count == 0)
       {
-        printf("%3lu %5s", ((i + 1) / m_col_size), get_row_name(i / m_col_size).value().c_str());
+        printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
       printf("%15d", m_d[i].value);
-      if (((i + 1) % m_col_size) == 0 && i != 0)
+      if (((i + 1) % m_col_count) == 0 && i != 0)
       {
         printf("\n");
       }
@@ -358,15 +529,15 @@ struct ColumnSeries
 {
   using ValueType         = Cell<T>;
   using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
-  using ColumnIterator    = Iterator<ColumnSeries>;
+  using Iterator          = Iterator<ColumnSeries>;
 
-  ColumnSeries(DataFrameIterator df_begin, DataFrameIterator df_end, std::size_t col_idx, std::size_t col_count)
+  ColumnSeries(DataFrameIterator df_begin, DataFrameIterator df_end, std::size_t col_idx, std::size_t row_size)
   {
-    m_d    = new ValueType[col_count];
-    m_size = col_count;
+    m_size = (df_end - df_begin) / row_size;
+    m_d    = new ValueType[m_size];
 
     DataFrameIterator i = df_begin;
-    for (std::size_t ii = 0; i < df_end; i += col_count)
+    for (std::size_t ii = 0; i < df_end; i += row_size)
     {
       m_d[ii] = *(i + col_idx);
       ++ii;
@@ -393,11 +564,11 @@ struct ColumnSeries
     return os;
   }
 
-  ColumnIterator begin() { return ColumnIterator(m_d); }
-  ColumnIterator begin() const { return ColumnIterator(m_d); }
+  Iterator begin() { return Iterator(m_d); }
+  Iterator begin() const { return Iterator(m_d); }
 
-  ColumnIterator end() { return ColumnIterator(m_d + m_size); }
-  ColumnIterator end() const { return ColumnIterator(m_d + m_size); }
+  Iterator end() { return Iterator(m_d + m_size); }
+  Iterator end() const { return Iterator(m_d + m_size); }
 
   ValueType& at(int idx) { return *(begin() + idx); }
 
