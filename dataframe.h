@@ -42,7 +42,6 @@ class Iterator
 
   Iterator& operator+=(int off)
   {
-    std::cout << "    add";
     m_d = m_d + off;
     return *this;
   }
@@ -367,10 +366,8 @@ struct ColumnSeries
     m_size = col_count;
 
     DataFrameIterator i = df_begin;
-    std::cout << i << "       before\n";
     for (std::size_t ii = 0; i < df_end; i += col_count)
     {
-      std::cout << i << "       after\n";
       m_d[ii] = *(i + col_idx);
       ++ii;
     }
