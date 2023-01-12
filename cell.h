@@ -4,8 +4,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-struct Index
-{
+struct Index {
   using size_t  = std::size_t;
   using string  = std::string;
   using ostream = std::ostream;
@@ -17,8 +16,7 @@ struct Index
   string col_name;
   string row_name;
 
-  friend ostream& operator<<(ostream& os, const Index& df_idx)
-  {
+  friend ostream& operator<<(ostream& os, const Index& df_idx) {
     os << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
        << df_idx.row_name << ", " << df_idx.row_idx << ">)";
     return os;
@@ -26,8 +24,7 @@ struct Index
 };
 
 template<typename T>
-struct Cell
-{
+struct Cell {
   using ostream = std::ostream;
 
   using ValueType = T;
@@ -37,8 +34,7 @@ struct Cell
 
   void operator=(const ValueType val) { value = val; }
 
-  friend ostream& operator<<(ostream& os, const Cell<ValueType>& cell)
-  {
+  friend ostream& operator<<(ostream& os, const Cell<ValueType>& cell) {
     os << "Cell(value: " << cell.value << ", " << cell.idx << ")";
     return os;
   }

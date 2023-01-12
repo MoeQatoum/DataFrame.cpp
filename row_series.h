@@ -13,8 +13,7 @@ template<typename T>
 class DataFrame;
 
 template<typename T>
-struct RowSeries
-{
+struct RowSeries {
   using size_t  = std::size_t;
   using ostream = std::ostream;
 
@@ -22,31 +21,26 @@ struct RowSeries
   using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
   using RowIterator       = Iterator<RowSeries>;
 
-  RowSeries(DataFrameIterator row_begin, DataFrameIterator row_end)
-  {
+  RowSeries(DataFrameIterator row_begin, DataFrameIterator row_end) {
     m_size = row_end - row_begin;
     m_d    = new ValueType[m_size];
 
-    for (size_t i = 0; i < m_size; i++)
-    {
+    for (size_t i = 0; i < m_size; i++) {
       m_d[i] = *(row_begin + i);
     }
   }
 
   ~RowSeries() { delete[] m_d; }
 
-  ValueType& operator[](const int idx)
-  {
+  ValueType& operator[](const int idx) {
     ValueType& item = *(m_d + idx);
     return item;
   }
 
-  friend ostream& operator<<(ostream& os, const RowSeries& row)
-  {
+  friend ostream& operator<<(ostream& os, const RowSeries& row) {
     os << "RowSeries(size: " << row.m_size << ", "
        << "Items: \n";
-    for (const ValueType& cell : row)
-    {
+    for (const ValueType& cell : row) {
       os << cell << "\n";
     }
     os << ")";

@@ -22,7 +22,7 @@ BreakBeforeBinaryOperators: All
 AllowAllParametersOfDeclarationOnNextLine: false
 BinPackArguments: false
 BinPackParameters: false
-BreakBeforeBraces: Allman 
+BreakBeforeBraces: Attach 
 ColumnLimit: 120
 ContinuationIndentWidth: 2
 EmptyLineBeforeAccessModifier: Always 
