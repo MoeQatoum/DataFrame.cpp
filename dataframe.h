@@ -162,7 +162,7 @@ class DataFrameRowIterator
 
   DataFrameRowIterator& operator++()
   {
-    m_df_iterator = m_df_iterator + m_row_size;
+    m_df_iterator += m_row_size;
     return *this;
   }
 
@@ -282,12 +282,12 @@ class DataFrameColIterator
 
 struct Shape
 {
-  size_t row_count;
   size_t col_count;
+  size_t row_count;
 
   friend std::ostream& operator<<(std::ostream& os, const Shape& shape)
   {
-    os << "Shape(" << shape.col_count << ", " << shape.row_count << ")";
+    os << "Shape(c: " << shape.col_count << ", r: " << shape.row_count << ")";
     return os;
   }
 };
@@ -342,7 +342,7 @@ class DataFrame
       m_d[i].idx.col_idx  = i % m_col_count;
       m_d[i].idx.col_name = col_names[i % m_col_count];
 
-      std::cout << i % m_col_count << " " << col_names[i % m_col_count] << "\n";
+      // std::cout << i % m_col_count << " " << col_names[i % m_col_count] << "\n";
 
       m_d[i].idx.row_idx  = i / m_col_count;
       m_d[i].idx.row_name = row_names[i / m_col_count];
@@ -378,10 +378,6 @@ class DataFrame
     ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
     return cell;
   }
-
-  // void update_row(RowSeries data);
-
-  // void update_col(ColumnSeries data);
 
   std::size_t get_col_idx(std::string col) { return m_col_idx_map[col]; }
 
@@ -423,9 +419,9 @@ class DataFrame
   constexpr size_t col_size() const { return m_col_size; }
   constexpr size_t row_size() const { return m_row_size; }
 
-  constexpr std::pair<size_t, size_t> shape() const { return {m_col_count, m_row_count}; }
+  constexpr Shape shape() const { return {m_col_count, m_row_count}; }
 
-  RowSeries get_raw(std::size_t row_idx)
+  RowSeries get_row(std::size_t row_idx)
   {
     DataFrameIterator row_bingen = begin() + (row_idx * m_row_size);
     DataFrameIterator row_end    = row_bingen + m_row_size;
