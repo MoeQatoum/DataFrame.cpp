@@ -14,6 +14,9 @@ project(
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/dataframe.h
+    ${CMAKE_CURRENT_LIST_DIR}/cell.h
+    ${CMAKE_CURRENT_LIST_DIR}/row_series.h
+    ${CMAKE_CURRENT_LIST_DIR}/column_series.h
 )
 
 add_library(${DATA_FRAME} INTERFACE
