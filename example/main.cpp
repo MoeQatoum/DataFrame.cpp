@@ -91,8 +91,8 @@ int main() {
 #endif
 
 #ifdef BENCH
-  #define BENCH_COL_COUNT 1500
-  #define BENCH_ROW_COUNT 1500
+  #define BENCH_COL_COUNT 5000
+  #define BENCH_ROW_COUNT 5000
 
   #define COUNT__ITER_DF_BENCH  100
   #define COUNT__ITER_ROW_BENCH 100
