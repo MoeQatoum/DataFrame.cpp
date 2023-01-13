@@ -494,19 +494,21 @@ class DataFrame {
     char* l;
     for (std::size_t i = 0; i < m_col_count; i++) {
       if (i == 0) {
-        printf("%24s", get_col_name(i).value().c_str());
+        printf("%17s", get_col_name(i).value().c_str());
       } else if (i == m_col_count - 1) {
-        printf("%5s\n\n", get_col_name(i).value().c_str());
+        printf("%8s\n", get_col_name(i).value().c_str());
       } else {
-        printf("%5s", get_col_name(i).value().c_str());
+        printf("%8s", get_col_name(i).value().c_str());
       }
     }
+
+    printf("idx\n");
 
     for (std::size_t i = 0; i < size(); i++) {
       if (i % m_col_count == 0) {
         printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
-      printf("%5d", m_d[i].value);
+      printf("%8d", m_d[i].value);
       if (((i + 1) % m_col_count) == 0 && i != 0) {
         printf("\n");
       }

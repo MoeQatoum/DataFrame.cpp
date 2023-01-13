@@ -10,8 +10,8 @@
 #define Y "\033[93m"
 #define W "\033[00m"
 
-// #define TEST
-#define BENCH
+#define TEST
+// #define BENCH
 
 template<typename TimeUnit, std::size_t N>
 void print_bench_result(std::array<int, N> data, const char* bench_name) {
@@ -57,27 +57,30 @@ int main() {
     std::cout << "iter_rows---------------------\n";
 
     std::size_t iiii = 0;
-    for (auto i = df.iter_rows(); i < df.shape().row_count; i++) {
+    // for (auto i = df.iter_rows(); i < df.shape().row_count; i++) {
 
-      // df[i.row()[0].idx.col_idx, i.row()[0].idx.row_idx] = 123123;
-      // i.row()[0].value                                   = 123123;
-      ++iiii;
-    }
+    // // df[i.row()[0].idx.col_idx, i.row()[0].idx.row_idx] = 123123;
+    // // i.row()[0].value                                   = 123123;
+    // ++iiii;
+    // }
 
     std::cout << "iter_cols---------------------\n";
     iiii = 0;
-    // // for (auto i = df.iter_cols(); i < df.end(); ++i) {
-    // for (auto i = df.iter_cols(); i < df.shape().col_count; ++i) {
-    //   // df[i.column()[0].idx.col_idx, i.column()[0].idx.row_idx] = 123123;
-    //   // i.column()[0]->value;
-    //   i.column()[0]->value = 111;
-    //   // std::cout << &i.column()[0] << "\n";
-    //   // std::cout << &df[0] << "\n";
-    //   // std::cout << "                         " << iiii * / << "----------\n";
-    //   // std::cout << i.column() << "\n";
-    //   // std::cout << i.column()[0] << "\n";
-    //   ++iiii;
-    // }
+    // for (auto i = df.iter_cols(); i < df.end(); ++i) {
+    for (auto i = df.iter_cols(); i < df.shape().col_count; i++) {
+      // df[i.column()[0].idx.col_idx, i.column()[0].idx.row_idx] = 123123;
+      // i.column()[0]->value;
+      // i.column()[0]->value = 111;
+      for (auto& c : i.column()) {
+        c->value = 111;
+      }
+      // std::cout << &i.column()[0] << "\n";
+      // std::cout << &df[0] << "\n";
+      // std::cout << "                         " << iiii * / << "----------\n";
+      // std::cout << i.column() << "\n";
+      // std::cout << i.column()[0] << "\n";
+      ++iiii;
+    }
 
     std::cout << "CELL---------------------\n";
     // df[1, 2].value = 99;
@@ -88,8 +91,8 @@ int main() {
 #endif
 
 #ifdef BENCH
-  #define BENCH_COL_COUNT 5000
-  #define BENCH_ROW_COUNT 5000
+  #define BENCH_COL_COUNT 15000
+  #define BENCH_ROW_COUNT 15000
 
   #define COUNT__ITER_DF_BENCH  10
   #define COUNT__ITER_ROW_BENCH 10
