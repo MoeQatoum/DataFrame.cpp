@@ -369,6 +369,8 @@ class DataFrame {
     // 10 11 12 13 14
     // 15 16 17 18 19
 
+    // 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
+
     for (std::size_t i = 0; i < m_current_size; i++) {
       m_d[i].idx.global_idx = i;
 

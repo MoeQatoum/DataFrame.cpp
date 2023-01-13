@@ -10,8 +10,8 @@
 #define Y "\033[93m"
 #define W "\033[00m"
 
-#define TEST
-// #define BENCH
+// #define TEST
+#define BENCH
 
 template<typename TimeUnit, std::size_t N>
 void print_bench_result(std::array<int, N> data, const char* bench_name) {
@@ -20,7 +20,7 @@ void print_bench_result(std::array<int, N> data, const char* bench_name) {
     sum += data[i];
   }
   auto avg = sum / N;
-  std::cout << "  " << bench_name << ", iterations " << N << ", avg time per it: " << TimeUnit(avg) << "\n";
+  std::cout << "    " << bench_name << " , avg time per it: " << TimeUnit(avg) << "\n";
 }
 
 int main() {
@@ -71,7 +71,7 @@ int main() {
       // df[i.column()[0].idx.col_idx, i.column()[0].idx.row_idx] = 123123;
       // i.column()[0]->value;
       // i.column()[0]->value = 111;
-      for (auto& c : i.column()) {
+      for (auto c : i.column()) {
         c->value = 111;
       }
       // std::cout << &i.column()[0] << "\n";
@@ -91,12 +91,12 @@ int main() {
 #endif
 
 #ifdef BENCH
-  #define BENCH_COL_COUNT 15000
-  #define BENCH_ROW_COUNT 15000
+  #define BENCH_COL_COUNT 1500
+  #define BENCH_ROW_COUNT 1500
 
-  #define COUNT__ITER_DF_BENCH  10
-  #define COUNT__ITER_ROW_BENCH 10
-  #define COUNT__ITER_COL_BENCH 10
+  #define COUNT__ITER_DF_BENCH  100
+  #define COUNT__ITER_ROW_BENCH 100
+  #define COUNT__ITER_COL_BENCH 100
 
   #define ITER_DF_BENCH
   #define ITER_ROW_BENCH
@@ -124,10 +124,11 @@ int main() {
   }
 
   std::cout << df.shape() << " size: " << sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT / 1000000
-            << " MB, data Type: " << typeid(dataT).name() << "\n"
-            << "Benchmarks:\n";
+            << " MB, data Type: " << typeid(dataT).name() << "\n";
 
   #ifdef ITER_DF_BENCH
+  std::cout << "  direct access, iterations: " << COUNT__ITER_DF_BENCH << "\n";
+
   std::array<int, COUNT__ITER_DF_BENCH> DataFrameIterator_bench_data;
 
   for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
@@ -141,7 +142,7 @@ int main() {
     nsec_timer.tock();
     DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "df.iter, read value of each cell");
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "iter(), read value - all cells");
 
   for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
     msec_timer.tick();
@@ -154,7 +155,7 @@ int main() {
     msec_timer.tock();
     DataFrameIterator_bench_data[i] = msec_timer.duration().count();
   }
-  print_bench_result<std::chrono::milliseconds>(DataFrameIterator_bench_data, "df.iter, write value to each cell");
+  print_bench_result<std::chrono::milliseconds>(DataFrameIterator_bench_data, "iter(), write value - all cells");
 
   for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
     int rand_idx = rand() % (df.size() - 1);
@@ -163,7 +164,7 @@ int main() {
     nsec_timer.tock();
     DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "df random access, read");
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access read - single cell");
 
   for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
     int rand_idx = rand() % (df.size() - 1);
@@ -172,11 +173,11 @@ int main() {
     nsec_timer.tock();
     DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "df random access, wite");
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access wite - single cell");
   #endif
 
   #ifdef ITER_ROW_BENCH
-  std::cout << "\n";
+  std::cout << "\n  row access, iterations: " << COUNT__ITER_ROW_BENCH << "\n";
   std::array<int, COUNT__ITER_ROW_BENCH> RowIterator_bench_data;
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
@@ -189,7 +190,7 @@ int main() {
     usec_timer.tock();
     RowIterator_bench_data[i] = usec_timer.duration().count();
   }
-  print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "df.iter_row, read all cells");
+  print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "iter_row(), read all cells");
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     msec_timer.tick();
@@ -201,7 +202,7 @@ int main() {
     msec_timer.tock();
     RowIterator_bench_data[i] = msec_timer.duration().count();
   }
-  print_bench_result<std::chrono::milliseconds>(RowIterator_bench_data, "df.iter_row, write to all cells");
+  print_bench_result<std::chrono::milliseconds>(RowIterator_bench_data, "iter_row(), write to all cells");
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     int rand_idx = rand() % (df.shape().row_count - 1);
@@ -213,7 +214,7 @@ int main() {
     nsec_timer.tock();
     RowIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(RowIterator_bench_data, "df rand access row read single row cells");
+  print_bench_result<std::chrono::nanoseconds>(RowIterator_bench_data, "row rand access read single row cells");
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     int rand_idx = rand() % (df.shape().row_count - 1);
@@ -225,11 +226,11 @@ int main() {
     usec_timer.tock();
     RowIterator_bench_data[i] = usec_timer.duration().count();
   }
-  print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "df rand access row write to single row cells");
+  print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "row rand access write to single row cells");
   #endif
 
   #ifdef ITER_COL_BENCH
-  std::cout << "\n";
+  std::cout << "\n  col access, iterations: " << COUNT__ITER_COL_BENCH << "\n";
   std::array<int, COUNT__ITER_COL_BENCH> ColumnIterator_bench_data;
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
@@ -242,7 +243,7 @@ int main() {
     nsec_timer.tock();
     ColumnIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(ColumnIterator_bench_data, "df.iter_col, read all cells");
+  print_bench_result<std::chrono::nanoseconds>(ColumnIterator_bench_data, "iter_col(), read all cells");
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     usec_timer.tick();
@@ -254,7 +255,7 @@ int main() {
     usec_timer.tock();
     ColumnIterator_bench_data[i] = usec_timer.duration().count();
   }
-  print_bench_result<std::chrono::microseconds>(ColumnIterator_bench_data, "df.iter_col, write to all cells");
+  print_bench_result<std::chrono::microseconds>(ColumnIterator_bench_data, "iter_col(), write to all cells");
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     int rand_idx = rand() % (df.shape().col_count - 1);
@@ -267,7 +268,7 @@ int main() {
     ColumnIterator_bench_data[i] = nsec_timer.duration().count();
   }
   print_bench_result<std::chrono::nanoseconds>(ColumnIterator_bench_data,
-                                               "df rand access col read single col cell values");
+                                               "col rand access, read single col cell values");
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     int rand_idx = rand() % (df.shape().col_count - 1);
@@ -280,7 +281,7 @@ int main() {
     ColumnIterator_bench_data[i] = usec_timer.duration().count();
   }
   print_bench_result<std::chrono::microseconds>(ColumnIterator_bench_data,
-                                                "df rand access row write to single col cells");
+                                                "col rand access, write to single col cells");
   #endif
 
 #endif

@@ -9,7 +9,7 @@ project(
     ${DATA_FRAME}
     VERSION 0.1.0
     DESCRIPTION "simple dataframe object with python pandas like api, in c++"
-    # LANGUAGES CXX
+    LANGUAGES CXX
 )
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
