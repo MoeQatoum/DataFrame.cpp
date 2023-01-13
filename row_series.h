@@ -22,12 +22,12 @@ struct RowSeries {
   using RowIterator       = Iterator<RowSeries>;
 
   RowSeries(DataFrameIterator row_begin, DataFrameIterator row_end) {
-    size_t idx = 0;
-    for (auto row_it = row_begin; row_it < row_end; row_begin++) {
-      m_d[idx] = &(row_it);
-      ++idx;
+    m_size = row_end - row_begin;
+    m_d    = new ValueType[m_size];
+
+    for (size_t i = 0; i < m_size; i++) {
+      m_d[i] = &(row_begin + i);
     }
-    m_size = idx;
   }
 
   ~RowSeries() {

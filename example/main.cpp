@@ -10,8 +10,8 @@
 #define Y "\033[93m"
 #define W "\033[00m"
 
-#define TEST
-// #define BENCH
+// #define TEST
+#define BENCH
 
 template<typename TimeUnit, std::size_t N>
 void print_bench_result(std::array<int, N> data, const char* bench_name) {
