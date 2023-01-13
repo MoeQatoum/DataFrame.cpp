@@ -1,0 +1,17 @@
+Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
+Benchmarks:
+  df.iter, read value of each cell, iterations 1000, avg time per it: 10ns
+  df.iter, write value to each cell, iterations 1000, avg time per it: 153ms
+  df random access, read, iterations 1000, avg time per it: 12ns
+  df random access, wite, iterations 1000, avg time per it: 101ns
+
+  df.iter_row, read all cells, iterations 1000, avg time per it: 1µs
+  df.iter_row, write to all cells, iterations 1000, avg time per it: 156ms
+  df rand access row read single row cells, iterations 1000, avg time per it: 10ns
+  df rand access row write to single row cells, iterations 1000, avg time per it: 29µs
+
+  df.iter_col, read all cells, iterations 1000, avg time per it: 46µs
+  df.iter_col, write to all cells, iterations 1000, avg time per it: 16µs
+  df rand access col read single col cell values, iterations 1000, avg time per it: 12ns
+  df rand access row write to single col cells, iterations 1000, avg time per it: 69µs
+DataFrame destroyed

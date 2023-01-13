@@ -29,10 +29,23 @@ struct Cell {
 
   using ValueType = T;
 
+  // Cell() { std::cout << "Cell def constructor\n"; }
+
+  // Cell(const Cell& other) : value(other.value), idx(other.idx) { std::cout << "Cell def constructor\n"; }
+
+  // Cell(Cell&& other) : value(other.value), idx(other.idx) { std::cout << "Cell def constructor\n"; }
+
+  ~Cell() {
+    // std::cout << "Cell destroyed\n";
+  }
+
   ValueType value;
   Index     idx;
 
-  void operator=(const ValueType val) { value = val; }
+  void operator=(const ValueType val) {
+    // std::cout << "Cell operator=\n";
+    value = val;
+  }
 
   friend ostream& operator<<(ostream& os, const Cell<ValueType>& cell) {
     os << "Cell(value: " << cell.value << ", " << cell.idx << ")";

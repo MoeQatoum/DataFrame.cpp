@@ -1,0 +1,17 @@
+copy every where:
+Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
+Benchmarks:
+  df.iter, read value of each cell, iterations 1000, avg time per it: 10ns
+  df.iter, write value to each cell, iterations 1000, avg time per it: 151ms
+  df random access, read, iterations 1000, avg time per it: 13ns
+  df random access, wite, iterations 1000, avg time per it: 106ns
+
+  df.iter_row, read all cells, iterations 1000, avg time per it: 202ms
+  df.iter_row, write to all cells, iterations 1000, avg time per it: 221ms
+  df rand access row read single row cells, iterations 1000, avg time per it: 43µs
+  df rand access row write to single row cells, iterations 1000, avg time per it: 47µs
+  
+  df.iter_col, read all cells, iterations 1000, avg time per it: 660ms
+  df.iter_col, write to all cells, iterations 1000, avg time per it: 662ms
+  df rand access col read single col cell values, iterations 1000, avg time per it: 223µs
+  df rand access row write to single col cells, iterations 1000, avg time per it: 219µs

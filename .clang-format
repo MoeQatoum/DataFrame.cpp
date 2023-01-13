@@ -13,7 +13,7 @@ AlignConsecutiveBitFields: true
 AlignConsecutiveMacros: true
 AlignEscapedNewlines: true
 AllowShortBlocksOnASingleLine: true
-AllowShortFunctionsOnASingleLine: InlineOnly
+AllowShortFunctionsOnASingleLine: None
 AllowShortIfStatementsOnASingleLine: Never
 AllowShortLambdasOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
