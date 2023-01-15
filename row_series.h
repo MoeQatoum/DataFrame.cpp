@@ -30,8 +30,9 @@ struct RowSeries {
     }
   }
 
+  RowSeries(const RowSeries& other) = delete;
+
   ~RowSeries() {
-    // std::cout << "RowSeries destroyed\n";
     delete[] m_d;
   }
 

@@ -9,6 +9,13 @@ struct Index {
   using string  = std::string;
   using ostream = std::ostream;
 
+  Index() {
+  }
+
+  Index(const Index& other) = delete;
+
+  Index(Index&& other) = delete;
+
   size_t row_idx;
   size_t col_idx;
   size_t global_idx;
@@ -30,26 +37,19 @@ struct Cell {
   using ValueType = T;
 
   Cell() {
-    // std::cout << "Cell def constructor\n";
   }
 
-  Cell(const Cell& other) : value(other.value), idx(other.idx) {
-    // std::cout << "Cell copy constructor\n";
-  }
+  Cell(const Cell& other) = delete;
 
-  Cell(Cell&& other) : value(other.value), idx(other.idx) {
-    // std::cout << "Cell move constructor\n";
-  }
+  Cell(Cell&& other) = delete;
 
   ~Cell() {
-    // std::cout << "Cell destroyed\n";
   }
 
   ValueType value;
   Index     idx;
 
   void operator=(const ValueType val) {
-    // std::cout << "Cell operator=\n";
     value = val;
   }
 

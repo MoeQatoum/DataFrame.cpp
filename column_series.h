@@ -29,8 +29,9 @@ struct ColumnSeries {
     }
   }
 
+  ColumnSeries(const ColumnSeries& other) = delete;
+
   ~ColumnSeries() {
-    // std::cout << "ColumnSeries destroyed\n";
     delete[] m_d;
   }
 

@@ -43,7 +43,7 @@ int main() {
     }
     df.print();
 
-    for (auto i = df.iter_cols(); i < df.end(); i++) {
+    for (auto i = df.iter_cols(); i < df.end(); ++i) {
       for (auto& c : i.column()) {
         c->value = 456;
       }
@@ -121,7 +121,7 @@ int main() {
     // for (int i = 0; i < df.size(); i++) {
     //   df[i].value = 234234.234478;
     // }
-    for (auto cell : df) {
+    for (auto& cell : df) {
       cell.value = 234234.234478;
     }
     msec_timer.tock();
@@ -165,8 +165,9 @@ int main() {
   print_bench_result<std::chrono::nanoseconds>(RowIterator_bench_data, "iter_row(), read all cells");
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
+    int row_c = df.shape().row_count;
     msec_timer.tick();
-    for (auto i = df.iter_rows(); i < df.end(); i++) {
+    for (auto i = df.iter_rows(); i < row_c; i++) {
       for (auto& c : i.row()) {
         c->value = 136136.136;
       }
@@ -218,8 +219,9 @@ int main() {
   print_bench_result<std::chrono::nanoseconds>(ColumnIterator_bench_data, "iter_col(), read all cells");
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
+    int col_c = df.shape().col_count;
     msec_timer.tick();
-    for (auto i = df.iter_cols(); i < df.end(); i++) {
+    for (auto i = df.iter_cols(); i < col_c; i++) {
       for (auto& c : i.column()) {
         c->value = 456456.456;
       }

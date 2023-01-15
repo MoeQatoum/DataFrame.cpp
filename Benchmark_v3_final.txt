@@ -1,18 +1,18 @@
 Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
   direct access, iterations: 1000
     iter(), read value - all cells , avg time per it: 10ns
-    iter(), write value - all cells , avg time per it: 141ms
-    random access read - single cell , avg time per it: 13ns
-    random access wite - single cell , avg time per it: 129ns
+    iter(), write value - all cells , avg time per it: 151ms
+    random access read - single cell , avg time per it: 12ns
+    random access wite - single cell , avg time per it: 106ns
 
   row access, iterations: 1000
-    iter_row(), read all cells , avg time per it: 15ns
-    iter_row(), write to all cells , avg time per it: 156ms
+    iter_row(), read all cells , avg time per it: 12ns
+    iter_row(), write to all cells , avg time per it: 153ms
     row rand access read single row cells , avg time per it: 10ns
-    row rand access write to single row cells , avg time per it: 33µs
+    row rand access write to single row cells , avg time per it: 29µs
 
   col access, iterations: 1000
     iter_col(), read all cells , avg time per it: 10ns
-    iter_col(), write to all cells , avg time per it: 335ms
+    iter_col(), write to all cells , avg time per it: 329ms
     col rand access, read single col cell values , avg time per it: 13ms
     col rand access, write to single col cells , avg time per it: 68µs
