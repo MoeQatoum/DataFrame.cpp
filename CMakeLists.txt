@@ -33,7 +33,7 @@ target_include_directories(${DATA_FRAME} INTERFACE
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME} INTERFACE
-        -O3
+        -O3 -pg
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     target_compile_options(${DATA_FRAME} INTERFACE

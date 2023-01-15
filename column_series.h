@@ -23,6 +23,7 @@ struct ColumnSeries {
   ColumnSeries(DataFrameIterator col_begin, size_t col_size, size_t row_size) {
     m_size = col_size;
     m_d    = new ValueType[m_size];
+
     for (int idx = 0; idx < col_size; idx++) {
       m_d[idx] = &(col_begin + (idx * row_size));
     }
@@ -33,7 +34,7 @@ struct ColumnSeries {
     delete[] m_d;
   }
 
-  ValueType& operator[](const int idx) {
+  ValueType operator[](const int& idx) {
     return *(m_d + idx);
   }
 
@@ -49,7 +50,7 @@ struct ColumnSeries {
 
   constexpr size_t size() {
     return m_size;
-  };
+  }
 
   Iterator begin() {
     return Iterator(m_d);
@@ -70,8 +71,7 @@ struct ColumnSeries {
   }
 
   private:
-  size_t m_size;
-  // ValueType** m_d;
+  size_t     m_size;
   ValueType* m_d;
 };
 

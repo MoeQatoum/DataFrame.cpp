@@ -2,9 +2,9 @@
 #ifndef ROW_SERIES_H
 #define ROW_SERIES_H
 
-#include <stdlib.h>
-
 #include <cell.h>
+#include <ostream>
+#include <stdlib.h>
 
 template<typename Iterable>
 class Iterator;
@@ -21,12 +21,12 @@ struct RowSeries {
   using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
   using RowIterator       = Iterator<RowSeries>;
 
-  RowSeries(DataFrameIterator row_begin, DataFrameIterator row_end) {
-    m_size = row_end - row_begin;
+  RowSeries(DataFrameIterator row_begin, std::size_t row_idx, std::size_t row_size) {
+    m_size = row_size;
     m_d    = new ValueType[m_size];
 
-    for (size_t i = 0; i < m_size; i++) {
-      m_d[i] = &(row_begin + i);
+    for (int idx = 0; idx < row_size; idx++) {
+      m_d[idx] = &(row_begin + ((row_idx * row_size) + idx));
     }
   }
 
@@ -35,9 +35,8 @@ struct RowSeries {
     delete[] m_d;
   }
 
-  ValueType& operator[](const int idx) {
-    ValueType& item = *(m_d + idx);
-    return item;
+  ValueType operator[](const int& idx) {
+    return *(m_d + idx);
   }
 
   friend ostream& operator<<(ostream& os, const RowSeries& row) {

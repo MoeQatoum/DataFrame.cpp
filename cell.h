@@ -29,11 +29,17 @@ struct Cell {
 
   using ValueType = T;
 
-  // Cell() { std::cout << "Cell def constructor\n"; }
+  Cell() {
+    // std::cout << "Cell def constructor\n";
+  }
 
-  // Cell(const Cell& other) : value(other.value), idx(other.idx) { std::cout << "Cell def constructor\n"; }
+  Cell(const Cell& other) : value(other.value), idx(other.idx) {
+    // std::cout << "Cell copy constructor\n";
+  }
 
-  // Cell(Cell&& other) : value(other.value), idx(other.idx) { std::cout << "Cell def constructor\n"; }
+  Cell(Cell&& other) : value(other.value), idx(other.idx) {
+    // std::cout << "Cell move constructor\n";
+  }
 
   ~Cell() {
     // std::cout << "Cell destroyed\n";
