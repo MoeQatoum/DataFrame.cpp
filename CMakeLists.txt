@@ -19,8 +19,9 @@ file(GLOB_RECURSE DATA_FRAME_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/column_series.h
 )
 
+
 add_library(${DATA_FRAME} INTERFACE
-    ${DATA_FRAME_SOURCES} 
+${DATA_FRAME_SOURCES} 
 )
 
 # target_link_libraries(${DATA_FRAME} PRIVATE

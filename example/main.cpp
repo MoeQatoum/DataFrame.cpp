@@ -94,9 +94,9 @@ int main() {
   #define BENCH_COL_COUNT 5000
   #define BENCH_ROW_COUNT 5000
 
-  #define COUNT__ITER_DF_BENCH  100
-  #define COUNT__ITER_ROW_BENCH 100
-  #define COUNT__ITER_COL_BENCH 100
+  #define COUNT__ITER_DF_BENCH  1000
+  #define COUNT__ITER_ROW_BENCH 1000
+  #define COUNT__ITER_COL_BENCH 1000
 
   #define ITER_DF_BENCH
   #define ITER_ROW_BENCH

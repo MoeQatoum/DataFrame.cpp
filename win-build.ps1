@@ -2,7 +2,8 @@ param(
     [switch]$clean = $false,
     [switch]$cleanBuild = $false,
     [switch]$norun = $false,
-    [string]$compiler = "msvc" ,
+    [switch]$buildExamples = $false,
+    [string]$COMPILER = "msvc" ,
     [string]$config = "Release",
     [string]$target = "install",
     [Int16]$parallel = 20,
@@ -13,7 +14,7 @@ if ($h -eq $true) {
     Write-Host "help:"
     Write-Host "  -clean       Remove existing build."
     Write-Host "  -norun       Build but don't run."
-    Write-Host "  -compiler    Specify compiler. default msvc. options MingWG ot msvc"
+    Write-Host "  -compiler    Specify COMPILER. default msvc. options MingWG ot msvc"
     Write-Host "  -config      Specify build type RELEASE, DEBUG ..."
     Write-Host "  -target      NOT USED. specify target."
     Write-Host "  -parallel    Allow N jobs at once"
@@ -22,7 +23,9 @@ if ($h -eq $true) {
 }
 
 [string]$BUILD_PATH = "./build"
-[string]$INSTALL_PATH = [string](Get-Location) + "\out"
+[string]$INSTALL_PREFIX = [string](Get-Location) + "\out"
+[string]$CONFIG = [string]$config
+[bool]$BUILD_EXAMPLES = !$buildExamples
 
 if ($clean -eq $true) {
     if (Test-Path -Path $BUILD_PATH) { 
@@ -31,36 +34,36 @@ if ($clean -eq $true) {
 }
 
 if ($cleanBuild -eq $true) {
-    if (Test-Path -Path $INSTALL_PATH) { 
-        Remove-Item $INSTALL_PATH -Recurse -Force 
+    if (Test-Path -Path $INSTALL_PREFIX) { 
+        Remove-Item $INSTALL_PREFIX -Recurse -Force 
     }
 }
 
-if ($compiler -eq "msvc") {
-    Write-Host $INSTALL_PATH
-    cmake -S . -B $BUILD_PATH -G "Visual Studio 17 2022" `
-        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=true `
-        -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PATH `
-        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=true 
+if ($COMPILER -eq "msvc") {
+    Write-Host $INSTALL_PREFIX
+    cmake -S . -B $BUILD_PATH -G "Visual Studio 17 2022" -T "host=x64" -A x64 `
+        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
+        -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX `
+        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES 
     if ( -not $? ) {
         Write-Error "Cmake configraion failed"
         exit 1
     }
-    cmake --build $BUILD_PATH --config $config --target $target --parallel 
+    cmake --build $BUILD_PATH --config $CONFIG --target $target --parallel -v
 }
-elseif ($compiler -eq "clang-cl") {
-    cmake -S . -B $BUILD_PATH -G  "MinGW Makefiles" `
-        -DCMAKE_C_COMPILER=clang `
-        -DCMAKE_CXX_COMPILER=clang++ `
+elseif ($COMPILER -eq "clang") {
+    cmake -S . -B $BUILD_PATH -G "Unix Makefiles" `
+        "-DCMAKE_C_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\Llvm\x64\bin\clang.exe" `
+        "-DCMAKE_CXX_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\Llvm\x64\bin\clang.exe" `
         -DCMAKE_BUILD_TYPE:STRING=$CONFIG `
-        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=true `
-        -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PATH `
-        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=true  
+        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
+        -DCMAKE_INSTALL_PREFIX:FILEPATH=$INSTALL_PREFIX `
+        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES  
     if ( -not $? ) {
         Write-Error "Cmake configraion failed"
         exit 1
     }
-    cmake --build $BUILD_PATH --target $target -j
+    cmake --build $BUILD_PATH --config $CONFIG --target $target -j
 }
 
 if ( -not $? ) {
@@ -69,6 +72,6 @@ if ( -not $? ) {
 }
 else {
     if ($norun -eq $false) {
-        .\out\dataframe-example.exe
+        .$INSTALL_PREFIX\dataframe-example.exe
     }
 }
