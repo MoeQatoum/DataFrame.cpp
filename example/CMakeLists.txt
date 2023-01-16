@@ -13,7 +13,7 @@ project(
 )
 
 file(GLOB_RECURSE DATA_FRAME_EXAMPLE_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/main-example.cpp
 )
 
 add_executable(${DATA_FRAME_EXAMPLE} 
