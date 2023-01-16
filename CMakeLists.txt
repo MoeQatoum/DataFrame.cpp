@@ -41,7 +41,7 @@ elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     )
 endif()
 
-if(BUILD_CPP_DATA_FRAME_EXAMPLES)
+if(DATA_FRAME_EXAMPLES)
     add_subdirectory(example)
 endif()
 
