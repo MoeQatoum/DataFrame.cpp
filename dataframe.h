@@ -13,6 +13,21 @@
 #include <column_series.h>
 #include <row_series.h>
 
+#ifndef NDEBUG
+  #define ASSERT(condition, message)                                                                                \
+    do {                                                                                                            \
+      if (!(condition)) {                                                                                           \
+        std::cerr << "Assertion `" #condition "` failed in " << __FILE__ << " line " << __LINE__ << ": " << message \
+                  << std::endl;                                                                                     \
+        abort();                                                                                                    \
+      }                                                                                                             \
+    } while (false)
+#else
+  #define ASSERT(condition, message) \
+    do {                             \
+    } while (false)
+#endif
+
 template<typename T>
 class DataFrame;
 
@@ -387,22 +402,22 @@ class DataFrame {
   }
 
   ValueType& operator[](const std::size_t& col_idx, const std::size_t& row_idx) {
-    assert(0 <= col_idx && col_idx <= (m_col_count - 1));
-    assert(0 <= row_idx && row_idx <= (m_row_count - 1));
+    ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
+    ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
 
     ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
     return cell;
   }
 
   ValueType& operator[](const std::string& col_name, const std::string& row_name) {
-    assert(m_col_idx_map.contains(col_name));
-    assert(m_row_idx_map.contains(row_name));
+    ASSERT(m_col_idx_map.contains(col_name), col_name);
+    ASSERT(m_row_idx_map.contains(row_name), row_name);
 
     std::size_t col_idx = m_col_idx_map[col_name];
     std::size_t row_idx = m_row_idx_map[row_name];
 
-    assert(0 <= col_idx && col_idx <= (m_col_count - 1));
-    assert(0 <= row_idx && row_idx <= (m_row_count - 1));
+    ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
+    ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
 
     ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
     return cell;
@@ -483,11 +498,11 @@ class DataFrame {
     char* l;
     for (std::size_t i = 0; i < m_col_count; i++) {
       if (i == 0) {
-        printf("%17s", get_col_name(i).value().c_str());
+        printf("%25s", get_col_name(i).value().c_str());
       } else if (i == m_col_count - 1) {
-        printf("%8s\n", get_col_name(i).value().c_str());
+        printf("%20s\n", get_col_name(i).value().c_str());
       } else {
-        printf("%8s", get_col_name(i).value().c_str());
+        printf("%20s", get_col_name(i).value().c_str());
       }
     }
 
@@ -495,7 +510,7 @@ class DataFrame {
 
     for (std::size_t i = 0; i < size(); i++) {
       if (i % m_col_count == 0) {
-        printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+        printf("%20f %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
       printf("%8f", m_d[i].value);
       if (((i + 1) % m_col_count) == 0 && i != 0) {
