@@ -510,9 +510,9 @@ class DataFrame {
 
     for (std::size_t i = 0; i < size(); i++) {
       if (i % m_col_count == 0) {
-        printf("%20f %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+        printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
-      printf("%8f", m_d[i].value);
+      printf("%20f", m_d[i].value);
       if (((i + 1) % m_col_count) == 0 && i != 0) {
         printf("\n");
       }
