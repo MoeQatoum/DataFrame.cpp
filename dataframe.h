@@ -497,7 +497,7 @@ class DataFrame {
       if (i % m_col_count == 0) {
         printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
-      printf("%8d", m_d[i].value);
+      printf("%8f", m_d[i].value);
       if (((i + 1) % m_col_count) == 0 && i != 0) {
         printf("\n");
       }
