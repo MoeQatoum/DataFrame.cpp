@@ -405,8 +405,14 @@ class DataFrame {
     ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
     ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
 
-    ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
-    return cell;
+    return *(m_d + ((m_row_size * row_idx) + col_idx));
+  }
+
+  const ValueType& operator[](const std::size_t& col_idx, const std::size_t& row_idx) const {
+    ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
+    ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
+
+    return *(m_d + ((m_row_size * row_idx) + col_idx));
   }
 
   ValueType& operator[](const std::string& col_name, const std::string& row_name) {
@@ -415,6 +421,20 @@ class DataFrame {
 
     std::size_t col_idx = m_col_idx_map[col_name];
     std::size_t row_idx = m_row_idx_map[row_name];
+
+    ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
+    ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
+
+    ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
+    return cell;
+  }
+
+  const ValueType& operator[](const std::string& col_name, const std::string& row_name) const {
+    ASSERT(m_col_idx_map.contains(col_name), col_name);
+    ASSERT(m_row_idx_map.contains(row_name), row_name);
+
+    std::size_t col_idx = m_col_idx_map.at(col_name);
+    std::size_t row_idx = m_row_idx_map.at(row_name);
 
     ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
     ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
