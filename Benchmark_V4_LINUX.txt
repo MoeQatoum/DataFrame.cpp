@@ -1,0 +1,20 @@
+Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
+  direct access, iterations: 1000
+    iter(), read value - all cells , avg time per it: 10ns
+    iter(), write value - all cells , avg time per it: 153ms
+    random access read single integral indexing- single cell , avg time per it: 13ns
+    random access, read value col row string indexing - single cell , avg time per it: 472ns
+    random access wite - single cell , avg time per it: 104ns
+    random access, write value col row string indexing - single cell , avg time per it: 447ns
+
+  row access, iterations: 1000
+    iter_row(), read all cells , avg time per it: 10ns
+    iter_row(), write to all cells , avg time per it: 155ms
+    row rand access read single row cells , avg time per it: 10ns
+    row rand access write to single row cells , avg time per it: 29µs
+
+  col access, iterations: 1000
+    iter_col(), read all cells , avg time per it: 10ns
+    iter_col(), write to all cells , avg time per it: 331ms
+    col rand access, read single col cell values , avg time per it: 13ms
+    col rand access, write to single col cells , avg time per it: 68µs

@@ -12,6 +12,16 @@ template<typename T>
 class DataFrame;
 
 template<typename T>
+struct ColumnData {
+  T*          data;
+  std::size_t size;
+
+  ~ColumnData() {
+    delete[] data;
+  }
+};
+
+template<typename T>
 struct ColumnSeries {
   using size_t  = std::size_t;
   using ostream = std::ostream;
@@ -39,6 +49,16 @@ struct ColumnSeries {
     return *(m_d + idx);
   }
 
+  ColumnData<T> get_data() {
+    ColumnData<T> data;
+    data.data = new T[m_size];
+    data.size = m_size;
+    for (int i = 0; i < m_size; i++) {
+      data.data[i] = (*(m_d + i))->value;
+    }
+    return data;
+  }
+
   friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
     os << "ColumnSeries(size: " << col.m_size << ", "
        << "Items: \n";
@@ -56,6 +76,7 @@ struct ColumnSeries {
   Iterator begin() {
     return Iterator(m_d);
   }
+
   Iterator begin() const {
     return Iterator(m_d);
   }
@@ -63,6 +84,7 @@ struct ColumnSeries {
   Iterator end() {
     return Iterator(m_d + m_size);
   }
+
   Iterator end() const {
     return Iterator(m_d + m_size);
   }

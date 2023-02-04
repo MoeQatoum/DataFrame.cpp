@@ -488,9 +488,11 @@ class DataFrame {
   constexpr size_t size() const {
     return m_current_size;
   }
+
   constexpr size_t col_size() const {
     return m_col_size;
   }
+
   constexpr size_t row_size() const {
     return m_row_size;
   }
@@ -499,17 +501,26 @@ class DataFrame {
     return {.col_count = m_col_count, .row_count = m_row_count};
   }
 
+  ColumnSeries get_col(std::size_t col_idx) {
+    return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
+  }
+
+  ColumnSeries get_column(std::string col_name) {
+    return ColumnSeries{begin() + get_col_idx(col_name), m_col_size, m_row_size};
+  }
+
   RowSeries get_row(std::size_t row_idx) {
     return RowSeries{begin(), row_idx, m_row_size};
   }
 
-  ColumnSeries get_col(size_t col_idx) {
-    return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
+  RowSeries get_row(std::string row_name) {
+    return RowSeries{begin(), get_row_idx(row_name), m_row_size};
   }
 
   DataFrameRowIterator iter_rows() {
     return DataFrameRowIterator(begin(), m_row_size);
   }
+
   DataFrameColIterator iter_cols() {
     return DataFrameColIterator(begin(), m_col_size, m_row_size);
   }
@@ -532,7 +543,7 @@ class DataFrame {
       if (i % m_col_count == 0) {
         printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
       }
-      printf("%20f", m_d[i].value);
+      printf("%20d", m_d[i].value);
       if (((i + 1) % m_col_count) == 0 && i != 0) {
         printf("\n");
       }

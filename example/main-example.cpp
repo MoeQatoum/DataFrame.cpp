@@ -49,6 +49,11 @@ int main() {
         c->value = 456;
       }
       // i.column()[0]->value = 123;
+      auto d = i.column().get_data();
+      for (int i = 0; i < d.size; i++) {
+        std::cout << d.data[i] << ", ";
+      }
+      std::cout << "\n";
     }
     df.print();
 
@@ -57,6 +62,11 @@ int main() {
         c->value = 123;
       }
       // i.row()[0]->value = 123;
+      auto d = i.row().get_data();
+      for (int i = 0; i < d.size; i++) {
+        std::cout << d.data[i] << ", ";
+      }
+      std::cout << "\n";
     }
 
     df.print();
@@ -137,7 +147,19 @@ int main() {
     nsec_timer.tock();
     DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
   }
-  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access read - single cell");
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data,
+                                               "random access read single integral indexing- single cell");
+
+  for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
+    std::string col_name{"col-" + std::to_string(rand() % (df.col_size() - 1))};
+    std::string row_name{"row-" + std::to_string(rand() % (df.row_size() - 1))};
+    nsec_timer.tick();
+    auto v = df[col_name, row_name].value;
+    nsec_timer.tock();
+    DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
+  }
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data,
+                                               "random access, read value col row string indexing - single cell");
 
   for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
     int rand_idx = rand() % (df.size() - 1);
@@ -147,6 +169,17 @@ int main() {
     DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
   }
   print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access wite - single cell");
+
+  for (int i = 0; i < COUNT__ITER_DF_BENCH; i++) {
+    std::string col_name{"col-" + std::to_string(rand() % (df.col_size() - 1))};
+    std::string row_name{"row-" + std::to_string(rand() % (df.row_size() - 1))};
+    nsec_timer.tick();
+    df[col_name, row_name].value = 159159.159;
+    nsec_timer.tock();
+    DataFrameIterator_bench_data[i] = nsec_timer.duration().count();
+  }
+  print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data,
+                                               "random access, write value col row string indexing - single cell");
   #endif
 
   #ifdef ITER_ROW_BENCH

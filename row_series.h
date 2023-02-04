@@ -13,6 +13,16 @@ template<typename T>
 class DataFrame;
 
 template<typename T>
+struct RowData {
+  T*          data;
+  std::size_t size;
+
+  ~RowData() {
+    delete[] data;
+  }
+};
+
+template<typename T>
 struct RowSeries {
   using size_t  = std::size_t;
   using ostream = std::ostream;
@@ -40,6 +50,16 @@ struct RowSeries {
     return *(m_d + idx);
   }
 
+  RowData<T> get_data() {
+    RowData<T> data;
+    data.data = new T[m_size];
+    data.size = m_size;
+    for (int i = 0; i < m_size; i++) {
+      data.data[i] = (*(m_d + i))->value;
+    }
+    return data;
+  }
+
   friend ostream& operator<<(ostream& os, const RowSeries& row) {
     os << "RowSeries(size: " << row.m_size << ", "
        << "Items: \n";
@@ -48,6 +68,10 @@ struct RowSeries {
     }
     os << ")";
     return os;
+  }
+
+  constexpr size_t size() {
+    return m_size;
   }
 
   RowIterator begin() {
