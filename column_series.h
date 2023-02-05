@@ -1,101 +1,104 @@
-#ifndef COLUMN_SERIES_H
-#define COLUMN_SERIES_H
+#ifndef DATA_FRAME_COLUMN_SERIES_H
+#define DATA_FRAME_COLUMN_SERIES_H
 
 #include <cell.h>
 #include <ostream>
 #include <stdlib.h>
 
-template<typename Iterable>
-class Iterator;
+namespace sDataFrame {
 
-template<typename T>
-class DataFrame;
+  template<typename Iterable>
+  class Iterator;
 
-template<typename T>
-struct ColumnData {
-  T*          data;
-  std::size_t size;
+  template<typename T>
+  class DataFrame;
 
-  ~ColumnData() {
-    delete[] data;
-  }
-};
+  template<typename T>
+  struct ColumnData {
+    T*          data;
+    std::size_t size;
 
-template<typename T>
-struct ColumnSeries {
-  using size_t  = std::size_t;
-  using ostream = std::ostream;
-
-  using ValueType         = Cell<T>*;
-  using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
-  using Iterator          = Iterator<ColumnSeries>;
-
-  ColumnSeries(DataFrameIterator col_begin, size_t col_size, size_t row_size) {
-    m_size = col_size;
-    m_d    = new ValueType[m_size];
-
-    for (int idx = 0; idx < col_size; idx++) {
-      m_d[idx] = &(col_begin + (idx * row_size));
+    ~ColumnData() {
+      delete[] data;
     }
-  }
+  };
 
-  ColumnSeries(const ColumnSeries& other) = delete;
+  template<typename T>
+  struct ColumnSeries {
+    using size_t  = std::size_t;
+    using ostream = std::ostream;
 
-  ~ColumnSeries() {
-    delete[] m_d;
-  }
+    using ValueType         = Cell<T>*;
+    using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
+    using Iterator          = Iterator<ColumnSeries>;
 
-  ValueType operator[](const int& idx) {
-    return *(m_d + idx);
-  }
+    ColumnSeries(DataFrameIterator col_begin, size_t col_size, size_t row_size) {
+      m_size = col_size;
+      m_d    = new ValueType[m_size];
 
-  ColumnData<T> get_data() {
-    ColumnData<T> data;
-    data.data = new T[m_size];
-    data.size = m_size;
-    for (int i = 0; i < m_size; i++) {
-      data.data[i] = (*(m_d + i))->value;
+      for (int idx = 0; idx < col_size; idx++) {
+        m_d[idx] = &(col_begin + (idx * row_size));
+      }
     }
-    return data;
-  }
 
-  friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
-    os << "ColumnSeries(size: " << col.m_size << ", "
-       << "Items: \n";
-    for (const ValueType& cell : col) {
-      os << *cell << "\n";
+    ColumnSeries(const ColumnSeries& other) = delete;
+
+    ~ColumnSeries() {
+      delete[] m_d;
     }
-    os << ")";
-    return os;
-  }
 
-  constexpr size_t size() {
-    return m_size;
-  }
+    ValueType operator[](const int& idx) {
+      return *(m_d + idx);
+    }
 
-  Iterator begin() {
-    return Iterator(m_d);
-  }
+    ColumnData<T> get_data() {
+      ColumnData<T> data;
+      data.data = new T[m_size];
+      data.size = m_size;
+      for (int i = 0; i < m_size; i++) {
+        data.data[i] = (*(m_d + i))->value;
+      }
+      return data;
+    }
 
-  Iterator begin() const {
-    return Iterator(m_d);
-  }
+    friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
+      os << "ColumnSeries(size: " << col.m_size << ", "
+         << "Items: \n";
+      for (const ValueType& cell : col) {
+        os << *cell << "\n";
+      }
+      os << ")";
+      return os;
+    }
 
-  Iterator end() {
-    return Iterator(m_d + m_size);
-  }
+    constexpr size_t size() {
+      return m_size;
+    }
 
-  Iterator end() const {
-    return Iterator(m_d + m_size);
-  }
+    Iterator begin() {
+      return Iterator(m_d);
+    }
 
-  ValueType& at(int idx) {
-    return *(begin() + idx);
-  }
+    Iterator begin() const {
+      return Iterator(m_d);
+    }
 
-  private:
-  size_t     m_size;
-  ValueType* m_d;
-};
+    Iterator end() {
+      return Iterator(m_d + m_size);
+    }
+
+    Iterator end() const {
+      return Iterator(m_d + m_size);
+    }
+
+    ValueType& at(int idx) {
+      return *(begin() + idx);
+    }
+
+private:
+    size_t     m_size;
+    ValueType* m_d;
+  };
+} // namespace sDataFrame
 
 #endif // COLUMN_SERIES_H

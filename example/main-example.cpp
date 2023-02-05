@@ -36,40 +36,74 @@ int main() {
   for (std::size_t i = 0; i < TEST_ROW_COUNT; i++) {
     row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
-  {
-    DataFrame<int> df{col_names, row_names};
 
-    for (std::size_t i = 0; i < df.size(); ++i) {
-      df[i] = static_cast<int>(i);
+  sDataFrame::DataFrame<int> df{col_names, row_names};
+
+  for (std::size_t i = 0; i < df.size(); ++i) {
+    df[i] = static_cast<int>(i);
+  }
+  df.print();
+
+  for (auto i = df.iter_cols(); i < df.end(); ++i) {
+    for (auto& c : i.column()) {
+      c->value = 456;
     }
-    df.print();
-
-    for (auto i = df.iter_cols(); i < df.end(); ++i) {
-      for (auto& c : i.column()) {
-        c->value = 456;
-      }
-      // i.column()[0]->value = 123;
-      auto d = i.column().get_data();
-      for (int i = 0; i < d.size; i++) {
-        std::cout << d.data[i] << ", ";
-      }
-      std::cout << "\n";
+    // i.column()[0]->value = 123;
+    auto d = i.column().get_data();
+    for (int i = 0; i < d.size; i++) {
+      std::cout << d.data[i] << ", ";
     }
-    df.print();
+    std::cout << "\n";
+  }
+  df.print();
 
-    for (auto i = df.iter_rows(); i < df.end(); i++) {
-      for (auto& c : i.row()) {
-        c->value = 123;
-      }
-      // i.row()[0]->value = 123;
-      auto d = i.row().get_data();
-      for (int i = 0; i < d.size; i++) {
-        std::cout << d.data[i] << ", ";
-      }
-      std::cout << "\n";
+  for (auto i = df.iter_rows(); i < df.end(); i++) {
+    for (auto& c : i.row()) {
+      c->value = 123;
     }
+    // i.row()[0]->value = 123;
+    auto d = i.row().get_data();
+    for (int i = 0; i < d.size; i++) {
+      std::cout << d.data[i] << ", ";
+    }
+    std::cout << "\n";
+  }
 
-    df.print();
+  df.print();
+
+  std::cout << "copy df ...\n";
+
+  std::vector<std::string> n_col_names{};
+  for (std::size_t i = 0; i < TEST_COL_COUNT; i++) {
+    n_col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+  }
+
+  std::vector<std::string> n_row_names{};
+  for (std::size_t i = 0; i < TEST_ROW_COUNT; i++) {
+    n_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+  }
+
+  sDataFrame::DataFrame<int> n_df{n_col_names, n_row_names};
+
+  for (std::size_t i = 0; i < n_df.size(); ++i) {
+    n_df[i] = static_cast<int>(i);
+  }
+
+  n_df.print();
+  sDataFrame::DataFrame<int> new_df = n_df.copy();
+  n_df.print();
+  std::cout << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
+  std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
+  for (int i = 0; i < new_df.size(); i++) {
+    std::cout << new_df[i].value << ", ";
+  }
+  std::cout << "\n";
+  for (int i = 0; i < new_df.col_size(); i++) {
+    std::cout << new_df.get_row_name(i).value() << ", ";
+  }
+  std::cout << "\n";
+  for (int i = 0; i < new_df.row_size(); i++) {
+    std::cout << new_df.get_col_name(i).value() << ", ";
   }
 #endif
 

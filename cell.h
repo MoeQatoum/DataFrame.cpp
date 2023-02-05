@@ -4,59 +4,82 @@
 #include <iostream>
 #include <stdlib.h>
 
-struct Index {
-  using size_t  = std::size_t;
-  using string  = std::string;
-  using ostream = std::ostream;
+namespace sDataFrame {
 
-  Index() {
-  }
+  struct Index {
+    using size_t  = std::size_t;
+    using string  = std::string;
+    using ostream = std::ostream;
 
-  Index(const Index& other) = delete;
+    Index() {
+    }
 
-  Index(Index&& other) = delete;
+    Index(const Index& other)
+        : row_idx(other.row_idx),
+          col_idx(other.col_idx),
+          global_idx(other.global_idx),
+          col_name(other.col_name),
+          row_name(other.row_name) {
+    }
 
-  size_t row_idx;
-  size_t col_idx;
-  size_t global_idx;
+    // Index(Index&& other) = delete;
 
-  string col_name;
-  string row_name;
+    // Index operator=(const Index& other) {
+    //   Index temp_idx;
+    //   temp_idx.row_idx    = other.row_idx;
+    //   temp_idx.col_idx    = other.col_idx;
+    //   temp_idx.global_idx = other.global_idx;
+    //   temp_idx.col_name   = other.col_name;
+    //   temp_idx.row_name   = other.row_name;
+    //   return temp_idx;
+    // }
 
-  friend ostream& operator<<(ostream& os, const Index& df_idx) {
-    os << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
-       << df_idx.row_name << ", " << df_idx.row_idx << ">)";
-    return os;
-  }
-};
+    size_t row_idx;
+    size_t col_idx;
+    size_t global_idx;
 
-template<typename T>
-struct Cell {
-  using ostream = std::ostream;
+    string col_name;
+    string row_name;
 
-  using ValueType = T;
+    friend ostream& operator<<(ostream& os, const Index& df_idx) {
+      os << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
+         << df_idx.row_name << ", " << df_idx.row_idx << ">)";
+      return os;
+    }
+  };
 
-  Cell() {
-  }
+  template<typename T>
+  struct Cell {
+    using ostream = std::ostream;
 
-  Cell(const Cell& other) = delete;
+    Cell() {
+    }
 
-  Cell(Cell&& other) = delete;
+    Cell(const Cell& other) : value(other.value), idx(other.idx) {
+    }
 
-  ~Cell() {
-  }
+    // Cell(Cell&& other) = delete;
 
-  ValueType value;
-  Index     idx;
+    Cell<T> operator=(const Cell<T>& other) {
+      value = other.value;
+      idx   = other.idx;
+      // return temp_cell;
+      // return Cell(other);
+      return *this;
+    }
 
-  void operator=(const ValueType val) {
-    value = val;
-  }
+    void operator=(const T val) {
+      value = val;
+    }
 
-  friend ostream& operator<<(ostream& os, const Cell<ValueType>& cell) {
-    os << "Cell(value: " << cell.value << ", " << cell.idx << ")";
-    return os;
-  }
-};
+    friend ostream& operator<<(ostream& os, const Cell<T>& cell) {
+      os << "Cell(value: " << cell.value << ", " << cell.idx << ")";
+      return os;
+    }
+
+    T     value;
+    Index idx;
+  };
+} // namespace sDataFrame
 
 #endif // DATA_FRAME_CELL_H
