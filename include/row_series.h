@@ -2,16 +2,16 @@
 #ifndef DATA_FRAME_ROW_SERIES_H
 #define DATA_FRAME_ROW_SERIES_H
 
-#include <cell.h>
-#include <ostream>
-#include <stdlib.h>
+#include "common.h"
+
+#include "cell.h"
 
 namespace sDataFrame {
 
   template<typename Iterable>
   class Iterator;
 
-  template<typename T>
+  template<NumericalTypes T>
   class DataFrame;
 
   template<typename T>
@@ -42,7 +42,11 @@ namespace sDataFrame {
       }
     }
 
-    RowSeries(const RowSeries& other) = delete;
+    RowSeries(const RowSeries& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
+      for (int i = 0; i < m_size; i++) {
+        m_d[i] = other.m_d[i];
+      }
+    }
 
     ~RowSeries() {
       delete[] m_d;
@@ -52,7 +56,7 @@ namespace sDataFrame {
       return *(m_d + idx);
     }
 
-    RowData<T> get_data() {
+    RowData<T> copy_data() {
       RowData<T> data;
       data.data = new T[m_size];
       data.size = m_size;

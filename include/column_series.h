@@ -1,16 +1,16 @@
 #ifndef DATA_FRAME_COLUMN_SERIES_H
 #define DATA_FRAME_COLUMN_SERIES_H
 
-#include <cell.h>
-#include <ostream>
-#include <stdlib.h>
+#include "common.h"
+
+#include "cell.h"
 
 namespace sDataFrame {
 
   template<typename Iterable>
   class Iterator;
 
-  template<typename T>
+  template<NumericalTypes T>
   class DataFrame;
 
   template<typename T>
@@ -51,7 +51,7 @@ namespace sDataFrame {
       return *(m_d + idx);
     }
 
-    ColumnData<T> get_data() {
+    ColumnData<T> copy_data() {
       ColumnData<T> data;
       data.data = new T[m_size];
       data.size = m_size;

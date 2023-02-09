@@ -1,38 +1,15 @@
 #ifndef DATA_FRAME_H
 #define DATA_FRAME_H
 
-#include <algorithm>
-#include <array>
-#include <assert.h>
-#include <cstring>
-#include <iostream>
-#include <map>
-#include <optional>
-#include <string>
-#include <vector>
+#include "common.h"
 
 #include <cell.h>
 #include <column_series.h>
 #include <row_series.h>
 
-#ifndef NDEBUG
-  #define DF_ASSERT(condition, message)                                                                             \
-    do {                                                                                                            \
-      if (!(condition)) {                                                                                           \
-        std::cerr << "Assertion `" #condition "` failed in " << __FILE__ << " line " << __LINE__ << ": " << message \
-                  << std::endl;                                                                                     \
-        abort();                                                                                                    \
-      }                                                                                                             \
-    } while (false)
-#else
-  #define DF_ASSERT(condition, message) \
-    do {                                \
-    } while (false)
-#endif
-
 namespace sDataFrame {
 
-  template<typename T>
+  template<NumericalTypes T>
   class DataFrame;
 
   template<typename Iterable>
@@ -349,7 +326,7 @@ private:
   template<typename T>
   struct RowSeries;
 
-  template<typename T>
+  template<NumericalTypes T>
   class DataFrame {
 public:
     using ValueType            = Cell<T>;
@@ -420,6 +397,8 @@ public:
     // DataFrame operator=(const DataFrame& other) {
     //   return DataFrame(other);
     // }
+
+    DataFrame operator=(const DataFrame& other) = delete;
 
     ValueType& operator[](const size_t& idx) {
       return *(m_d + idx);
@@ -514,7 +493,7 @@ public:
     }
 
     DataFrameIterator end() {
-      return DataFrameIterator(m_d + size());
+      return DataFrameIterator(m_d + m_current_size);
     }
 
     constexpr size_t size() const {

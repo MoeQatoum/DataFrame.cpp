@@ -13,10 +13,7 @@ project(
 )
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/dataframe.h
-    ${CMAKE_CURRENT_LIST_DIR}/cell.h
-    ${CMAKE_CURRENT_LIST_DIR}/row_series.h
-    ${CMAKE_CURRENT_LIST_DIR}/column_series.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/*.h
 )
 
 
@@ -28,19 +25,19 @@ ${DATA_FRAME_SOURCES}
 # )
 
 target_include_directories(${DATA_FRAME} INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/include
 )
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME} INTERFACE
-        -O3 -static-libstdc++
+        -O3 #-static-libstdc++
         #profile CPU with as small performance impact as possible: use -pg
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     # target_compile_definitions(${DATA_FRAME} INTERFACE _GLIBCXX_DEBUG)
 
     target_compile_options(${DATA_FRAME} INTERFACE
-    -O0 -static-libstdc++ -g -Wall -Weverything -Wconversion -Wextra -Wpedantic
+    -O0 -g -Wall -Weverything -Wconversion -Wextra -Wpedantic
     )
 endif()
 

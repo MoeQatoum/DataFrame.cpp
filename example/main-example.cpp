@@ -1,8 +1,10 @@
 #include "bench.h"
-#include <dataframe.h>
 #include <iostream>
 #include <memory>
 #include <stdlib.h>
+
+#include "utils.h"
+#include <dataframe.h>
 
 #define R "\033[91m"
 #define G "\033[92m"
@@ -49,7 +51,7 @@ int main() {
       c->value = 456;
     }
     // i.column()[0]->value = 123;
-    auto d = i.column().get_data();
+    auto d = i.column().copy_data();
     for (int i = 0; i < d.size; i++) {
       std::cout << d.data[i] << ", ";
     }
@@ -62,7 +64,7 @@ int main() {
       c->value = 123;
     }
     // i.row()[0]->value = 123;
-    auto d = i.row().get_data();
+    auto d = i.row().copy_data();
     for (int i = 0; i < d.size; i++) {
       std::cout << d.data[i] << ", ";
     }
@@ -71,7 +73,11 @@ int main() {
 
   df.print();
 
-  std::cout << "copy df ...\n";
+  //////////
+  // copy //
+  //////////
+
+  std::cout << "copy:\n";
 
   std::vector<std::string> n_col_names{};
   for (std::size_t i = 0; i < TEST_COL_COUNT; i++) {
@@ -96,6 +102,7 @@ int main() {
   std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
   for (int i = 0; i < new_df.size(); i++) {
     std::cout << new_df[i].value << ", ";
+    new_df[i].value = 999;
   }
   std::cout << "\n";
   for (int i = 0; i < new_df.col_size(); i++) {
@@ -105,6 +112,22 @@ int main() {
   for (int i = 0; i < new_df.row_size(); i++) {
     std::cout << new_df.get_col_name(i).value() << ", ";
   }
+  std::cout << "\n"
+            << "df addr: " << &n_df << " size: " << sizeof(n_df) << ", new_df addr: " << &new_df
+            << " size: " << sizeof(new_df) << "\n";
+  n_df.print();
+  new_df.print();
+
+  //////////
+  // sort //
+  //////////
+
+  std::cout << "sort:\n";
+  n_df.print();
+  sDataFrame::DataFrame<int> sorted_df
+    = sDataFrame::utils::sort_rows<int>(n_df, "col-2", sDataFrame::utils::Descending, false);
+  sorted_df.print();
+
 #endif
 
 #ifdef BENCH
