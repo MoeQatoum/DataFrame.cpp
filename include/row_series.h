@@ -6,7 +6,7 @@
 
 #include "cell.h"
 
-namespace sDataFrame {
+namespace df {
 
   template<typename Iterable>
   class Iterator;
@@ -102,6 +102,6 @@ private:
     size_t     m_size;
     ValueType* m_d;
   };
-} // namespace sDataFrame
+} // namespace df
 
 #endif // COLUMN_SERIES_H

@@ -7,7 +7,7 @@
 #include <column_series.h>
 #include <row_series.h>
 
-namespace sDataFrame {
+namespace df {
 
   template<NumericalTypes T>
   class DataFrame;
@@ -572,5 +572,5 @@ private:
     size_t                        m_row_count;
     ValueType*                    m_d;
   };
-} // namespace sDataFrame
+} // namespace df
 #endif // DATA_FRAME_H

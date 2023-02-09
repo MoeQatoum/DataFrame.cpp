@@ -39,7 +39,7 @@ int main() {
     row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  sDataFrame::DataFrame<int> df{col_names, row_names};
+  df::DataFrame<int> df{col_names, row_names};
 
   for (std::size_t i = 0; i < df.size(); ++i) {
     df[i] = static_cast<int>(i);
@@ -89,14 +89,14 @@ int main() {
     n_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  sDataFrame::DataFrame<int> n_df{n_col_names, n_row_names};
+  df::DataFrame<int> n_df{n_col_names, n_row_names};
 
   for (std::size_t i = 0; i < n_df.size(); ++i) {
     n_df[i] = static_cast<int>(i);
   }
 
   n_df.print();
-  sDataFrame::DataFrame<int> new_df = n_df.copy();
+  df::DataFrame<int> new_df = n_df.copy();
   n_df.print();
   std::cout << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
   std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
@@ -123,10 +123,12 @@ int main() {
   //////////
 
   std::cout << "sort:\n";
+  for (int i = 0; i < n_df.size(); i++) {
+    n_df[i] = n_df.size() - i;
+  }
   n_df.print();
-  sDataFrame::DataFrame<int> sorted_df
-    = sDataFrame::utils::sort_rows<int>(n_df, "col-2", sDataFrame::utils::Descending, false);
-  sorted_df.print();
+  df::utils::asc_sort_rows(n_df, "col-2");
+  // sorted_df.print();
 
 #endif
 

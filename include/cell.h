@@ -4,7 +4,7 @@
 #include <iostream>
 #include <stdlib.h>
 
-namespace sDataFrame {
+namespace df {
 
   struct Index {
     using size_t  = std::size_t;
@@ -80,6 +80,6 @@ namespace sDataFrame {
     T     value;
     Index idx;
   };
-} // namespace sDataFrame
+} // namespace df
 
 #endif // DATA_FRAME_CELL_H
