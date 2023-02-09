@@ -1,0 +1,26 @@
+Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
+  direct access, test iterations: 1000
+    iter(), read value - all cells , avg time per it: 10ns
+    iter(), write value - all cells , avg time per it: 158ms
+    random access read single integral indexing- single cell , avg time per it: 13ns
+    random access, read value col row string indexing - single cell , avg time per it: 478ns
+    random access wite - single cell , avg time per it: 104ns
+    random access, write value col row string indexing - single cell , avg time per it: 446ns
+
+  row access, test iterations: 1000
+    iter_row(), read all cells , avg time per it: 10ns
+    iter_row(), write to all cells , avg time per it: 163ms
+    row rand access read single row cells , avg time per it: 10ns
+    row rand access write to single row cells , avg time per it: 32µs
+
+  col access, test iterations: 1000
+    iter_col(), read all cells , avg time per it: 11ns
+    iter_col(), write to all cells , avg time per it: 343ms
+    col rand access, read single col cell values , avg time per it: 13ms
+    col rand access, write to single col cells , avg time per it: 72µs
+
+  sort, test iterations: 1000
+    sort_rows(col_name), sort df by col , avg time per it: 2625ms
+
+  sort, test iterations: 1000
+    utils::asc_sort_rows(df&, col_name), sort df rows by col , avg time per it: 236ms
