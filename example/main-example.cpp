@@ -1,4 +1,5 @@
 #include "bench.h"
+#include <array>
 #include <iostream>
 #include <memory>
 #include <stdlib.h>
@@ -12,8 +13,8 @@
 #define Y "\033[93m"
 #define W "\033[00m"
 
-#define TEST
-// #define BENCH
+// #define TEST
+#define BENCH
 
 template<typename TimeUnit, std::size_t N>
 void print_bench_result(std::array<int, N> data, const char* bench_name) {
@@ -100,16 +101,16 @@ int main() {
   n_df.print();
   std::cout << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
   std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
-  for (int i = 0; i < new_df.size(); i++) {
+  for (size_t i = 0; i < new_df.size(); i++) {
     std::cout << new_df[i].value << ", ";
     new_df[i].value = 999;
   }
   std::cout << "\n";
-  for (int i = 0; i < new_df.col_size(); i++) {
+  for (size_t i = 0; i < new_df.col_size(); i++) {
     std::cout << new_df.get_row_name(i).value() << ", ";
   }
   std::cout << "\n";
-  for (int i = 0; i < new_df.row_size(); i++) {
+  for (size_t i = 0; i < new_df.row_size(); i++) {
     std::cout << new_df.get_col_name(i).value() << ", ";
   }
   std::cout << "\n"
@@ -123,12 +124,41 @@ int main() {
   //////////
 
   std::cout << "sort:\n";
-  for (int i = 0; i < n_df.size(); i++) {
-    n_df[i] = n_df.size() - i;
+
+  df::DataFrame<int> unsorted_df = df.copy();
+  for (size_t i = 0; i < unsorted_df.size(); i++) {
+    unsorted_df[i] = rand() % static_cast<int>(unsorted_df.size());
   }
-  n_df.print();
-  df::utils::asc_sort_rows(n_df, "col-2");
-  // sorted_df.print();
+
+  unsorted_df.print();
+
+  std::vector<df::RowSeries<int>> sorted_rows = df::utils::asc_sort_rows(unsorted_df, "col-2");
+
+  // dont modify the original df from sorted rows
+  df::DataFrame<int> sorted_df(unsorted_df);
+  size_t             idx = 0;
+  for (auto row : sorted_rows) {
+    for (auto c : row) {
+      sorted_df[idx].value = c->value;
+      idx++;
+    }
+  }
+
+  sorted_df.print();
+
+  std::cout << "---------------------------------------------------------------------\ninplace sort:\n";
+
+  df::DataFrame<int> inplace_sort_df = df.copy();
+  for (size_t i = 0; i < inplace_sort_df.size(); i++) {
+    inplace_sort_df[i] = rand() % static_cast<int>(unsorted_df.size());
+  }
+
+  for (size_t i = 0; i < unsorted_df.size(); i++) {
+    unsorted_df[i] = rand() % static_cast<int>(unsorted_df.size());
+  }
+
+  inplace_sort_df.print();
+  inplace_sort_df.sort_rows("col-2").print();
 
 #endif
 
@@ -136,13 +166,16 @@ int main() {
   #define BENCH_COL_COUNT 5000
   #define BENCH_ROW_COUNT 5000
 
-  #define COUNT__ITER_DF_BENCH  1000
-  #define COUNT__ITER_ROW_BENCH 1000
-  #define COUNT__ITER_COL_BENCH 1000
+  #define COUNT__ITER_DF_BENCH   1000
+  #define COUNT__ITER_ROW_BENCH  1000
+  #define COUNT__ITER_COL_BENCH  1000
+  #define COUNT__ITER_SORT_BENCH 1000
 
-  #define ITER_DF_BENCH
-  #define ITER_ROW_BENCH
-  #define ITER_COL_BENCH
+  #define DF_BENCH
+  #define ROW_BENCH
+  #define COL_BENCH
+  #define SORT_BENCH
+  #define ROW_SORT_BENCH
 
   using dataT = double;
 
@@ -159,7 +192,7 @@ int main() {
     row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  DataFrame<dataT> df{col_names, row_names};
+  df::DataFrame<dataT> df{col_names, row_names};
 
   for (std::size_t i = 0; i < df.size(); ++i) {
     df[i] = static_cast<dataT>(i);
@@ -168,8 +201,8 @@ int main() {
   std::cout << df.shape() << " size: " << sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT / 1000000
             << " MB, data Type: " << typeid(dataT).name() << "\n";
 
-  #ifdef ITER_DF_BENCH
-  std::cout << "  direct access, iterations: " << COUNT__ITER_DF_BENCH << "\n";
+  #ifdef DF_BENCH
+  std::cout << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH << "\n";
 
   std::array<int, COUNT__ITER_DF_BENCH> DataFrameIterator_bench_data;
 
@@ -241,8 +274,8 @@ int main() {
                                                "random access, write value col row string indexing - single cell");
   #endif
 
-  #ifdef ITER_ROW_BENCH
-  std::cout << "\n  row access, iterations: " << COUNT__ITER_ROW_BENCH << "\n";
+  #ifdef ROW_BENCH
+  std::cout << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH << "\n";
   std::array<int, COUNT__ITER_ROW_BENCH> RowIterator_bench_data;
 
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
@@ -295,8 +328,8 @@ int main() {
   print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "row rand access write to single row cells");
   #endif
 
-  #ifdef ITER_COL_BENCH
-  std::cout << "\n  col access, iterations: " << COUNT__ITER_COL_BENCH << "\n";
+  #ifdef COL_BENCH
+  std::cout << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH << "\n";
   std::array<int, COUNT__ITER_COL_BENCH> ColumnIterator_bench_data;
 
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
@@ -351,6 +384,40 @@ int main() {
                                                 "col rand access, write to single col cells");
   #endif
 
+  #ifdef SORT_BENCH
+  std::cout << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  std::array<int, COUNT__ITER_SORT_BENCH> sort_bench_data;
+
+  for (int i = 0; i < COUNT__ITER_SORT_BENCH; i++) {
+    for (std::size_t i = 0; i < df.size(); ++i) {
+      df[i] = static_cast<dataT>(rand() % df.size());
+    }
+    std::string col_name = col_names[rand() % (col_names.size() - 1)];
+    msec_timer.tick();
+    df.sort_rows(col_name);
+    msec_timer.tock();
+    sort_bench_data[i] = msec_timer.duration().count();
+  }
+  print_bench_result<std::chrono::milliseconds>(sort_bench_data, "sort_rows(col_name), sort df by col");
+  #endif
+
+  #ifdef ROW_SORT_BENCH
+  std::cout << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  std::array<int, COUNT__ITER_SORT_BENCH> row_sort_bench_data;
+
+  for (int i = 0; i < COUNT__ITER_SORT_BENCH; i++) {
+    for (std::size_t i = 0; i < df.size(); ++i) {
+      df[i] = static_cast<dataT>(rand() % df.size());
+    }
+    std::string col_name = col_names[rand() % (col_names.size() - 1)];
+    msec_timer.tick();
+    df::utils::asc_sort_rows(df, col_name);
+    msec_timer.tock();
+    row_sort_bench_data[i] = msec_timer.duration().count();
+  }
+  print_bench_result<std::chrono::milliseconds>(row_sort_bench_data,
+                                                "utils::asc_sort_rows(df&, col_name), sort df rows by col");
+  #endif
 #endif
   return 0;
 }

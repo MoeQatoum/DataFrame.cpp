@@ -37,13 +37,13 @@ namespace df {
       m_size = row_size;
       m_d    = new ValueType[m_size];
 
-      for (int idx = 0; idx < row_size; idx++) {
+      for (size_t idx = 0; idx < row_size; idx++) {
         m_d[idx] = &(row_begin + ((row_idx * row_size) + idx));
       }
     }
 
     RowSeries(const RowSeries& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
-      for (int i = 0; i < m_size; i++) {
+      for (size_t i = 0; i < m_size; i++) {
         m_d[i] = other.m_d[i];
       }
     }

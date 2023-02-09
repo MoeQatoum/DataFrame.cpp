@@ -2,6 +2,7 @@
 #define DATA_FRAME_H
 
 #include "common.h"
+#include "utils.h"
 
 #include <cell.h>
 #include <column_series.h>
@@ -108,11 +109,11 @@ public:
 
     bool operator==(const Iterator& other) const {
       return other.m_d == this->m_d;
-    };
+    }
 
     bool operator!=(const Iterator& other) const {
       return !(other.m_d == this->m_d);
-    };
+    }
 
     friend bool operator<(const Iterator& lhs, const Iterator& rhs) {
       return lhs.m_d < rhs.m_d;
@@ -330,6 +331,7 @@ private:
   class DataFrame {
 public:
     using ValueType            = Cell<T>;
+    using pValueType           = Cell<T>*;
     using RowSeries            = RowSeries<T>;
     using ColumnSeries         = ColumnSeries<T>;
     using DataFrameIterator    = Iterator<DataFrame<T>>;
@@ -534,6 +536,69 @@ public:
 
     DataFrameColIterator iter_cols() {
       return DataFrameColIterator(begin(), m_col_size, m_row_size);
+    }
+
+    DataFrame sort_rows(std::string col_name, bool inplace = true) {
+      size_t       col_idx = get_col_idx(col_name);
+      ColumnSeries col     = get_column(col_name);
+
+      pValueType* sorted_cells = new pValueType[col.size()];
+
+      std::vector<RowSeries> rows;
+      for (auto row = iter_rows(); row < end(); row++) {
+        rows.push_back(row.row());
+      }
+
+      // check if row copy works ... it does.
+      // for (int i = 0; i < rows.size(); i++) {
+      //   // std::cout << rows[i];
+      //   for (const auto& row_item : rows[i]) {
+      //     std::cout << *row_item << "\n";
+      //   }
+      // }
+
+      sorted_cells[0] = col[0];
+
+      for (int idx = 0; idx < col.size(); idx++) {
+        bool lower_found = false;
+        int  insert_idx  = 0;
+        for (int sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+          if (col[idx]->value < sorted_cells[sorted_idx]->value) {
+            lower_found = true;
+            insert_idx  = sorted_idx;
+            break;
+          }
+        }
+        if (lower_found) {
+          for (int i = idx - 1; i >= insert_idx; i--) {
+            sorted_cells[i + 1] = sorted_cells[i];
+          }
+          sorted_cells[insert_idx] = col[idx];
+        } else {
+          sorted_cells[idx] = col[idx];
+        }
+      }
+
+      // sort
+      size_t     idx       = 0;
+      ValueType* temp_vals = new ValueType[m_current_size];
+
+      for (size_t i = 0; i < col.size(); i++) {
+        for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
+          temp_vals[idx] = *c;
+          idx++;
+        }
+        m_row_idx_map[sorted_cells[i]->idx.row_name] = i;
+      }
+
+      delete[] sorted_cells;
+
+      for (size_t i = 0; i < m_current_size; i++) {
+        m_d[i] = temp_vals[i];
+      }
+      delete[] temp_vals;
+
+      return *this;
     }
 
     void print() {
