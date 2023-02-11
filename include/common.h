@@ -47,4 +47,6 @@ concept NumericalTypes
     || std::is_same<T, df_i64>::value || std::is_same<T, df_ui64>::value || std::is_same<T, df_f32>::value
     || std::is_same<T, df_f64>::value || std::is_same<T, df_f128>::value;
 
+using size_t = df_ui32;
+
 #endif // DATA_FRAME_COMMON_H

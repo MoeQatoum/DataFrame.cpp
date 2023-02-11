@@ -10,6 +10,9 @@ file(GLOB_RECURSE DF_TESTS_SOURCES
 )
 
 add_executable(${DF_TESTS} ${DF_TESTS_SOURCES})
-target_link_libraries(${DF_TESTS} PRIVATE GTest::gtest_main)
+target_link_libraries(${DF_TESTS} PRIVATE 
+    GTest::gtest_main
+    ${DATA_FRAME}
+)
 include(GoogleTest)
 gtest_discover_tests(${DF_TESTS})

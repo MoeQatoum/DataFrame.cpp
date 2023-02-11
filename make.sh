@@ -142,7 +142,7 @@ if [[ $? -eq 0 ]]; then
 
   #run tests
   if [[ $BUILD_TESTS = true ]]; then
-    GTEST_COLOR=1 ctest --test-dir build --output-in-failure -j
+    GTEST_COLOR=1 ctest --test-dir build --output-on-failure -j
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run tests failed.${W}\n"
       exit 1
