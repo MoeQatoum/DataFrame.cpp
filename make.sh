@@ -152,7 +152,7 @@ if [[ $? -eq 0 ]]; then
   #run Benchmark
   if [[ $RUN = true && $BUILD_BENCH_MARK = true ]]; then
     printf "${G}-- Running Application.${W}\n\n"
-    cd $INSTALL_PREFIX && ./dataframe-benchmark
+    ./build/benchmark/dataframe-benchmark
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run benchmark failed.${W}\n"
       exit 1

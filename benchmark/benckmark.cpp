@@ -144,7 +144,7 @@ int main() {
     nsec_timer.tick();
     for (auto i = df.iter_rows(); i < df.end(); i++) {
       for (const auto& c : i.row()) {
-        c.value;
+        c->value;
       }
     }
     nsec_timer.tock();
@@ -157,7 +157,7 @@ int main() {
     msec_timer.tick();
     for (auto i = df.iter_rows(); i < row_c; i++) {
       for (auto& c : i.row()) {
-        c.value = 136136.136;
+        c->value = 136136.136;
       }
     }
     msec_timer.tock();
@@ -170,7 +170,7 @@ int main() {
     nsec_timer.tick();
     auto row = df.get_row(rand_idx);
     for (const auto& c : row) {
-      auto v = c.value;
+      auto v = c->value;
     }
     nsec_timer.tock();
     RowIterator_bench_data[i] = nsec_timer.duration().count();
@@ -182,7 +182,7 @@ int main() {
     usec_timer.tick();
     auto row = df.get_row(rand_idx);
     for (auto& c : row) {
-      c.value = 789789.789;
+      c->value = 789789.789;
     }
     usec_timer.tock();
     RowIterator_bench_data[i] = usec_timer.duration().count();
@@ -198,7 +198,7 @@ int main() {
     nsec_timer.tick();
     for (auto i = df.iter_cols(); i < df.end(); i++) {
       for (auto& c : i.column()) {
-        auto v = c.value;
+        auto v = c->value;
       }
     }
     nsec_timer.tock();
@@ -211,7 +211,7 @@ int main() {
     msec_timer.tick();
     for (auto i = df.iter_cols(); i < col_c; i++) {
       for (auto& c : i.column()) {
-        c.value = 456456.456;
+        c->value = 456456.456;
       }
     }
     msec_timer.tock();
@@ -224,7 +224,7 @@ int main() {
     nsec_timer.tick();
     auto col = df.get_col(rand_idx);
     for (auto& c : col) {
-      auto v = c.value;
+      auto v = c->value;
     }
     nsec_timer.tock();
     ColumnIterator_bench_data[i] = nsec_timer.duration().count();
@@ -237,7 +237,7 @@ int main() {
     usec_timer.tick();
     auto col = df.get_col(rand_idx);
     for (auto& c : col) {
-      c.value = 123123.123;
+      c->value = 123123.123;
     }
     usec_timer.tock();
     ColumnIterator_bench_data[i] = usec_timer.duration().count();
