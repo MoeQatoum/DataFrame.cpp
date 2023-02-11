@@ -2,11 +2,11 @@
 #define DATA_FRAME_H
 
 #include "common.h"
-#include "utils.h"
 
-#include <cell.h>
-#include <column_series.h>
-#include <row_series.h>
+#include "cell.h"
+#include "column_series.h"
+#include "row_series.h"
+#include "utils.h"
 
 namespace df {
 
@@ -17,7 +17,7 @@ namespace df {
   class Iterator {
     using ValueType = typename Iterable::ValueType;
 
-    using size_t = std::size_t;
+    using size_t = df_ui32;
 
     template<typename>
     friend class DataFrameRowIterator;
@@ -137,7 +137,7 @@ private:
     using DataFrameIterator = typename Iterable::DataFrameIterator;
     using RowSeries         = typename Iterable::RowSeries;
 
-    using size_t = std::size_t;
+    using size_t = df_ui32;
 
 public:
     DataFrameRowIterator(DataFrameIterator df_begin, size_t row_size)
@@ -226,7 +226,7 @@ private:
     using ColumnSeries  = typename Iterable::ColumnSeries;
     using ColIterator   = typename ColumnSeries::Iterator;
 
-    using size_t = std::size_t;
+    using size_t = df_ui32;
 
 public:
     DataFrameColIterator(DataFrameIter df_begin, size_t col_size, size_t row_size)
@@ -321,12 +321,6 @@ private:
     }
   };
 
-  template<typename T>
-  struct ColumnSeries;
-
-  template<typename T>
-  struct RowSeries;
-
   template<NumericalTypes T>
   class DataFrame {
 public:
@@ -337,7 +331,7 @@ public:
     using DataFrameIterator    = Iterator<DataFrame<T>>;
     using DataFrameRowIterator = DataFrameRowIterator<DataFrame<T>>;
     using DataFrameColIterator = DataFrameColIterator<DataFrame<T>>;
-    using size_t               = std::size_t;
+    using size_t               = df_ui32;
 
 public:
     DataFrame(const std::vector<std::string>& col_names, const std::vector<std::string>& row_names) {
@@ -411,15 +405,15 @@ public:
     }
 
     ValueType& operator[](const size_t& col_idx, const size_t& row_idx) {
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
+      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
+      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
 
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
 
     const ValueType& operator[](const size_t& col_idx, const size_t& row_idx) const {
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
+      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_siz - 1), "index out of range");
+      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_siz - 1), "index out of range");
 
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
@@ -494,7 +488,15 @@ public:
       return DataFrameIterator(m_d);
     }
 
+    DataFrameIterator begin() const {
+      return DataFrameIterator(m_d);
+    }
+
     DataFrameIterator end() {
+      return DataFrameIterator(m_d + m_current_size);
+    }
+
+    DataFrameIterator end() const {
       return DataFrameIterator(m_d + m_current_size);
     }
 

@@ -7,15 +7,15 @@ namespace df {
   template<NumericalTypes T>
   class DataFrame;
 
-  template<typename T>
+  template<NumericalTypes T>
   class RowSeries;
 
-  template<typename T>
+  template<NumericalTypes T>
   class ColumnSeries;
 
   namespace utils {
 
-    template<typename T>
+    template<NumericalTypes T>
     std::vector<RowSeries<T>> asc_sort_rows(DataFrame<T>& df, const std::string& col_name) {
       using ValueType = typename ColumnSeries<T>::ValueType;
 

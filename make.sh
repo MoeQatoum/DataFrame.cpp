@@ -15,6 +15,7 @@ RUN=true
 JOBS="-j"
 TARGET=
 CLEAN=false
+BENCH=false
 COMPILER=clang++
 C_COMPILER=clang
 
@@ -31,6 +32,9 @@ for ((i = 0; i < $#; i++)); do
     ;;
   --no-run)
     RUN=false
+    ;;
+  --bench)
+    BENCH=true
     ;;
   --prefix)
     INSTALL_PREFIX=${opts[$((i + 1))]}
@@ -64,6 +68,7 @@ for ((i = 0; i < $#; i++)); do
     printf "help:\n"
     printf "  --clean       Remove existing build folder.\n"
     printf "  --no-run      Build but don't run the app.\n"
+    printf "  --bench       Build benchmarks.\n"
     printf "  --prefix      Specify install prefix.\n"
     printf "  --config      Specify build type. Options RELEASE, DEBUG ...\n"
     printf "  --compiler    Specify compiler. Default clang\n"
@@ -99,7 +104,8 @@ cmake -S . -B $BUILD_DIR \
   -DCMAKE_C_COMPILER=$C_COMPILER \
   -DCMAKE_CXX_COMPILER=$COMPILER \
   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
+  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
+  -DBUILD_BENCH_MARKS:BOOL=$BENCH
 
 if [[ $? -eq 1 ]]; then
   printf "${R}-- Cmake failed${W}\n" &&

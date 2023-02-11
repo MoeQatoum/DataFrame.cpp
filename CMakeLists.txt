@@ -30,14 +30,14 @@ target_include_directories(${DATA_FRAME} INTERFACE
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME} INTERFACE
-        -O3 #-static-libstdc++
+        -O3 -Wconversion -Wno-c++98-compat #-static-libstdc++
         #profile CPU with as small performance impact as possible: use -pg
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     # target_compile_definitions(${DATA_FRAME} INTERFACE _GLIBCXX_DEBUG)
 
     target_compile_options(${DATA_FRAME} INTERFACE
-    -O0 -g -Wall -Weverything -Wconversion -Wextra -Wpedantic
+    -O0 -g -Wconversion # -Wall -Weverything -Wextra -Wpedantic
     )
 endif()
 

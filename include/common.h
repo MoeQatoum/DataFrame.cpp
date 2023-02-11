@@ -11,11 +11,6 @@
 #include <string>
 #include <vector>
 
-template<typename T>
-concept NumericalTypes = std::is_same<T, short>::value || std::is_same<T, long>::value || std::is_same<T, int>::value
-                         || std::is_same<T, long long>::value || std::is_same<T, float>::value
-                         || std::is_same<T, double>::value || std::is_same<T, long double>::value;
-
 #ifndef NDEBUG
   #define DF_ASSERT(condition, message)                                                                             \
     do {                                                                                                            \
@@ -30,5 +25,26 @@ concept NumericalTypes = std::is_same<T, short>::value || std::is_same<T, long>:
     do {                                \
     } while (false)
 #endif
+
+// numerical types
+
+using df_i8   = char;
+using df_ui8  = unsigned char;
+using df_i16  = short;
+using df_ui16 = unsigned short;
+using df_i32  = long;
+using df_ui32 = unsigned long;
+using df_i64  = long long;
+using df_ui64 = unsigned long long;
+using df_f32  = float;
+using df_f64  = double;
+using df_f128 = long double;
+
+template<typename T>
+concept NumericalTypes
+  = std::is_same<T, df_i8>::value || std::is_same<T, df_ui8>::value || std::is_same<T, df_i16>::value
+    || std::is_same<T, df_ui16>::value || std::is_same<T, df_i32>::value || std::is_same<T, df_ui32>::value
+    || std::is_same<T, df_i64>::value || std::is_same<T, df_ui64>::value || std::is_same<T, df_f32>::value
+    || std::is_same<T, df_f64>::value || std::is_same<T, df_f128>::value;
 
 #endif // DATA_FRAME_COMMON_H

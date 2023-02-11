@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#include "cell.h"
-
 namespace df {
 
   template<typename Iterable>
@@ -13,22 +11,27 @@ namespace df {
   template<NumericalTypes T>
   class DataFrame;
 
-  template<typename T>
+  template<NumericalTypes T>
   struct ColumnData {
-    T*          data;
-    std::size_t size;
+    using size_t = df_ui32;
+
+    ColumnData(size_t size) : size(size), data(new T[size]) {
+    }
+
+    T*     data;
+    size_t size;
 
     ~ColumnData() {
       delete[] data;
     }
   };
 
-  template<typename T>
+  template<NumericalTypes T>
   struct ColumnSeries {
-    using size_t  = std::size_t;
+    using size_t  = df_ui32;
     using ostream = std::ostream;
 
-    using ValueType         = Cell<T>*;
+    using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
     using Iterator          = Iterator<ColumnSeries>;
 
@@ -47,14 +50,12 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType operator[](const int& idx) {
+    ValueType& operator[](const int& idx) {
       return *(m_d + idx);
     }
 
     ColumnData<T> copy_data() {
-      ColumnData<T> data;
-      data.data = new T[m_size];
-      data.size = m_size;
+      ColumnData<T> data{m_size};
       for (int i = 0; i < m_size; i++) {
         data.data[i] = (*(m_d + i))->value;
       }

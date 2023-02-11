@@ -20,6 +20,12 @@ add_executable(${DATA_FRAME_EXAMPLE}
     ${DATA_FRAME_EXAMPLE_SOURCES} 
 )
 
+if(BUILD_BENCH_MARKS)
+    target_compile_definitions(${DATA_FRAME_EXAMPLE} PRIVATE BENCH)
+else()
+    target_compile_definitions(${DATA_FRAME_EXAMPLE} PRIVATE TEST)
+endif(BUILD_BENCH_MARKS)
+
 target_link_libraries(${DATA_FRAME_EXAMPLE} PRIVATE
     ${DATA_FRAME}
 )

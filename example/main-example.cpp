@@ -14,7 +14,7 @@
 #define W "\033[00m"
 
 // #define TEST
-#define BENCH
+// #define BENCH
 
 template<typename TimeUnit, std::size_t N>
 void print_bench_result(std::array<int, N> data, const char* bench_name) {
@@ -40,10 +40,10 @@ int main() {
     row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  df::DataFrame<int> df{col_names, row_names};
-
+  df::DataFrame<df_i32> df{col_names, row_names};
+  int                   i = 0;
   for (std::size_t i = 0; i < df.size(); ++i) {
-    df[i] = static_cast<int>(i);
+    df[i] = static_cast<df_i32>(i);
   }
   df.print();
 
@@ -90,14 +90,14 @@ int main() {
     n_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  df::DataFrame<int> n_df{n_col_names, n_row_names};
+  df::DataFrame<df_i32> n_df{n_col_names, n_row_names};
 
   for (std::size_t i = 0; i < n_df.size(); ++i) {
-    n_df[i] = static_cast<int>(i);
+    n_df[i] = static_cast<df_i32>(i);
   }
 
   n_df.print();
-  df::DataFrame<int> new_df = n_df.copy();
+  df::DataFrame<df_i32> new_df = n_df.copy();
   n_df.print();
   std::cout << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
   std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
@@ -125,18 +125,18 @@ int main() {
 
   std::cout << "sort:\n";
 
-  df::DataFrame<int> unsorted_df = df.copy();
+  df::DataFrame<df_i32> unsorted_df = df.copy();
   for (size_t i = 0; i < unsorted_df.size(); i++) {
-    unsorted_df[i] = rand() % static_cast<int>(unsorted_df.size());
+    unsorted_df[i] = rand() % static_cast<df_i32>(unsorted_df.size());
   }
 
   unsorted_df.print();
 
-  std::vector<df::RowSeries<int>> sorted_rows = df::utils::asc_sort_rows(unsorted_df, "col-2");
+  std::vector<df::RowSeries<df_i32>> sorted_rows = df::utils::asc_sort_rows(unsorted_df, "col-2");
 
   // dont modify the original df from sorted rows
-  df::DataFrame<int> sorted_df(unsorted_df);
-  size_t             idx = 0;
+  df::DataFrame<df_i32> sorted_df(unsorted_df);
+  size_t                idx = 0;
   for (auto row : sorted_rows) {
     for (auto c : row) {
       sorted_df[idx].value = c->value;
@@ -148,13 +148,13 @@ int main() {
 
   std::cout << "---------------------------------------------------------------------\ninplace sort:\n";
 
-  df::DataFrame<int> inplace_sort_df = df.copy();
+  df::DataFrame<df_i32> inplace_sort_df = df.copy();
   for (size_t i = 0; i < inplace_sort_df.size(); i++) {
-    inplace_sort_df[i] = rand() % static_cast<int>(unsorted_df.size());
+    inplace_sort_df[i] = rand() % static_cast<df_i32>(unsorted_df.size());
   }
 
   for (size_t i = 0; i < unsorted_df.size(); i++) {
-    unsorted_df[i] = rand() % static_cast<int>(unsorted_df.size());
+    unsorted_df[i] = rand() % static_cast<df_i32>(unsorted_df.size());
   }
 
   inplace_sort_df.print();
@@ -163,8 +163,8 @@ int main() {
 #endif
 
 #ifdef BENCH
-  #define BENCH_COL_COUNT 390
-  #define BENCH_ROW_COUNT 390
+  #define BENCH_COL_COUNT 400
+  #define BENCH_ROW_COUNT 400
 
   #define COUNT__ITER_DF_BENCH   1000
   #define COUNT__ITER_ROW_BENCH  1000
@@ -174,7 +174,7 @@ int main() {
   #define DF_BENCH
   #define ROW_BENCH
   #define COL_BENCH
-  #define SORT_BENCH
+  // #define SORT_BENCH
   #define ROW_SORT_BENCH
 
   using dataT = double;
@@ -183,16 +183,16 @@ int main() {
   Timer<std::chrono::microseconds> usec_timer;
   Timer<std::chrono::nanoseconds>  nsec_timer;
 
-  std::vector<std::string> col_names{};
+  std::vector<std::string> bench_col_names{};
   for (std::size_t i = 0; i < BENCH_COL_COUNT; i++) {
-    col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+    bench_col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
   }
-  std::vector<std::string> row_names{};
+  std::vector<std::string> bench_row_names{};
   for (std::size_t i = 0; i < BENCH_ROW_COUNT; i++) {
-    row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+    bench_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
   }
 
-  df::DataFrame<dataT> df{col_names, row_names};
+  df::DataFrame<dataT> df{bench_col_names, bench_row_names};
 
   for (std::size_t i = 0; i < df.size(); ++i) {
     df[i] = static_cast<dataT>(i);
@@ -282,7 +282,7 @@ int main() {
     nsec_timer.tick();
     for (auto i = df.iter_rows(); i < df.end(); i++) {
       for (const auto& c : i.row()) {
-        c->value;
+        c.value;
       }
     }
     nsec_timer.tock();
@@ -295,7 +295,7 @@ int main() {
     msec_timer.tick();
     for (auto i = df.iter_rows(); i < row_c; i++) {
       for (auto& c : i.row()) {
-        c->value = 136136.136;
+        c.value = 136136.136;
       }
     }
     msec_timer.tock();
@@ -308,7 +308,7 @@ int main() {
     nsec_timer.tick();
     auto row = df.get_row(rand_idx);
     for (const auto& c : row) {
-      auto v = c->value;
+      auto v = c.value;
     }
     nsec_timer.tock();
     RowIterator_bench_data[i] = nsec_timer.duration().count();
@@ -320,7 +320,7 @@ int main() {
     usec_timer.tick();
     auto row = df.get_row(rand_idx);
     for (auto& c : row) {
-      c->value = 789789.789;
+      c.value = 789789.789;
     }
     usec_timer.tock();
     RowIterator_bench_data[i] = usec_timer.duration().count();
@@ -336,7 +336,7 @@ int main() {
     nsec_timer.tick();
     for (auto i = df.iter_cols(); i < df.end(); i++) {
       for (auto& c : i.column()) {
-        auto v = c->value;
+        auto v = c.value;
       }
     }
     nsec_timer.tock();
@@ -349,7 +349,7 @@ int main() {
     msec_timer.tick();
     for (auto i = df.iter_cols(); i < col_c; i++) {
       for (auto& c : i.column()) {
-        c->value = 456456.456;
+        c.value = 456456.456;
       }
     }
     msec_timer.tock();
@@ -362,7 +362,7 @@ int main() {
     nsec_timer.tick();
     auto col = df.get_col(rand_idx);
     for (auto& c : col) {
-      auto v = c->value;
+      auto v = c.value;
     }
     nsec_timer.tock();
     ColumnIterator_bench_data[i] = nsec_timer.duration().count();
@@ -375,7 +375,7 @@ int main() {
     usec_timer.tick();
     auto col = df.get_col(rand_idx);
     for (auto& c : col) {
-      c->value = 123123.123;
+      c.value = 123123.123;
     }
     usec_timer.tock();
     ColumnIterator_bench_data[i] = usec_timer.duration().count();
@@ -392,7 +392,7 @@ int main() {
     for (std::size_t i = 0; i < df.size(); ++i) {
       df[i] = static_cast<dataT>(rand() % df.size());
     }
-    std::string col_name = col_names[rand() % (col_names.size() - 1)];
+    std::string col_name = bench_col_names[rand() % (bench_col_names.size() - 1)];
     msec_timer.tick();
     df.sort_rows(col_name);
     msec_timer.tock();
@@ -409,7 +409,7 @@ int main() {
     for (std::size_t i = 0; i < df.size(); ++i) {
       df[i] = static_cast<dataT>(rand() % df.size());
     }
-    std::string col_name = col_names[rand() % (col_names.size() - 1)];
+    std::string col_name = bench_col_names[rand() % (bench_col_names.size() - 1)];
     msec_timer.tick();
     df::utils::asc_sort_rows(df, col_name);
     msec_timer.tock();

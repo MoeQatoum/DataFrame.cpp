@@ -1,13 +1,12 @@
 #ifndef DATA_FRAME_CELL_H
 #define DATA_FRAME_CELL_H
 
-#include <iostream>
-#include <stdlib.h>
+#include "common.h"
 
 namespace df {
 
   struct Index {
-    using size_t  = std::size_t;
+    using size_t  = df_ui32;
     using string  = std::string;
     using ostream = std::ostream;
 
@@ -48,7 +47,7 @@ namespace df {
     }
   };
 
-  template<typename T>
+  template<NumericalTypes T>
   struct Cell {
     using ostream = std::ostream;
 
