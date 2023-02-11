@@ -51,7 +51,7 @@ endif()
 if(DF_BUILD_TESTS)
     include(cmake/UpdateSubmodules.cmake)
     include (CTest)
-    add_subdirectory(third_party)
+    add_subdirectory(third_party/GoogleTest)
     add_subdirectory(tests)
 endif()
 
