@@ -9,15 +9,16 @@ Y="\033[0;93m"
 num_re='^[0-9]+$'
 
 BUILD_DIR="./build"
-BUILD_EXAMPLES=true
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
 TARGET=
 CLEAN=false
-BENCH=false
-COMPILER=clang++
-C_COMPILER=clang
+CXX_COMPILER=clang++
+
+BUILD_EXAMPLES=false
+BUILD_TESTS=false
+BUILD_BENCH_MARK=false
 
 INSTALL_PREFIX=$("pwd")/out
 
@@ -27,14 +28,20 @@ for ((i = 0; i < $#; i++)); do
   --clean)
     CLEAN=true
     ;;
-  --include-examples)
+  --build-examples)
     BUILD_EXAMPLES=true
+    TARGET=dataframe-example
     ;;
   --no-run)
     RUN=false
     ;;
   --bench)
-    BENCH=true
+    BUILD_BENCH_MARK=true
+    TARGET=dataframe-benchmark
+    ;;
+  --test)
+    BUILD_TESTS=true
+    TARGET=dataframe-tests
     ;;
   --prefix)
     INSTALL_PREFIX=${opts[$((i + 1))]}
@@ -44,8 +51,8 @@ for ((i = 0; i < $#; i++)); do
     CONFIG=${opts[$((i + 1))]}
     ((i++))
     ;;
-  --compiler)
-    COMPILER=${opts[$((i + 1))]}
+  --cpp-compiler)
+    CXX_COMPILER=${opts[$((i + 1))]}
     ((i++))
     ;;
   --arch)
@@ -66,15 +73,17 @@ for ((i = 0; i < $#; i++)); do
     ;;
   -h)
     printf "help:\n"
-    printf "  --clean       Remove existing build folder.\n"
-    printf "  --no-run      Build but don't run the app.\n"
-    printf "  --bench       Build benchmarks.\n"
-    printf "  --prefix      Specify install prefix.\n"
-    printf "  --config      Specify build type. Options RELEASE, DEBUG ...\n"
-    printf "  --compiler    Specify compiler. Default clang\n"
-    printf "  --target      NOT USED. specify target.\n"
-    printf "  -j            Allow N jobs at once\n"
-    printf "  -h            this help.\n"
+    printf "  --clean           Remove existing build folder.\n"
+    printf "  --no-run          Build but don't run the app.\n"
+    printf "  --build-examples  Build benchmarks.\n"
+    printf "  --bench           Build benchmarks.\n"
+    printf "  --prefix          Specify install prefix.\n"
+    printf "  --config          Specify build type. Options RELEASE, DEBUG ...\n"
+    printf "  --cpp-compiler    Specify CXX compiler. Default clang\n"
+    printf "  --c-compiler      Specify C compiler. Default clang\n"
+    printf "  --target          NOT USED. specify target.\n"
+    printf "  -j                Allow N jobs at once\n"
+    printf "  -h                this help.\n"
     exit 0
     ;;
   *)
@@ -83,6 +92,11 @@ for ((i = 0; i < $#; i++)); do
     ;;
   esac
 done
+
+if [[ $BUILD_EXAMPLES = false && $BUILD_TESTS = false && $BUILD_BENCH_MARK = false ]]; then
+  BUILD_EXAMPLES=true
+  TARGET=dataframe-example
+fi
 
 if [ $CLEAN == true ]; then
   printf "${Y}-- Removing build folder${W}\n"
@@ -99,27 +113,48 @@ if [ $CLEAN == true ]; then
 fi
 
 cmake -S . -B $BUILD_DIR \
-  -DDATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES \
+  -DDF_BUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES \
+  -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK \
+  -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS \
   -DCMAKE_BUILD_TYPE:STRING=$CONFIG \
-  -DCMAKE_C_COMPILER=$C_COMPILER \
-  -DCMAKE_CXX_COMPILER=$COMPILER \
+  -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
-  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE \
-  -DBUILD_BENCH_MARKS:BOOL=$BENCH
+  -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 if [[ $? -eq 1 ]]; then
   printf "${R}-- Cmake failed${W}\n" &&
     exit 1
 fi
 
-cmake --build $BUILD_DIR --target install $JOBS
+cmake --build $BUILD_DIR --target $TARGET $JOBS
 if [[ $? -eq 0 ]]; then
   printf "${G}-- Build successful.${W}\n"
+
+  #run example
   if [[ $RUN = true && $BUILD_EXAMPLES = true ]]; then
     printf "${G}-- Running Application.${W}\n\n"
-    cd $INSTALL_PREFIX && ./dataframe-example
+    ./build/example/dataframe-example
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run failed.${W}\n"
+      exit 1
+    fi
+  fi
+
+  #run tests
+  if [[ $BUILD_TESTS = true ]]; then
+    GTEST_COLOR=1 ctest --test-dir build --output-in-failure -j
+    if [[ $? -eq 1 ]]; then
+      printf "${R}-- run tests failed.${W}\n"
+      exit 1
+    fi
+  fi
+
+  #run Benchmark
+  if [[ $RUN = true && $BUILD_BENCH_MARK = true ]]; then
+    printf "${G}-- Running Application.${W}\n\n"
+    cd $INSTALL_PREFIX && ./dataframe-benchmark
+    if [[ $? -eq 1 ]]; then
+      printf "${R}-- run benchmark failed.${W}\n"
       exit 1
     fi
   fi

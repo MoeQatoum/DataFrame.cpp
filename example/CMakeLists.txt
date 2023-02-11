@@ -34,13 +34,10 @@ if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME_EXAMPLE} PUBLIC
         -O3
     )
+
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     target_compile_options(${DATA_FRAME_EXAMPLE} PUBLIC
         -g -Wall -Weverything -Wconversion -Wextra -Wpedantic -O0
     )
+    
 endif()
-
-install(
-    TARGETS ${DATA_FRAME_EXAMPLE}
-    DESTINATION ${CMAKE_INSTALL_PREFIX}
-)

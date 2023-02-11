@@ -3,3 +3,4 @@
 *.key
 build
 out
+ccore.*

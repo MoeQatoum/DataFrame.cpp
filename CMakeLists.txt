@@ -16,7 +16,6 @@ file(GLOB_RECURSE DATA_FRAME_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/include/*.h
 )
 
-
 add_library(${DATA_FRAME} INTERFACE
 ${DATA_FRAME_SOURCES} 
 )
@@ -41,7 +40,18 @@ elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
     )
 endif()
 
-if(DATA_FRAME_EXAMPLES)
+if(DF_BUILD_EXAMPLES)
     add_subdirectory(example)
+endif()
+
+if(DF_BUILD_BENCH_MARKS)
+    add_subdirectory(benckmark)
+endif()
+
+if(DF_BUILD_TESTS)
+    include(cmake/UpdateSubmodules.cmake)
+    include (CTest)
+    add_subdirectory(third_party)
+    add_subdirectory(tests)
 endif()
 
