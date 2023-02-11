@@ -45,7 +45,7 @@ if(DF_BUILD_EXAMPLES)
 endif()
 
 if(DF_BUILD_BENCH_MARKS)
-    add_subdirectory(benckmark)
+    add_subdirectory(benchmark)
 endif()
 
 if(DF_BUILD_TESTS)
