@@ -13,8 +13,8 @@
 #define Y "\033[93m"
 #define W "\033[00m"
 
-#define BENCH_COL_COUNT 400
-#define BENCH_ROW_COUNT 400
+#define BENCH_COL_COUNT 5000
+#define BENCH_ROW_COUNT 5000
 
 #define COUNT__ITER_DF_BENCH   1000
 #define COUNT__ITER_ROW_BENCH  1000
@@ -143,7 +143,7 @@ int main() {
   for (int i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     nsec_timer.tick();
     for (auto i = df.iter_rows(); i < df.end(); i++) {
-      for (const auto& c : i.row()) {
+      for (const auto& c : i.current_row()) {
         c->value;
       }
     }
@@ -156,7 +156,7 @@ int main() {
     int row_c = df.shape().row_count;
     msec_timer.tick();
     for (auto i = df.iter_rows(); i < row_c; i++) {
-      for (auto& c : i.row()) {
+      for (auto& c : i.current_row()) {
         c->value = 136136.136;
       }
     }
@@ -197,7 +197,7 @@ int main() {
   for (int i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     nsec_timer.tick();
     for (auto i = df.iter_cols(); i < df.end(); i++) {
-      for (auto& c : i.column()) {
+      for (auto& c : i.current_col()) {
         auto v = c->value;
       }
     }
@@ -210,7 +210,7 @@ int main() {
     int col_c = df.shape().col_count;
     msec_timer.tick();
     for (auto i = df.iter_cols(); i < col_c; i++) {
-      for (auto& c : i.column()) {
+      for (auto& c : i.current_col()) {
         c->value = 456456.456;
       }
     }
