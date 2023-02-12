@@ -13,7 +13,7 @@ project(
 )
 
 file(GLOB_RECURSE DATA_FRAME_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/include/*.h
+    ${CMAKE_CURRENT_LIST_DIR}/include/**.h
 )
 
 add_library(${DATA_FRAME} INTERFACE
