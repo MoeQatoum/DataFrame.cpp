@@ -55,13 +55,13 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType operator[](const int& idx) {
+    ValueType operator[](const size_t& idx) {
       return *(m_d + idx);
     }
 
     RowData<T> copy_data() {
       RowData<T> data{m_size};
-      for (int i = 0; i < m_size; i++) {
+      for (size_t i = 0; i < m_size; i++) {
         data.data[i] = (*(m_d + i))->value;
       }
       return data;
@@ -95,7 +95,7 @@ namespace df {
       return RowIterator(m_d + m_size);
     }
 
-    ValueType& at(int idx) {
+    ValueType& at(size_t idx) {
       return *(begin() + idx);
     }
 

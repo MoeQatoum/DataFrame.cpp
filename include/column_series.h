@@ -39,7 +39,7 @@ namespace df {
       m_size = col_size;
       m_d    = new ValueType[m_size];
 
-      for (int idx = 0; idx < col_size; idx++) {
+      for (size_t idx = 0; idx < col_size; idx++) {
         m_d[idx] = &(col_begin + (idx * row_size));
       }
     }
@@ -50,13 +50,13 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType& operator[](const int& idx) {
+    ValueType& operator[](const size_t& idx) {
       return *(m_d + idx);
     }
 
     ColumnData<T> copy_data() {
       ColumnData<T> data{m_size};
-      for (int i = 0; i < m_size; i++) {
+      for (size_t i = 0; i < m_size; i++) {
         data.data[i] = (*(m_d + i))->value;
       }
       return data;
@@ -92,7 +92,7 @@ namespace df {
       return Iterator(m_d + m_size);
     }
 
-    ValueType& at(int idx) {
+    ValueType& at(size_t idx) {
       return *(begin() + idx);
     }
 

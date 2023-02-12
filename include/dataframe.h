@@ -78,11 +78,11 @@ public:
       return tmp;
     }
 
-    void operator+=(int off) {
+    void operator+=(size_t off) {
       m_d += off;
     }
 
-    friend int operator-(const Iterator& lhs, const Iterator& rhs) {
+    friend df_i32 operator-(const Iterator& lhs, const Iterator& rhs) {
       return lhs.m_d - rhs.m_d;
     }
 
@@ -103,7 +103,7 @@ public:
       return tmp;
     }
 
-    void operator-=(int off) {
+    void operator-=(size_t off) {
       m_d -= off;
     }
 
@@ -276,7 +276,7 @@ public:
       return tmp;
     }
 
-    void operator+=(int off) {
+    void operator+=(size_t off) {
       m_current_col_idx += off;
     }
 
@@ -516,8 +516,24 @@ public:
       return m_col_size;
     }
 
+    constexpr size_t col_count() {
+      return m_col_count;
+    }
+
+    constexpr size_t col_count() const {
+      return m_col_count;
+    }
+
     constexpr size_t row_size() const {
       return m_row_size;
+    }
+
+    constexpr size_t row_count() {
+      return m_row_count;
+    }
+
+    constexpr size_t row_count() const {
+      return m_row_count;
     }
 
     constexpr Shape shape() const {
@@ -555,24 +571,16 @@ public:
       pValueType* sorted_cells = new pValueType[col.size()];
 
       std::vector<RowSeries> rows;
-      for (auto row = iter_rows(); row < end(); row++) {
-        rows.push_back(row.row());
+      for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
+        rows.push_back(row_iterator.current_row());
       }
-
-      // check if row copy works ... it does.
-      // for (int i = 0; i < rows.size(); i++) {
-      //   // std::cout << rows[i];
-      //   for (const auto& row_item : rows[i]) {
-      //     std::cout << *row_item << "\n";
-      //   }
-      // }
 
       sorted_cells[0] = col[0];
 
-      for (int idx = 0; idx < col.size(); idx++) {
-        bool lower_found = false;
-        int  insert_idx  = 0;
-        for (int sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+      for (size_t idx = 0; idx < col.size(); idx++) {
+        bool   lower_found = false;
+        size_t insert_idx  = 0;
+        for (size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
           if (col[idx]->value < sorted_cells[sorted_idx]->value) {
             lower_found = true;
             insert_idx  = sorted_idx;
@@ -580,8 +588,13 @@ public:
           }
         }
         if (lower_found) {
-          for (int i = idx - 1; i >= insert_idx; i--) {
+          for (size_t i = idx - 1; i >= insert_idx; i--) {
             sorted_cells[i + 1] = sorted_cells[i];
+
+            // avoid size_t (aka df_ui32) underflow
+            if (i == 0) {
+              break;
+            }
           }
           sorted_cells[insert_idx] = col[idx];
         } else {

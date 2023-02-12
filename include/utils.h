@@ -25,16 +25,16 @@ namespace df {
       ValueType* sorted_cells = new ValueType[col.size()];
 
       std::vector<RowSeries<T>> rows;
-      for (auto row = df.iter_rows(); row < df.end(); row++) {
-        rows.push_back(row.row());
+      for (auto row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
+        rows.push_back(row_iterator.current_row());
       }
 
       sorted_cells[0] = col[0];
 
-      for (int idx = 0; idx < col.size(); idx++) {
-        bool lower_found = false;
-        int  insert_idx  = 0;
-        for (int sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+      for (size_t idx = 0; idx < col.size(); idx++) {
+        bool   lower_found = false;
+        size_t insert_idx  = 0;
+        for (size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
           if (col[idx]->value < sorted_cells[sorted_idx]->value) {
             lower_found = true;
             insert_idx  = sorted_idx;
@@ -42,8 +42,13 @@ namespace df {
           }
         }
         if (lower_found) {
-          for (int i = idx - 1; i >= insert_idx; i--) {
+          for (size_t i = idx - 1; i >= insert_idx; i--) {
             sorted_cells[i + 1] = sorted_cells[i];
+
+            // avoid size_t (aka df_ui32) underflow
+            if (i == 0) {
+              break;
+            }
           }
           sorted_cells[insert_idx] = col[idx];
         } else {
