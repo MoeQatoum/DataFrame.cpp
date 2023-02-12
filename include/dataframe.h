@@ -17,8 +17,6 @@ namespace df {
   class Iterator {
     using ValueType = typename Iterable::ValueType;
 
-    using size_t = df_ui32;
-
     template<typename>
     friend class DataFrameRowIterator;
 
@@ -82,7 +80,7 @@ public:
       m_d += off;
     }
 
-    friend df_i32 operator-(const Iterator& lhs, const Iterator& rhs) {
+    friend i32 operator-(const Iterator& lhs, const Iterator& rhs) {
       return lhs.m_d - rhs.m_d;
     }
 
@@ -123,10 +121,13 @@ public:
       return lhs.m_d > rhs.m_d;
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Iterator& itr) {
+#ifdef QT_IMPLEMENTATION
+#else
+    friend ostream& operator<<(ostream& os, const Iterator& itr) {
       os << itr.m_d;
       return os;
     }
+#endif
 
 private:
     ValueType* m_d;
@@ -137,7 +138,7 @@ private:
     using DataFrameIterator = typename Iterable::DataFrameIterator;
     using RowSeries         = typename Iterable::RowSeries;
 
-    using size_t = df_ui32;
+    using size_t = size_t;
 
 public:
     DataFrameRowIterator(DataFrameIterator df_begin, size_t row_size)
@@ -230,7 +231,7 @@ private:
     using ColumnSeries  = typename Iterable::ColumnSeries;
     using ColIterator   = typename ColumnSeries::Iterator;
 
-    using size_t = df_ui32;
+    using size_t = size_t;
 
 public:
     DataFrameColIterator(DataFrameIter df_begin, size_t col_size, size_t row_size)
@@ -261,7 +262,6 @@ public:
     DataFrameColIterator operator+(const size_t& off) {
       DataFrameColIterator tmp{*this};
       tmp += off;
-      std::cout << "==";
       return tmp;
     }
 
@@ -322,11 +322,13 @@ private:
   struct Shape {
     size_t col_count;
     size_t row_count;
-
-    friend std::ostream& operator<<(std::ostream& os, const Shape& shape) {
+#ifdef QT_IMPLEMENTATION
+#else
+    friend ostream& operator<<(ostream& os, const Shape& shape) {
       os << "Shape(c: " << shape.col_count << ", r: " << shape.row_count << ")";
       return os;
     }
+#endif
   };
 
   template<NumericalTypes T>
@@ -339,10 +341,9 @@ public:
     using DataFrameIterator    = Iterator<DataFrame<T>>;
     using DataFrameRowIterator = DataFrameRowIterator<DataFrame<T>>;
     using DataFrameColIterator = DataFrameColIterator<DataFrame<T>>;
-    using size_t               = df_ui32;
 
 public:
-    DataFrame(const std::vector<std::string>& col_names, const std::vector<std::string>& row_names) {
+    DataFrame(const StringList& col_names, const StringList& row_names) {
       m_col_count    = col_names.size();
       m_row_count    = row_names.size();
       m_col_size     = m_row_count;
@@ -371,8 +372,6 @@ public:
         m_d[i].idx.col_idx  = i % m_col_count;
         m_d[i].idx.col_name = col_names[i % m_col_count];
 
-        // std::cout << i % m_col_count << " " << col_names[i % m_col_count] << "\n";
-
         m_d[i].idx.row_idx  = i / m_col_count;
         m_d[i].idx.row_name = row_names[i / m_col_count];
       }
@@ -388,8 +387,6 @@ public:
           m_row_count(other.m_row_count),
           m_d(new ValueType[m_current_size]) {
       for (size_t idx = 0; idx < m_current_size; idx++) {
-        // m_d[idx].value = other.m_d[idx].value;
-        // m_d[idx].idx   = other.m_d[idx].idx;
         m_d[idx] = other.m_d[idx];
       }
     }
@@ -426,7 +423,7 @@ public:
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
 
-    ValueType& operator[](const std::string& col_name, const std::string& row_name) {
+    ValueType& operator[](const String& col_name, const String& row_name) {
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
@@ -440,7 +437,7 @@ public:
       return cell;
     }
 
-    const ValueType& operator[](const std::string& col_name, const std::string& row_name) const {
+    const ValueType& operator[](const String& col_name, const String& row_name) const {
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
@@ -458,11 +455,11 @@ public:
       return DataFrame(*this);
     }
 
-    size_t get_col_idx(std::string col) {
+    size_t get_col_idx(String col) {
       return m_col_idx_map[col];
     }
 
-    std::optional<std::string> get_col_name(size_t col_idx) {
+    std::optional<String> get_col_name(size_t col_idx) {
       for (const auto& [col_name, idx] : m_col_idx_map) {
         if (idx == col_idx) {
           return col_name;
@@ -471,11 +468,11 @@ public:
       return std::nullopt;
     }
 
-    size_t get_row_idx(std::string row) {
+    size_t get_row_idx(String row) {
       return m_row_idx_map[row];
     }
 
-    std::optional<std::string> get_row_name(size_t row_idx) {
+    std::optional<String> get_row_name(size_t row_idx) {
       for (const auto& [row_name, idx] : m_row_idx_map) {
         if (idx == row_idx) {
           return row_name;
@@ -544,7 +541,7 @@ public:
       return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
     }
 
-    ColumnSeries get_column(std::string col_name) {
+    ColumnSeries get_column(String col_name) {
       return ColumnSeries{begin() + get_col_idx(col_name), m_col_size, m_row_size};
     }
 
@@ -552,7 +549,7 @@ public:
       return RowSeries{begin(), row_idx, m_row_size};
     }
 
-    RowSeries get_row(std::string row_name) {
+    RowSeries get_row(String row_name) {
       return RowSeries{begin(), get_row_idx(row_name), m_row_size};
     }
 
@@ -564,7 +561,7 @@ public:
       return DataFrameColIterator(begin(), m_col_size, m_row_size);
     }
 
-    DataFrame sort_rows(std::string col_name, bool inplace = true) {
+    DataFrame sort_rows(String col_name, bool inplace = true) {
       size_t       col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
 
@@ -624,7 +621,7 @@ public:
       return *this;
     }
 
-    void print() {
+    void print(size_t head = 0, size_t tail = 0) {
       char* l;
       for (size_t i = 0; i < m_col_count; i++) {
         if (i == 0) {
@@ -651,14 +648,14 @@ public:
     }
 
 private:
-    std::map<std::string, size_t> m_col_idx_map;
-    std::map<std::string, size_t> m_row_idx_map;
-    size_t                        m_current_size;
-    size_t                        m_col_size;
-    size_t                        m_col_count;
-    size_t                        m_row_size;
-    size_t                        m_row_count;
-    ValueType*                    m_d;
+    IndexHash  m_col_idx_map;
+    IndexHash  m_row_idx_map;
+    size_t     m_current_size;
+    size_t     m_col_size;
+    size_t     m_col_count;
+    size_t     m_row_size;
+    size_t     m_row_count;
+    ValueType* m_d;
   };
 } // namespace df
 #endif // DATA_FRAME_H

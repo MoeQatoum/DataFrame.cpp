@@ -13,7 +13,6 @@ namespace df {
 
   template<NumericalTypes T>
   struct ColumnData {
-    using size_t = df_ui32;
 
     ColumnData(size_t size) : size(size), data(new T[size]) {
     }
@@ -28,8 +27,6 @@ namespace df {
 
   template<NumericalTypes T>
   struct ColumnSeries {
-    using size_t  = df_ui32;
-    using ostream = std::ostream;
 
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
@@ -61,7 +58,8 @@ namespace df {
       }
       return data;
     }
-
+#ifdef QT_IMPLEMENTATION
+#else
     friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
       os << "ColumnSeries(size: " << col.m_size << ", "
          << "Items: \n";
@@ -71,6 +69,7 @@ namespace df {
       os << ")";
       return os;
     }
+#endif
 
     constexpr size_t size() {
       return m_size;

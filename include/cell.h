@@ -6,9 +6,6 @@
 namespace df {
 
   struct Index {
-    using size_t  = df_ui32;
-    using string  = std::string;
-    using ostream = std::ostream;
 
     Index() {
     }
@@ -37,19 +34,21 @@ namespace df {
     size_t col_idx;
     size_t global_idx;
 
-    string col_name;
-    string row_name;
+    String col_name;
+    String row_name;
 
+#ifdef QT_IMPLEMENTATION
+#else
     friend ostream& operator<<(ostream& os, const Index& df_idx) {
       os << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
          << df_idx.row_name << ", " << df_idx.row_idx << ">)";
       return os;
     }
+#endif
   };
 
   template<NumericalTypes T>
   struct Cell {
-    using ostream = std::ostream;
 
     Cell() {
     }
@@ -71,10 +70,13 @@ namespace df {
       value = val;
     }
 
+#ifdef QT_IMPLEMENTATION
+#else
     friend ostream& operator<<(ostream& os, const Cell<T>& cell) {
       os << "Cell(value: " << cell.value << ", " << cell.idx << ")";
       return os;
     }
+#endif
 
     T     value;
     Index idx;

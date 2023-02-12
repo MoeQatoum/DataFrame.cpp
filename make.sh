@@ -29,7 +29,7 @@ for ((i = 0; i < $#; i++)); do
   --clean)
     CLEAN=true
     ;;
-  --build-examples)
+  --example)
     BUILD_EXAMPLES=true
     TARGET=dataframe-example
     ;;
@@ -79,7 +79,7 @@ for ((i = 0; i < $#; i++)); do
     printf "help:\n"
     printf "  --clean           Remove existing build folder.\n"
     printf "  --no-run          Build but don't run the app.\n"
-    printf "  --build-examples  Build benchmarks.\n"
+    printf "  --example         Build example.\n"
     printf "  --bench           Build benchmarks.\n"
     printf "  --prefix          Specify install prefix.\n"
     printf "  --config          Specify build type. Options RELEASE, DEBUG ...\n"
