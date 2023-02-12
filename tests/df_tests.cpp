@@ -86,7 +86,7 @@ TEST(df_copy_tests, dfCopyColNamesEquality) {
   DataFrame<df_i32> df_orig = create_dataframe();
   DataFrame<df_i32> df_copy = df_orig.copy();
 
-  for (size_t i = 0; i < df_orig.col_size(); i++) {
+  for (df_ui32 i = 0; i < df_orig.col_size(); i++) {
     EXPECT_EQ(df_orig.get_col_name(i), df_copy.get_col_name(i));
   }
 }
@@ -95,7 +95,7 @@ TEST(df_copy_tests, dfCopyRowNamesEquality) {
   DataFrame<df_i32> df_orig = create_dataframe();
   DataFrame<df_i32> df_copy = df_orig.copy();
 
-  for (size_t i = 0; i < df_orig.row_size(); i++) {
+  for (df_ui32 i = 0; i < df_orig.row_size(); i++) {
     EXPECT_EQ(df_orig.get_row_name(i), df_copy.get_row_name(i));
   }
 }
@@ -104,7 +104,33 @@ TEST(df_copy_tests, dfCopy_verifyDataAddr) {
   DataFrame<df_i32> df_orig = create_dataframe();
   DataFrame<df_i32> df_copy = df_orig.copy();
 
-  for (size_t i = 0; i < df_orig.size(); i++) {
+  for (df_ui32 i = 0; i < df_orig.size(); i++) {
     EXPECT_NE(&df_orig[i], &df_copy[i]);
+  }
+}
+
+TEST(df_sort, dfRowsAscendingSort) {
+  DataFrame<df_i32> df = create_dataframe();
+
+  for (df_ui32 i = 0; i < df.size(); i++) {
+    df[i] = (df_i32)rand();
+  }
+
+  df_ui32     col_idx  = 2;
+  std::string col_name = df.get_col_name(col_idx).value();
+
+  std::vector sorted_rows = utils::asc_sort_rows(df, col_name);
+
+  EXPECT_EQ(sorted_rows.size(), df.row_count());
+
+  df_i32 sorted_values[sorted_rows.size()];
+  for (df_ui32 idx = 0; idx < sorted_rows.size(); idx++) {
+    sorted_values[idx] = sorted_rows[idx][col_idx]->value;
+  }
+  for (RowSeries<df_i32> row : sorted_rows) {
+    for (auto c : row) {
+      EXPECT_EQ(c, &df[c->idx.global_idx]);
+      EXPECT_EQ(c->value, df[c->idx.global_idx].value);
+    }
   }
 }
