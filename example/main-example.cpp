@@ -8,7 +8,7 @@
 
 int main() {
 #define TEST_COL_COUNT 3
-#define TEST_ROW_COUNT 5
+#define TEST_ROW_COUNT 10
   std::vector<std::string> col_names{};
   for (std::size_t i = 0; i < TEST_COL_COUNT; i++) {
     col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
@@ -102,7 +102,7 @@ int main() {
   // sort //
   //////////
 
-  std::cout << "sort:\n";
+  std::cout << "---------------------------------------------------------------------\nsort:\n";
 
   df::DataFrame<df_i32> unsorted_df = df.copy();
   for (size_t i = 0; i < unsorted_df.size(); i++) {
