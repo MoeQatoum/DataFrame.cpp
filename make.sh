@@ -19,6 +19,7 @@ CXX_COMPILER=clang++
 BUILD_EXAMPLES=false
 BUILD_TESTS=false
 BUILD_BENCH_MARK=false
+UPDATE_SUBMODULES=false
 
 INSTALL_PREFIX=$("pwd")/out
 
@@ -34,6 +35,9 @@ for ((i = 0; i < $#; i++)); do
     ;;
   --no-run)
     RUN=false
+    ;;
+  --update)
+    UPDATE_SUBMODULES=true
     ;;
   --bench)
     BUILD_BENCH_MARK=true
@@ -116,6 +120,7 @@ cmake -S . -B $BUILD_DIR \
   -DDF_BUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES \
   -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK \
   -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS \
+  -DDF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES \
   -DCMAKE_BUILD_TYPE:STRING=$CONFIG \
   -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
@@ -142,7 +147,7 @@ if [[ $? -eq 0 ]]; then
 
   #run tests
   if [[ $BUILD_TESTS = true ]]; then
-    GTEST_COLOR=1 ctest --test-dir build --output-on-failure -j
+    GTEST_COLOR=1 ./build/tests/dataframe-tests
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run tests failed.${W}\n"
       exit 1

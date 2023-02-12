@@ -26,12 +26,12 @@ int main() {
   }
   df.print();
 
-  for (auto i = df.iter_cols(); i < df.end(); ++i) {
-    for (auto& c : i.column()) {
+  for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
+    for (auto& c : col_iter.current_col()) {
       c->value = 456;
     }
     // i.column()[0]->value = 123;
-    auto d = i.column().copy_data();
+    auto d = col_iter.current_col().copy_data();
     for (int i = 0; i < d.size; i++) {
       std::cout << d.data[i] << ", ";
     }
@@ -39,12 +39,12 @@ int main() {
   }
   df.print();
 
-  for (auto i = df.iter_rows(); i < df.end(); i++) {
-    for (auto& c : i.row()) {
+  for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
+    for (auto& c : row_iter.current_row()) {
       c->value = 123;
     }
     // i.row()[0]->value = 123;
-    auto d = i.row().copy_data();
+    auto d = row_iter.current_row().copy_data();
     for (int i = 0; i < d.size; i++) {
       std::cout << d.data[i] << ", ";
     }

@@ -155,8 +155,12 @@ public:
     ~DataFrameRowIterator() {
     }
 
-    RowSeries row() {
+    RowSeries current_row() {
       return RowSeries(m_df_begin, m_current_row_idx, m_row_size);
+    }
+
+    size_t current_row_idx() {
+      return m_current_row_idx;
     }
 
     DataFrameRowIterator& operator++() {
@@ -197,19 +201,19 @@ public:
       return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
     }
 
-    friend bool operator<(const DataFrameRowIterator& lhs, const int& rhs) {
+    friend bool operator<(const DataFrameRowIterator& lhs, const size_t& rhs) {
       return lhs.m_current_row_idx < rhs;
     }
 
-    friend bool operator<(const int& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator<(const size_t& lhs, const DataFrameRowIterator& rhs) {
       return lhs < rhs.m_current_row_idx;
     }
 
-    friend bool operator>(const DataFrameRowIterator& lhs, const int& rhs) {
+    friend bool operator>(const DataFrameRowIterator& lhs, const size_t& rhs) {
       return lhs.m_current_row_idx > rhs;
     }
 
-    friend bool operator>(const int& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator>(const size_t& lhs, const DataFrameRowIterator& rhs) {
       return lhs > rhs.m_current_row_idx;
     }
 
@@ -246,8 +250,12 @@ public:
     ~DataFrameColIterator() {
     }
 
-    ColumnSeries column() {
+    ColumnSeries current_col() {
       return ColumnSeries(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+    }
+
+    size_t current_col_idx() {
+      return m_current_col_idx;
     }
 
     DataFrameColIterator operator+(const size_t& off) {
@@ -288,19 +296,19 @@ public:
       return lhs.m_d > (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
     }
 
-    friend bool operator<(const DataFrameColIterator& lhs, const int& rhs) {
+    friend bool operator<(const DataFrameColIterator& lhs, const size_t& rhs) {
       return lhs.m_current_col_idx < rhs;
     }
 
-    friend bool operator<(const int& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator<(const size_t& lhs, const DataFrameColIterator& rhs) {
       return lhs < rhs.m_current_col_idx;
     }
 
-    friend bool operator>(const DataFrameColIterator& lhs, const int& rhs) {
+    friend bool operator>(const DataFrameColIterator& lhs, const size_t& rhs) {
       return lhs.m_current_col_idx > rhs;
     }
 
-    friend bool operator>(const int& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator>(const size_t& lhs, const DataFrameColIterator& rhs) {
       return lhs > rhs.m_current_col_idx;
     }
 
