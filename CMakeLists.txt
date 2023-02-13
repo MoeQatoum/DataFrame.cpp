@@ -17,11 +17,21 @@ file(GLOB_RECURSE DATA_FRAME_SOURCES
 )
 
 add_library(${DATA_FRAME} INTERFACE
-${DATA_FRAME_SOURCES} 
+    ${DATA_FRAME_SOURCES} 
 )
 
 # target_link_libraries(${DATA_FRAME} PRIVATE
 # )
+
+if (DF_QT_IMPLEMENTATION)
+    find_package(Qt6 HINTS $ENV{QTDIR} REQUIRED COMPONENTS Core)
+    target_link_libraries(${DATA_FRAME} INTERFACE
+        Qt6::Core
+    )
+    target_compile_definitions(${DATA_FRAME} INTERFACE
+        QT_IMPLEMENTATION
+    )
+endif(DF_QT_IMPLEMENTATION)
 
 target_include_directories(${DATA_FRAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include

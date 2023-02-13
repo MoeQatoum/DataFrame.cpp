@@ -9,6 +9,7 @@ Y="\033[0;93m"
 num_re='^[0-9]+$'
 
 BUILD_DIR="./build"
+QT_DIR="$HOME/Qt/6.4.2/gcc_64"
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
@@ -20,6 +21,7 @@ BUILD_EXAMPLES=false
 BUILD_TESTS=false
 BUILD_BENCH_MARK=false
 UPDATE_SUBMODULES=false
+USE_QT_IMPLEMENTATION=false
 
 INSTALL_PREFIX=$("pwd")/out
 
@@ -29,15 +31,15 @@ for ((i = 0; i < $#; i++)); do
   --clean)
     CLEAN=true
     ;;
-  --example)
-    BUILD_EXAMPLES=true
-    TARGET=dataframe-example
-    ;;
   --no-run)
     RUN=false
     ;;
   --update)
     UPDATE_SUBMODULES=true
+    ;;
+  --example)
+    BUILD_EXAMPLES=true
+    TARGET=dataframe-example
     ;;
   --bench)
     BUILD_BENCH_MARK=true
@@ -46,6 +48,13 @@ for ((i = 0; i < $#; i++)); do
   --test)
     BUILD_TESTS=true
     TARGET=dataframe-tests
+    ;;
+  --qt-impl)
+    USE_QT_IMPLEMENTATION=true
+    ;;
+  --qt-dir)
+    QT_DIR=${opts[$((i + 1))]}
+    ((i++))
     ;;
   --prefix)
     INSTALL_PREFIX=${opts[$((i + 1))]}
@@ -116,11 +125,19 @@ if [ $CLEAN == true ]; then
   fi
 fi
 
-cmake -S . -B $BUILD_DIR \
+if [ -d "$QT_DIR" ]; then
+  printf "${G}-- Qt dir found: $QT_DIR${W}\n"
+else
+  printf "${R}-- Qt dir was not found: $QT_DIR${W}\n"
+  exit 1
+fi
+
+QTDIR=$QT_DIR cmake -S . -B $BUILD_DIR \
   -DDF_BUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES \
   -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK \
   -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS \
   -DDF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES \
+  -DDF_QT_IMPLEMENTATION:BOOL=$USE_QT_IMPLEMENTATION \
   -DCMAKE_BUILD_TYPE:STRING=$CONFIG \
   -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
   -DCMAKE_INSTALL_PREFIX=$INSTALL_PREFIX \
