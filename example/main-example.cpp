@@ -1,7 +1,6 @@
 #include <array>
 #include <iostream>
 
-#include "utils.h"
 #include <dataframe.h>
 
 using namespace df;
@@ -128,7 +127,7 @@ int main() {
 
   unsorted_df.print();
 
-  List<RowSeries<ui32>> sorted_rows = utils::asc_sort_rows(unsorted_df, "col-2");
+  List<RowSeries<ui32>> sorted_rows = asc_sort_rows(unsorted_df, "col-2");
 
   // dont modify the original df from sorted rows
   DataFrame<ui32> sorted_df(unsorted_df);

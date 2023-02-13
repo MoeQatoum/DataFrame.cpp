@@ -4,7 +4,6 @@
 #include <memory>
 #include <stdlib.h>
 
-#include "utils.h"
 #include <dataframe.h>
 
 using namespace df;
@@ -327,7 +326,7 @@ int main() {
     }
     String col_name = bench_col_names[(size_t)rand() % (bench_col_names.size() - 1)];
     msec_timer.tick();
-    utils::asc_sort_rows(df, col_name);
+    asc_sort_rows(df, col_name);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }

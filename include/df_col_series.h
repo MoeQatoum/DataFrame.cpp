@@ -1,7 +1,7 @@
 #ifndef DATA_FRAME_COLUMN_SERIES_H
 #define DATA_FRAME_COLUMN_SERIES_H
 
-#include "common.h"
+#include "df_common.h"
 
 namespace df {
 

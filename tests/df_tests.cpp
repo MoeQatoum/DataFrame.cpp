@@ -129,7 +129,7 @@ TEST(df_sort, dfRowsAscendingSort) {
   ui32   col_idx  = 2;
   String col_name = df.get_col_name(col_idx).value();
 
-  List<RowSeries<i32>> sorted_rows = utils::asc_sort_rows(df, col_name);
+  List<RowSeries<i32>> sorted_rows = asc_sort_rows(df, col_name);
 
   EXPECT_EQ(sorted_rows.size(), df.row_count());
 

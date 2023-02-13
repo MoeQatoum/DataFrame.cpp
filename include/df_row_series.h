@@ -2,7 +2,7 @@
 #ifndef DATA_FRAME_ROW_SERIES_H
 #define DATA_FRAME_ROW_SERIES_H
 
-#include "common.h"
+#include "df_common.h"
 
 namespace df {
 
