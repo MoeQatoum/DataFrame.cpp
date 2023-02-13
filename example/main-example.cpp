@@ -61,12 +61,7 @@ int main() {
 
   df.print();
 
-  //////////
-  // copy //
-  //////////
-
-  clog << "copy:\n";
-
+  clog << "---------------------------------------------------------------------\ncopy:\n";
   StringList n_col_names{};
   for (size_t i = 1; i <= TEST_COL_COUNT; i++) {
 #ifdef QT_IMPLEMENTATION
@@ -94,32 +89,15 @@ int main() {
   n_df.print();
   DataFrame<i32> new_df = n_df.copy();
   n_df.print();
-  clog << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
-  clog << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
   for (size_t i = 0; i < new_df.size(); i++) {
     clog << new_df[i].value << ", ";
     new_df[i].value = 999;
   }
-  clog << "\n";
-  for (size_t i = 0; i < new_df.col_size(); i++) {
-    clog << new_df.get_row_name(i).value() << ", ";
-  }
-  clog << "\n";
-  for (size_t i = 0; i < new_df.row_size(); i++) {
-    clog << new_df.get_col_name(i).value() << ", ";
-  }
-  clog << "\n"
-       << "df addr: " << &n_df << " size: " << sizeof(n_df) << ", new_df addr: " << &new_df
-       << " size: " << sizeof(new_df) << "\n";
+
   n_df.print();
   new_df.print();
 
-  //////////
-  // sort //
-  //////////
-
   clog << "---------------------------------------------------------------------\naec sort:\n";
-
   DataFrame<i32> unsorted_df = df.copy();
   for (size_t i = 0; i < unsorted_df.size(); i++) {
     unsorted_df[i] = rand() % static_cast<i32>(unsorted_df.size());
@@ -142,7 +120,6 @@ int main() {
   sorted_df.print();
 
   clog << "---------------------------------------------------------------------\ndec sort:\n";
-
   DataFrame<i32> dec_unsorted_df = df.copy();
   for (size_t i = 0; i < dec_unsorted_df.size(); i++) {
     dec_unsorted_df[i] = rand() % static_cast<i32>(dec_unsorted_df.size());
@@ -165,7 +142,6 @@ int main() {
   sorted_df.print();
 
   clog << "---------------------------------------------------------------------\ninplace aec sort:\n";
-
   DataFrame<i32> inplace_sort_df = df.copy();
   for (size_t i = 0; i < inplace_sort_df.size(); i++) {
     inplace_sort_df[i] = rand() % static_cast<i32>(unsorted_df.size());
@@ -179,7 +155,6 @@ int main() {
   inplace_sort_df.aec_sort_rows("col-2").print();
 
   clog << "---------------------------------------------------------------------\ninplace dec sort:\n";
-
   DataFrame<i32> dec_inplace_sort_df = df.copy();
   for (size_t i = 0; i < dec_inplace_sort_df.size(); i++) {
     dec_inplace_sort_df[i] = rand() % static_cast<i32>(unsorted_df.size());
@@ -191,6 +166,15 @@ int main() {
 
   dec_inplace_sort_df.print();
   dec_inplace_sort_df.dec_sort_rows("col-2").print();
+
+  clog << "---------------------------------------------------------------------\nhead:\n";
+  dec_inplace_sort_df.print(3, 0);
+
+  clog << "---------------------------------------------------------------------\ntail:\n";
+  dec_inplace_sort_df.print(0, 3);
+
+  clog << "---------------------------------------------------------------------\nhead and tail:\n";
+  dec_inplace_sort_df.print(3, 3);
 
   return 0;
 }

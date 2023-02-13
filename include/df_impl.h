@@ -745,17 +745,51 @@ public:
 
       printf("idx\n");
 
-      for (size_t i = 0; i < size(); i++) {
-        if (i % m_col_count == 0) {
+      if (head > 0 || tail > 0) {
+        if (head > 0) {
+          for (size_t i = 0; i < head * m_row_size; i++) {
+            if (i % m_col_count == 0) {
 #ifdef QT_IMPLEMENTATION
-          printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
+              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
 #else
-          printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
 #endif
+            }
+            printf("%20d", m_d[i].value);
+            if (((i + 1) % m_col_count) == 0 && i != 0) {
+              printf("\n");
+            }
+          }
         }
-        printf("%20d", m_d[i].value);
-        if (((i + 1) % m_col_count) == 0 && i != 0) {
-          printf("\n");
+
+        if (tail > 0) {
+          for (size_t i = m_current_size - (tail * m_row_size); i < m_current_size; i++) {
+            if (i % m_col_count == 0) {
+#ifdef QT_IMPLEMENTATION
+              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
+#else
+              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+#endif
+            }
+            printf("%20d", m_d[i].value);
+            if (((i + 1) % m_col_count) == 0 && i != 0) {
+              printf("\n");
+            }
+          }
+        }
+      } else {
+        for (size_t i = 0; i < m_current_size; i++) {
+          if (i % m_col_count == 0) {
+#ifdef QT_IMPLEMENTATION
+            printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
+#else
+            printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+#endif
+          }
+          printf("%20d", m_d[i].value);
+          if (((i + 1) % m_col_count) == 0 && i != 0) {
+            printf("\n");
+          }
         }
       }
       printf("\n");
