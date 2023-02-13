@@ -27,10 +27,10 @@ int main() {
 #endif
   }
 
-  DataFrame<ui32> df{col_names, row_names};
-  int             i = 0;
+  DataFrame<i32> df{col_names, row_names};
+  int            i = 0;
   for (size_t i = 0; i < df.size(); ++i) {
-    df[i] = static_cast<ui32>(i);
+    df[i] = static_cast<i32>(i);
   }
   df.print();
 
@@ -85,14 +85,14 @@ int main() {
 #endif
   }
 
-  DataFrame<ui32> n_df{n_col_names, n_row_names};
+  DataFrame<i32> n_df{n_col_names, n_row_names};
 
   for (size_t i = 0; i < n_df.size(); ++i) {
-    n_df[i] = static_cast<ui32>(i);
+    n_df[i] = static_cast<i32>(i);
   }
 
   n_df.print();
-  DataFrame<ui32> new_df = n_df.copy();
+  DataFrame<i32> new_df = n_df.copy();
   n_df.print();
   clog << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
   clog << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
@@ -118,20 +118,20 @@ int main() {
   // sort //
   //////////
 
-  clog << "---------------------------------------------------------------------\nsort:\n";
+  clog << "---------------------------------------------------------------------\naec sort:\n";
 
-  DataFrame<ui32> unsorted_df = df.copy();
+  DataFrame<i32> unsorted_df = df.copy();
   for (size_t i = 0; i < unsorted_df.size(); i++) {
-    unsorted_df[i] = rand() % static_cast<ui32>(unsorted_df.size());
+    unsorted_df[i] = rand() % static_cast<i32>(unsorted_df.size());
   }
 
   unsorted_df.print();
 
-  List<RowSeries<ui32>> sorted_rows = asc_sort_rows(unsorted_df, "col-2");
+  List<RowSeries<i32>> sorted_rows = asc_sort_rows(unsorted_df, "col-2");
 
   // dont modify the original df from sorted rows
-  DataFrame<ui32> sorted_df(unsorted_df);
-  size_t          idx = 0;
+  DataFrame<i32> sorted_df(unsorted_df);
+  size_t         idx = 0;
   for (auto row : sorted_rows) {
     for (auto c : row) {
       sorted_df[idx].value = c->value;
@@ -141,19 +141,56 @@ int main() {
 
   sorted_df.print();
 
-  clog << "---------------------------------------------------------------------\ninplace sort:\n";
+  clog << "---------------------------------------------------------------------\ndec sort:\n";
 
-  DataFrame<ui32> inplace_sort_df = df.copy();
+  DataFrame<i32> dec_unsorted_df = df.copy();
+  for (size_t i = 0; i < dec_unsorted_df.size(); i++) {
+    dec_unsorted_df[i] = rand() % static_cast<i32>(dec_unsorted_df.size());
+  }
+
+  dec_unsorted_df.print();
+
+  List<RowSeries<i32>> dec_sorted_rows = dec_sort_rows(dec_unsorted_df, "col-2");
+
+  // dont modify the original df from sorted rows
+  DataFrame<i32> dec_sorted_df(dec_unsorted_df);
+  size_t         dec_idx = 0;
+  for (auto row : dec_sorted_rows) {
+    for (auto c : row) {
+      sorted_df[dec_idx].value = c->value;
+      dec_idx++;
+    }
+  }
+
+  sorted_df.print();
+
+  clog << "---------------------------------------------------------------------\ninplace aec sort:\n";
+
+  DataFrame<i32> inplace_sort_df = df.copy();
   for (size_t i = 0; i < inplace_sort_df.size(); i++) {
-    inplace_sort_df[i] = rand() % static_cast<ui32>(unsorted_df.size());
+    inplace_sort_df[i] = rand() % static_cast<i32>(unsorted_df.size());
   }
 
   for (size_t i = 0; i < unsorted_df.size(); i++) {
-    unsorted_df[i] = rand() % static_cast<ui32>(unsorted_df.size());
+    unsorted_df[i] = rand() % static_cast<i32>(unsorted_df.size());
   }
 
   inplace_sort_df.print();
-  inplace_sort_df.sort_rows("col-2").print();
+  inplace_sort_df.aec_sort_rows("col-2").print();
+
+  clog << "---------------------------------------------------------------------\ninplace dec sort:\n";
+
+  DataFrame<i32> dec_inplace_sort_df = df.copy();
+  for (size_t i = 0; i < dec_inplace_sort_df.size(); i++) {
+    dec_inplace_sort_df[i] = rand() % static_cast<i32>(unsorted_df.size());
+  }
+
+  for (size_t i = 0; i < dec_inplace_sort_df.size(); i++) {
+    unsorted_df[i] = rand() % static_cast<i32>(unsorted_df.size());
+  }
+
+  dec_inplace_sort_df.print();
+  dec_inplace_sort_df.dec_sort_rows("col-2").print();
 
   return 0;
 }

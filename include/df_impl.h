@@ -600,7 +600,7 @@ public:
       return DataFrameColIterator(begin(), m_col_size, m_row_size);
     }
 
-    DataFrame sort_rows(String col_name, bool inplace = true) {
+    DataFrame aec_sort_rows(String col_name, bool inplace = true) {
       size_t       col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
 
@@ -624,6 +624,66 @@ public:
           }
         }
         if (lower_found) {
+          for (size_t i = idx - 1; i >= insert_idx; i--) {
+            sorted_cells[i + 1] = sorted_cells[i];
+
+            // avoid size_t (aka df_ui32) underflow
+            if (i == 0) {
+              break;
+            }
+          }
+          sorted_cells[insert_idx] = col[idx];
+        } else {
+          sorted_cells[idx] = col[idx];
+        }
+      }
+
+      // sort
+      size_t     idx       = 0;
+      ValueType* temp_vals = new ValueType[m_current_size];
+
+      for (size_t i = 0; i < col.size(); i++) {
+        for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
+          temp_vals[idx] = *c;
+          idx++;
+        }
+        m_row_idx_map[sorted_cells[i]->idx.row_name] = i;
+      }
+
+      delete[] sorted_cells;
+
+      for (size_t i = 0; i < m_current_size; i++) {
+        m_d[i] = temp_vals[i];
+      }
+      delete[] temp_vals;
+
+      return *this;
+    }
+
+    DataFrame dec_sort_rows(String col_name, bool inplace = true) {
+      size_t       col_idx = get_col_idx(col_name);
+      ColumnSeries col     = get_column(col_name);
+
+      pValueType* sorted_cells = new pValueType[col.size()];
+
+      List<RowSeries> rows;
+      for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
+        rows.push_back(row_iterator.current_row());
+      }
+
+      sorted_cells[0] = col[0];
+
+      for (size_t idx = 0; idx < col.size(); idx++) {
+        bool   higher_found = false;
+        size_t insert_idx   = 0;
+        for (size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+          if (col[idx]->value > sorted_cells[sorted_idx]->value) {
+            higher_found = true;
+            insert_idx   = sorted_idx;
+            break;
+          }
+        }
+        if (higher_found) {
           for (size_t i = idx - 1; i >= insert_idx; i--) {
             sorted_cells[i + 1] = sorted_cells[i];
 
