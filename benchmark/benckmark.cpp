@@ -7,14 +7,16 @@
 #include "utils.h"
 #include <dataframe.h>
 
+using namespace df;
+
 #define R "\033[91m"
 #define G "\033[92m"
 #define C "\033[96m"
 #define Y "\033[93m"
 #define W "\033[00m"
 
-#define BENCH_COL_COUNT 5000
-#define BENCH_ROW_COUNT 5000
+#define BENCH_COL_COUNT 10
+#define BENCH_ROW_COUNT 10
 
 #define COUNT__ITER_DF_BENCH   1000
 #define COUNT__ITER_ROW_BENCH  1000
@@ -24,7 +26,7 @@
 #define DF_BENCH
 #define ROW_BENCH
 #define COL_BENCH
-// #define SORT_BENCH
+#define SORT_BENCH
 #define ROW_SORT_BENCH
 
 template<typename TimeUnit, size_t N>
@@ -34,7 +36,20 @@ void print_bench_result(std::array<long, N> data, const char* bench_name) {
     sum += data[i];
   }
   auto avg = static_cast<size_t>(sum) / N;
-  std::cout << "    " << bench_name << " , avg time per it: " << TimeUnit(avg) << "\n";
+#ifdef QT_IMPLEMENTATION
+  if (std::is_same<TimeUnit, std::chrono::milliseconds>::value) {
+    clog << "    " << bench_name << " , avg time per it: " << String("%1%2").arg(TimeUnit(avg).count()).arg("ms");
+  } else if (std::is_same<TimeUnit, std::chrono::microseconds>::value) {
+    clog << "    " << bench_name << " , avg time per it: " << String("%1%2").arg(TimeUnit(avg).count()).arg("µs");
+  } else if (std::is_same<TimeUnit, std::chrono::nanoseconds>::value) {
+    clog << "    " << bench_name << " , avg time per it: " << String("%1%2").arg(TimeUnit(avg).count()).arg("ns");
+  } else {
+    clog << "Unknown TimeUnit Type:" << typeid(TimeUnit).name();
+    qTerminate();
+  }
+#else
+  clog << "    " << bench_name << " , avg time per it: " << TimeUnit(avg) << "\n";
+#endif
 }
 
 int main() {
@@ -45,26 +60,38 @@ int main() {
   Timer<std::chrono::microseconds> usec_timer;
   Timer<std::chrono::nanoseconds>  nsec_timer;
 
-  std::vector<std::string> bench_col_names{};
-  for (std::size_t i = 0; i < BENCH_COL_COUNT; i++) {
-    bench_col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+  StringList bench_col_names{};
+  for (size_t i = 0; i < BENCH_COL_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    bench_col_names.push_back(String{"row-%1"}.arg(i));
+#else
+    bench_col_names.push_back(String{"col-" + std::to_string(i + 1)});
+#endif
   }
-  std::vector<std::string> bench_row_names{};
-  for (std::size_t i = 0; i < BENCH_ROW_COUNT; i++) {
-    bench_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+  StringList bench_row_names{};
+  for (size_t i = 0; i < BENCH_ROW_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    bench_row_names.push_back(String{"row-%1"}.arg(i));
+#else
+    bench_row_names.push_back(String{"row-" + std::to_string(i + 1)});
+#endif
   }
 
-  df::DataFrame<dataT> df{bench_col_names, bench_row_names};
+  DataFrame<dataT> df{bench_col_names, bench_row_names};
 
-  for (std::size_t i = 0; i < df.size(); ++i) {
+  for (size_t i = 0; i < df.size(); ++i) {
     df[i] = static_cast<dataT>(i);
   }
 
-  std::cout << df.shape() << " size: " << sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT / 1000000
-            << " MB, data Type: " << typeid(dataT).name() << "\n";
+  clog << df.shape() << " size: " << sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT / 1000000
+       << " MB, data Type: " << typeid(dataT).name() << "\n";
 
 #ifdef DF_BENCH
-  std::cout << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH << "\n";
+  #ifdef QT_IMPLEMENTATION
+  clog << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH;
+  #else
+  clog << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH << "\n";
+  #endif
 
   std::array<long, COUNT__ITER_DF_BENCH> DataFrameIterator_bench_data;
 
@@ -105,8 +132,13 @@ int main() {
                                                "random access read single integral indexing- single cell");
 
   for (size_t i = 0; i < COUNT__ITER_DF_BENCH; i++) {
-    std::string col_name{"col-" + std::to_string(static_cast<size_t>(rand()) % (df.col_size() - 1))};
-    std::string row_name{"row-" + std::to_string(static_cast<size_t>(rand()) % (df.row_size() - 1))};
+  #ifdef QT_IMPLEMENTATION
+    String col_name = String("col-%1").arg(static_cast<size_t>(rand()) % (df.col_size() - 1));
+    String row_name = String("row-%1").arg(static_cast<size_t>(rand()) % (df.row_size() - 1));
+  #else
+    String col_name{"col-" + std::to_string(static_cast<size_t>(rand()) % (df.col_size() - 1))};
+    String row_name{"row-" + std::to_string(static_cast<size_t>(rand()) % (df.row_size() - 1))};
+  #endif
     nsec_timer.tick();
     auto v = df[col_name, row_name].value;
     nsec_timer.tock();
@@ -125,8 +157,13 @@ int main() {
   print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access wite - single cell");
 
   for (size_t i = 0; i < COUNT__ITER_DF_BENCH; i++) {
-    std::string col_name{"col-" + std::to_string(static_cast<size_t>(rand()) % (df.col_size() - 1))};
-    std::string row_name{"row-" + std::to_string(static_cast<size_t>(rand()) % (df.row_size() - 1))};
+  #ifdef QT_IMPLEMENTATION
+    String col_name = String("col-%1").arg(static_cast<size_t>(rand()) % (df.col_size() - 1));
+    String row_name = String("row-%1").arg(static_cast<size_t>(rand()) % (df.row_size() - 1));
+  #else
+    String col_name{"col-" + std::to_string(static_cast<size_t>(rand()) % (df.col_size() - 1))};
+    String row_name{"row-" + std::to_string(static_cast<size_t>(rand()) % (df.row_size() - 1))};
+  #endif
     nsec_timer.tick();
     df[col_name, row_name].value = 159159.159;
     nsec_timer.tock();
@@ -137,7 +174,12 @@ int main() {
 #endif
 
 #ifdef ROW_BENCH
-  std::cout << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH << "\n";
+  #ifdef QT_IMPLEMENTATION
+  clog << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH;
+  #else
+  clog << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH << "\n";
+  #endif
+
   std::array<long, COUNT__ITER_ROW_BENCH> RowIterator_bench_data;
 
   for (size_t i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
@@ -191,7 +233,11 @@ int main() {
 #endif
 
 #ifdef COL_BENCH
-  std::cout << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH << "\n";
+  #ifdef QT_IMPLEMENTATION
+  clog << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH;
+  #else
+  clog << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH << "\n";
+  #endif
   std::array<long, COUNT__ITER_COL_BENCH> ColumnIterator_bench_data;
 
   for (size_t i = 0; i < COUNT__ITER_COL_BENCH; i++) {
@@ -247,14 +293,18 @@ int main() {
 #endif
 
 #ifdef SORT_BENCH
-  std::cout << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  #ifdef QT_IMPLEMENTATION
+  clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH;
+  #else
+  clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  #endif
   std::array<long, COUNT__ITER_SORT_BENCH> sort_bench_data;
 
   for (size_t i = 0; i < COUNT__ITER_SORT_BENCH; i++) {
-    for (std::size_t i = 0; i < df.size(); ++i) {
+    for (size_t i = 0; i < df.size(); ++i) {
       df[i] = static_cast<dataT>(static_cast<size_t>(rand()) % df.size());
     }
-    std::string col_name = bench_col_names[static_cast<size_t>(rand()) % (bench_col_names.size() - 1)];
+    String col_name = bench_col_names[static_cast<size_t>(rand()) % (bench_col_names.size() - 1)];
     msec_timer.tick();
     df.sort_rows(col_name);
     msec_timer.tock();
@@ -264,16 +314,20 @@ int main() {
 #endif
 
 #ifdef ROW_SORT_BENCH
-  std::cout << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  #ifdef QT_IMPLEMENTATION
+  clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH;
+  #else
+  clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  #endif
   std::array<long, COUNT__ITER_SORT_BENCH> row_sort_bench_data;
 
   for (size_t i = 0; i < COUNT__ITER_SORT_BENCH; i++) {
-    for (std::size_t i = 0; i < df.size(); ++i) {
+    for (size_t i = 0; i < df.size(); ++i) {
       df[i] = static_cast<dataT>(static_cast<size_t>(rand()) % df.size());
     }
-    std::string col_name = bench_col_names[(size_t)rand() % (bench_col_names.size() - 1)];
+    String col_name = bench_col_names[(size_t)rand() % (bench_col_names.size() - 1)];
     msec_timer.tick();
-    df::utils::asc_sort_rows(df, col_name);
+    utils::asc_sort_rows(df, col_name);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }
