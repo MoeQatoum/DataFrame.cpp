@@ -16,7 +16,7 @@ namespace df {
   namespace utils {
 
     template<NumericalTypes T>
-    std::vector<RowSeries<T>> asc_sort_rows(DataFrame<T>& df, const std::string& col_name) {
+    List<RowSeries<T>> asc_sort_rows(DataFrame<T>& df, const String& col_name) {
       using ValueType = typename ColumnSeries<T>::ValueType;
 
       size_t          col_idx = df.get_col_idx(col_name);
@@ -24,7 +24,7 @@ namespace df {
 
       ValueType* sorted_cells = new ValueType[col.size()];
 
-      std::vector<RowSeries<T>> rows;
+      List<RowSeries<T>> rows;
       for (auto row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
         rows.push_back(row_iterator.current_row());
       }
@@ -57,7 +57,7 @@ namespace df {
       }
 
       // sort
-      std::vector<RowSeries<T>> sorted_rows;
+      List<RowSeries<T>> sorted_rows;
       for (size_t idx = 0; idx < col.size(); idx++) {
         sorted_rows.push_back(df.get_row(sorted_cells[idx]->idx.row_idx));
       }

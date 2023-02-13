@@ -59,6 +59,16 @@ namespace df {
       return data;
     }
 #ifdef QT_IMPLEMENTATION
+    friend QDebug operator<<(QDebug dbg, const ColumnSeries& col) {
+      dbg.noquote();
+      dbg << "ColumnSeries(size: " << col.m_size << ", "
+          << "Items: \n";
+      for (const ValueType& cell : col) {
+        dbg << *cell << "\n";
+      }
+      dbg << ")";
+      return dbg;
+    }
 #else
     friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
       os << "ColumnSeries(size: " << col.m_size << ", "

@@ -5,11 +5,13 @@
 #include <optional>
 
 #ifdef QT_IMPLEMENTATION
-  #include <QHash>
+  #include <QDebug>
   #include <QList>
+  #include <QMap>
   #include <QString>
   #include <QStringList>
 #else
+  #include <iostream>
   #include <map>
   #include <ostream>
   #include <stdlib.h>
@@ -33,36 +35,17 @@ namespace df {
   using size_t = ui32;
 
 #ifdef QT_IMPLEMENTATION
+  #define List QList
+  #define clog qDebug().noquote()
   using String     = QString;
   using StringList = QStringList;
-  using i8List     = QList<i8>;
-  using ui8List    = QList<ui8>;
-  using i16List    = QList<i16>;
-  using ui16List   = QList<ui16>;
-  using i32List    = QList<i32>;
-  using ui32List   = QList<ui32>;
-  using i64List    = QList<i64>;
-  using ui64List   = QList<ui64>;
-  using f32List    = QList<f32>;
-  using f64List    = QList<f64>;
-  using f128List   = QList<f128>;
-  using IndexHash  = QHash<QString, i32>;
-
+  using IndexHash  = QMap<QString, ui32>;
 #else
+  #define List std::vector
+  #define clog std::cout
   using String     = std::string;
   using StringList = std::vector<String>;
-  using i8List     = std::vector<i8>;
-  using ui8List    = std::vector<ui8>;
-  using i16List    = std::vector<i16>;
-  using ui16List   = std::vector<ui16>;
-  using i32List    = std::vector<i32>;
-  using ui32List   = std::vector<ui32>;
-  using i64List    = std::vector<i64>;
-  using ui64List   = std::vector<ui64>;
-  using f32List    = std::vector<f32>;
-  using f64List    = std::vector<f64>;
-  using f128List   = std::vector<f128>;
-  using IndexHash  = std::map<String, i32>;
+  using IndexHash  = std::map<String, ui32>;
   using ostream    = std::ostream;
 #endif
 

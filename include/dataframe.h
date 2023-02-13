@@ -122,9 +122,14 @@ public:
     }
 
 #ifdef QT_IMPLEMENTATION
+    friend QDebug operator<<(QDebug dbg, const Iterator& itr) {
+      dbg.noquote();
+      dbg << "Iterator(current addr: " << itr.m_d << ")";
+      return dbg;
+    }
 #else
     friend ostream& operator<<(ostream& os, const Iterator& itr) {
-      os << itr.m_d;
+      os << "Iterator(current addr: " << itr.m_d << ")";
       return os;
     }
 #endif
@@ -323,6 +328,11 @@ private:
     size_t col_count;
     size_t row_count;
 #ifdef QT_IMPLEMENTATION
+    friend QDebug operator<<(QDebug dbg, const Shape& shape) {
+      dbg.noquote();
+      dbg << "Shape(c: " << shape.col_count << ", r: " << shape.row_count << ")";
+      return dbg;
+    }
 #else
     friend ostream& operator<<(ostream& os, const Shape& shape) {
       os << "Shape(c: " << shape.col_count << ", r: " << shape.row_count << ")";
@@ -344,19 +354,27 @@ public:
 
 public:
     DataFrame(const StringList& col_names, const StringList& row_names) {
-      m_col_count    = col_names.size();
-      m_row_count    = row_names.size();
+      m_col_count    = static_cast<size_t>(col_names.size());
+      m_row_count    = static_cast<size_t>(row_names.size());
       m_col_size     = m_row_count;
       m_row_size     = m_col_count;
       m_current_size = m_col_count * m_row_count;
       m_d            = new ValueType[m_current_size];
 
       for (size_t i = 0; i < m_col_count; i++) {
+#ifdef QT_IMPLEMENTATION
+        m_col_idx_map.insert(col_names[i], i);
+#else
         m_col_idx_map.insert({col_names[i], i});
+#endif
       }
 
       for (size_t i = 0; i < m_row_count; i++) {
+#ifdef QT_IMPLEMENTATION
+        m_row_idx_map.insert(row_names[i], i);
+#else
         m_row_idx_map.insert({row_names[i], i});
+#endif
       }
 
       // 00 01 02 03 04
@@ -417,8 +435,8 @@ public:
     }
 
     const ValueType& operator[](const size_t& col_idx, const size_t& row_idx) const {
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_siz - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_siz - 1), "index out of range");
+      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
+      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
 
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
@@ -441,8 +459,13 @@ public:
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
+#ifdef QT_IMPLEMENTATION
+      size_t col_idx = m_col_idx_map[col_name];
+      size_t row_idx = m_row_idx_map[row_name];
+#else
       size_t col_idx = m_col_idx_map.at(col_name);
       size_t row_idx = m_row_idx_map.at(row_name);
+#endif
 
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
@@ -460,11 +483,19 @@ public:
     }
 
     std::optional<String> get_col_name(size_t col_idx) {
+#ifdef QT_IMPLEMENTATION
+      for (const String& col_name : m_col_idx_map.keys()) {
+        if (m_col_idx_map[col_name] == col_idx) {
+          return col_name;
+        }
+      }
+#else
       for (const auto& [col_name, idx] : m_col_idx_map) {
         if (idx == col_idx) {
           return col_name;
         }
       }
+#endif
       return std::nullopt;
     }
 
@@ -473,11 +504,19 @@ public:
     }
 
     std::optional<String> get_row_name(size_t row_idx) {
+#ifdef QT_IMPLEMENTATION
+      for (const String& row_name : m_row_idx_map.keys()) {
+        if (m_row_idx_map[row_name] == row_idx) {
+          return row_name;
+        }
+      }
+#else
       for (const auto& [row_name, idx] : m_row_idx_map) {
         if (idx == row_idx) {
           return row_name;
         }
       }
+#endif
       return std::nullopt;
     }
 
@@ -567,7 +606,7 @@ public:
 
       pValueType* sorted_cells = new pValueType[col.size()];
 
-      std::vector<RowSeries> rows;
+      List<RowSeries> rows;
       for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
         rows.push_back(row_iterator.current_row());
       }
@@ -622,14 +661,25 @@ public:
     }
 
     void print(size_t head = 0, size_t tail = 0) {
-      char* l;
       for (size_t i = 0; i < m_col_count; i++) {
         if (i == 0) {
+#ifdef QT_IMPLEMENTATION
+          printf("%25s", get_col_name(i).value().toUtf8().constData());
+#else
           printf("%25s", get_col_name(i).value().c_str());
+#endif
         } else if (i == m_col_count - 1) {
+#ifdef QT_IMPLEMENTATION
+          printf("%20s\n", get_col_name(i).value().toUtf8().constData());
+#else
           printf("%20s\n", get_col_name(i).value().c_str());
+#endif
         } else {
+#ifdef QT_IMPLEMENTATION
+          printf("%20s", get_col_name(i).value().toUtf8().constData());
+#else
           printf("%20s", get_col_name(i).value().c_str());
+#endif
         }
       }
 
@@ -637,7 +687,11 @@ public:
 
       for (size_t i = 0; i < size(); i++) {
         if (i % m_col_count == 0) {
+#ifdef QT_IMPLEMENTATION
+          printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
+#else
           printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
+#endif
         }
         printf("%20d", m_d[i].value);
         if (((i + 1) % m_col_count) == 0 && i != 0) {
