@@ -10,19 +10,27 @@ int main() {
 
 #define TEST_COL_COUNT 3
 #define TEST_ROW_COUNT 10
-  std::vector<std::string> col_names{};
-  for (std::size_t i = 0; i < TEST_COL_COUNT; i++) {
-    col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+  StringList col_names{};
+  for (size_t i = 1; i <= TEST_COL_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    col_names.push_back(String{"col-%1"}.arg(i));
+#else
+    col_names.push_back(String{"col-" + std::to_string(i)});
+#endif
   }
 
-  std::vector<std::string> row_names{};
-  for (std::size_t i = 0; i < TEST_ROW_COUNT; i++) {
-    row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+  StringList row_names{};
+  for (size_t i = 1; i <= TEST_ROW_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    row_names.push_back(String{"row-%1"}.arg(i));
+#else
+    row_names.push_back(String{"row-" + std::to_string(i)});
+#endif
   }
 
   DataFrame<ui32> df{col_names, row_names};
   int             i = 0;
-  for (std::size_t i = 0; i < df.size(); ++i) {
+  for (size_t i = 0; i < df.size(); ++i) {
     df[i] = static_cast<ui32>(i);
   }
   df.print();
@@ -34,9 +42,9 @@ int main() {
     // i.column()[0]->value = 123;
     auto d = col_iter.current_col().copy_data();
     for (int i = 0; i < d.size; i++) {
-      std::cout << d.data[i] << ", ";
+      clog << d.data[i] << ", ";
     }
-    std::cout << "\n";
+    clog << "\n";
   }
   df.print();
 
@@ -47,9 +55,9 @@ int main() {
     // i.row()[0]->value = 123;
     auto d = row_iter.current_row().copy_data();
     for (int i = 0; i < d.size; i++) {
-      std::cout << d.data[i] << ", ";
+      clog << d.data[i] << ", ";
     }
-    std::cout << "\n";
+    clog << "\n";
   }
 
   df.print();
@@ -58,44 +66,52 @@ int main() {
   // copy //
   //////////
 
-  std::cout << "copy:\n";
+  clog << "copy:\n";
 
-  std::vector<std::string> n_col_names{};
-  for (std::size_t i = 0; i < TEST_COL_COUNT; i++) {
-    n_col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+  StringList n_col_names{};
+  for (size_t i = 1; i <= TEST_COL_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    n_col_names.push_back(String{"row-%1"}.arg(i));
+#else
+    n_col_names.push_back(String{"row-" + std::to_string(i)});
+#endif
   }
 
-  std::vector<std::string> n_row_names{};
-  for (std::size_t i = 0; i < TEST_ROW_COUNT; i++) {
-    n_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+  StringList n_row_names{};
+  for (size_t i = 1; i <= TEST_ROW_COUNT; i++) {
+#ifdef QT_IMPLEMENTATION
+    n_row_names.push_back(String{"row-%1"}.arg(i));
+#else
+    n_row_names.push_back(String{"row-" + std::to_string(i)});
+#endif
   }
 
   DataFrame<ui32> n_df{n_col_names, n_row_names};
 
-  for (std::size_t i = 0; i < n_df.size(); ++i) {
+  for (size_t i = 0; i < n_df.size(); ++i) {
     n_df[i] = static_cast<ui32>(i);
   }
 
   n_df.print();
   DataFrame<ui32> new_df = n_df.copy();
   n_df.print();
-  std::cout << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
-  std::cout << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
+  clog << "kkkkkkkkkkkk" << n_df.copy().get_row_name(1).value() << "\n";
+  clog << "n_df_cpy[3] " << n_df.copy()[3] << "\n";
   for (size_t i = 0; i < new_df.size(); i++) {
-    std::cout << new_df[i].value << ", ";
+    clog << new_df[i].value << ", ";
     new_df[i].value = 999;
   }
-  std::cout << "\n";
+  clog << "\n";
   for (size_t i = 0; i < new_df.col_size(); i++) {
-    std::cout << new_df.get_row_name(i).value() << ", ";
+    clog << new_df.get_row_name(i).value() << ", ";
   }
-  std::cout << "\n";
+  clog << "\n";
   for (size_t i = 0; i < new_df.row_size(); i++) {
-    std::cout << new_df.get_col_name(i).value() << ", ";
+    clog << new_df.get_col_name(i).value() << ", ";
   }
-  std::cout << "\n"
-            << "df addr: " << &n_df << " size: " << sizeof(n_df) << ", new_df addr: " << &new_df
-            << " size: " << sizeof(new_df) << "\n";
+  clog << "\n"
+       << "df addr: " << &n_df << " size: " << sizeof(n_df) << ", new_df addr: " << &new_df
+       << " size: " << sizeof(new_df) << "\n";
   n_df.print();
   new_df.print();
 
@@ -103,7 +119,7 @@ int main() {
   // sort //
   //////////
 
-  std::cout << "---------------------------------------------------------------------\nsort:\n";
+  clog << "---------------------------------------------------------------------\nsort:\n";
 
   DataFrame<ui32> unsorted_df = df.copy();
   for (size_t i = 0; i < unsorted_df.size(); i++) {
@@ -112,7 +128,7 @@ int main() {
 
   unsorted_df.print();
 
-  std::vector<RowSeries<ui32>> sorted_rows = utils::asc_sort_rows(unsorted_df, "col-2");
+  List<RowSeries<ui32>> sorted_rows = utils::asc_sort_rows(unsorted_df, "col-2");
 
   // dont modify the original df from sorted rows
   DataFrame<ui32> sorted_df(unsorted_df);
@@ -126,7 +142,7 @@ int main() {
 
   sorted_df.print();
 
-  std::cout << "---------------------------------------------------------------------\ninplace sort:\n";
+  clog << "---------------------------------------------------------------------\ninplace sort:\n";
 
   DataFrame<ui32> inplace_sort_df = df.copy();
   for (size_t i = 0; i < inplace_sort_df.size(); i++) {
