@@ -15,11 +15,11 @@ namespace df {
   template<NumericalTypes T>
   struct RowData {
 
-    RowData(size_t size) : size(size), data(new T[size]) {
+    RowData(sizetype size) : size(size), data(new T[size]) {
     }
 
-    T*     data;
-    size_t size;
+    T*       data;
+    sizetype size;
 
     ~RowData() {
       delete[] data;
@@ -33,17 +33,17 @@ namespace df {
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
     using RowIterator       = Iterator<RowSeries>;
 
-    RowSeries(DataFrameIterator row_begin, size_t row_idx, size_t row_size) {
+    RowSeries(DataFrameIterator row_begin, sizetype row_idx, sizetype row_size) {
       m_size = row_size;
       m_d    = new ValueType[m_size];
 
-      for (size_t idx = 0; idx < row_size; idx++) {
+      for (sizetype idx = 0; idx < row_size; idx++) {
         m_d[idx] = &(row_begin + ((row_idx * row_size) + idx));
       }
     }
 
     RowSeries(const RowSeries& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
-      for (size_t i = 0; i < m_size; i++) {
+      for (sizetype i = 0; i < m_size; i++) {
         m_d[i] = other.m_d[i];
       }
     }
@@ -52,13 +52,13 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType operator[](const size_t& idx) {
+    ValueType operator[](const sizetype& idx) {
       return *(m_d + idx);
     }
 
     RowData<T> copy_data() {
       RowData<T> data{m_size};
-      for (size_t i = 0; i < m_size; i++) {
+      for (sizetype i = 0; i < m_size; i++) {
         data.data[i] = (*(m_d + i))->value;
       }
       return data;
@@ -86,13 +86,34 @@ namespace df {
     }
 #endif
 
-    constexpr size_t size() {
+    constexpr sizetype size() {
       return m_size;
+    }
+
+    constexpr sizetype size() const {
+      return m_size;
+    }
+
+    constexpr const sizetype& idx() {
+      return (*begin())->idx.row_idx;
+    }
+
+    constexpr const sizetype& idx() const {
+      return (*begin())->idx.row_idx;
+    }
+
+    String& name() {
+      return (*begin())->idx.row_name;
+    }
+
+    const String& name() const {
+      return (*begin())->idx.row_name;
     }
 
     RowIterator begin() {
       return RowIterator(m_d);
     }
+
     RowIterator begin() const {
       return RowIterator(m_d);
     }
@@ -100,16 +121,13 @@ namespace df {
     RowIterator end() {
       return RowIterator(m_d + m_size);
     }
+
     RowIterator end() const {
       return RowIterator(m_d + m_size);
     }
 
-    ValueType& at(size_t idx) {
-      return *(begin() + idx);
-    }
-
 private:
-    size_t     m_size;
+    sizetype   m_size;
     ValueType* m_d;
   };
 } // namespace df

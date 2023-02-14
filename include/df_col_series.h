@@ -14,11 +14,11 @@ namespace df {
   template<NumericalTypes T>
   struct ColumnData {
 
-    ColumnData(size_t size) : size(size), data(new T[size]) {
+    ColumnData(sizetype size) : size(size), data(new T[size]) {
     }
 
-    T*     data;
-    size_t size;
+    T*       data;
+    sizetype size;
 
     ~ColumnData() {
       delete[] data;
@@ -30,13 +30,13 @@ namespace df {
 
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
-    using Iterator          = Iterator<ColumnSeries>;
+    using ColIterator       = Iterator<ColumnSeries>;
 
-    ColumnSeries(DataFrameIterator col_begin, size_t col_size, size_t row_size) {
+    ColumnSeries(DataFrameIterator col_begin, sizetype col_size, sizetype row_size) {
       m_size = col_size;
       m_d    = new ValueType[m_size];
 
-      for (size_t idx = 0; idx < col_size; idx++) {
+      for (sizetype idx = 0; idx < col_size; idx++) {
         m_d[idx] = &(col_begin + (idx * row_size));
       }
     }
@@ -47,13 +47,13 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType& operator[](const size_t& idx) {
+    ValueType& operator[](const sizetype& idx) {
       return *(m_d + idx);
     }
 
     ColumnData<T> copy_data() {
       ColumnData<T> data{m_size};
-      for (size_t i = 0; i < m_size; i++) {
+      for (sizetype i = 0; i < m_size; i++) {
         data.data[i] = (*(m_d + i))->value;
       }
       return data;
@@ -81,32 +81,48 @@ namespace df {
     }
 #endif
 
-    constexpr size_t size() {
+    constexpr sizetype size() {
       return m_size;
     }
 
-    Iterator begin() {
-      return Iterator(m_d);
+    constexpr sizetype size() const {
+      return m_size;
     }
 
-    Iterator begin() const {
-      return Iterator(m_d);
+    constexpr sizetype idx() {
+      return (*begin())->idx.col_idx;
     }
 
-    Iterator end() {
-      return Iterator(m_d + m_size);
+    constexpr const sizetype& idx() const {
+      return (*begin())->idx.col_idx;
     }
 
-    Iterator end() const {
-      return Iterator(m_d + m_size);
+    String name() {
+      return (*begin())->idx.col_name;
     }
 
-    ValueType& at(size_t idx) {
-      return *(begin() + idx);
+    const String& name() const {
+      return (*begin())->idx.col_name;
+    }
+
+    ColIterator begin() {
+      return ColIterator(m_d);
+    }
+
+    ColIterator begin() const {
+      return ColIterator(m_d);
+    }
+
+    ColIterator end() {
+      return ColIterator(m_d + m_size);
+    }
+
+    ColIterator end() const {
+      return ColIterator(m_d + m_size);
     }
 
 private:
-    size_t     m_size;
+    sizetype   m_size;
     ValueType* m_d;
   };
 } // namespace df
