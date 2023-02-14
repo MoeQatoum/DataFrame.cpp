@@ -10,7 +10,7 @@
 
 namespace df {
 
-  template<NumericalTypes T>
+  template<typename T>
   class DataFrame;
 
   template<typename Iterable>
@@ -80,7 +80,7 @@ public:
       m_d += off;
     }
 
-    friend i32 operator-(const Iterator& lhs, const Iterator& rhs) {
+    friend long operator-(const Iterator& lhs, const Iterator& rhs) {
       return lhs.m_d - rhs.m_d;
     }
 
@@ -335,7 +335,7 @@ private:
 #endif
   };
 
-  template<NumericalTypes T>
+  template<typename T>
   class DataFrame {
 public:
     using ValueType            = Cell<T>;
@@ -361,29 +361,23 @@ public:
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_col_idx_map.insert(col_names[i], i);
-        if (col_names[i].size() > m_max_col_name_size) {
-          m_max_col_name_size = col_names[i].size();
-        }
 #else
         m_col_idx_map.insert({col_names[i], i});
+#endif
         if (col_names[i].size() > m_max_col_name_size) {
           m_max_col_name_size = col_names[i].size();
         }
-#endif
       }
 
       for (sizetype i = 0; i < m_row_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_row_idx_map.insert(row_names[i], i);
-        if (row_names[i].size() > m_max_row_name_size) {
-          m_max_row_name_size = row_names[i].size();
-        }
 #else
         m_row_idx_map.insert({row_names[i], i});
+#endif
         if (row_names[i].size() > m_max_row_name_size) {
           m_max_row_name_size = row_names[i].size();
         }
-#endif
       }
 
       // 00 01 02 03 04
@@ -613,7 +607,8 @@ public:
       return DataFrameColIterator(begin(), m_col_size, m_row_size);
     }
 
-    DataFrame aec_sort_rows(String col_name, bool inplace = true) {
+    template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+    DataFrame asc_sort_rows(String col_name, bool inplace = true) {
       sizetype     col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
 
@@ -673,6 +668,7 @@ public:
       return *this;
     }
 
+    template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
     DataFrame dec_sort_rows(String col_name, bool inplace = true) {
       sizetype     col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
@@ -762,7 +758,7 @@ public:
           const auto& row = get_row(i);
           dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
           for (const auto& c : row) {
-            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            if (std::is_floating_point_v<T>) {
               dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
             } else {
               dbg << String("%1").arg(c->value, -(col_spacing));
@@ -778,7 +774,7 @@ public:
           const auto& row = get_row(i);
           dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
           for (const auto& c : row) {
-            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            if (std::is_floating_point_v<T>) {
               dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
             } else {
               dbg << String("%1").arg(c->value, -(col_spacing));
@@ -807,7 +803,7 @@ public:
         const auto& row = df.get_row(i);
         dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
         for (const auto& c : row) {
-          if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+          if (std::is_floating_point_v<T>) {
             dbg << String("%1").arg(String::number(c->value, 'f', df.m_floatPrecision), -10);
           } else {
             dbg << String("%1").arg(c->value, -(col_spacing));
@@ -840,7 +836,7 @@ public:
           clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space)
                << row.name();
           for (const auto& c : row) {
-            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            if (std::is_floating_point_v<T>) {
               clog.precision(m_floatPrecision);
               clog << std::left << std::setw(col_spacing) << c->value;
               clog.precision(0);
@@ -859,9 +855,9 @@ public:
           clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space)
                << row.name();
           for (const auto& c : row) {
-            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            if (std::is_floating_point_v<T>) {
               clog.precision(m_floatPrecision);
-              clog << std::left << std::setw(col_spacing) << c->value;
+              clog << std::left << std::setw(col_spacing + m_floatPrecision) << c->value;
               clog.precision(0);
             } else {
               clog << std::left << std::setw(col_spacing) << c->value;
@@ -889,7 +885,7 @@ public:
         const auto& row = df.get_row(i);
         os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
-          if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+          if (std::is_floating_point_v<T>) {
             os.precision(df.m_floatPrecision);
             os << std::left << std::setw(col_spacing) << c->value;
             os.precision(0);

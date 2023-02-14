@@ -4,16 +4,16 @@
 #include "df_common.h"
 
 namespace df {
-  template<NumericalTypes T>
+  template<typename T>
   class DataFrame;
 
-  template<NumericalTypes T>
+  template<typename T>
   class RowSeries;
 
-  template<NumericalTypes T>
+  template<typename T>
   class ColumnSeries;
 
-  template<NumericalTypes T>
+  template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
   List<RowSeries<T>> asc_sort_rows(DataFrame<T>& df, const String& col_name) {
     using ValueType = typename ColumnSeries<T>::ValueType;
 
@@ -64,7 +64,7 @@ namespace df {
     return sorted_rows;
   }
 
-  template<NumericalTypes T>
+  template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
   List<RowSeries<T>> dec_sort_rows(DataFrame<T>& df, const String& col_name) {
     using ValueType = typename ColumnSeries<T>::ValueType;
 

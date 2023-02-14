@@ -53,7 +53,7 @@ namespace df {
 #endif
   };
 
-  template<NumericalTypes T>
+  template<typename T>
   struct Cell {
 
     Cell() {

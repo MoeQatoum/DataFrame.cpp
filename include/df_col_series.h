@@ -8,10 +8,10 @@ namespace df {
   template<typename Iterable>
   class Iterator;
 
-  template<NumericalTypes T>
+  template<typename T>
   class DataFrame;
 
-  template<NumericalTypes T>
+  template<typename T>
   struct ColumnData {
 
     ColumnData(sizetype size) : size(size), data(new T[size]) {
@@ -25,7 +25,7 @@ namespace df {
     }
   };
 
-  template<NumericalTypes T>
+  template<typename T>
   struct ColumnSeries {
 
     using ValueType         = typename DataFrame<T>::pValueType;
