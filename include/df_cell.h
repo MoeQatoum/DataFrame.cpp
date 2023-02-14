@@ -30,9 +30,9 @@ namespace df {
     //   return temp_idx;
     // }
 
-    size_t row_idx;
-    size_t col_idx;
-    size_t global_idx;
+    sizetype row_idx;
+    sizetype col_idx;
+    sizetype global_idx;
 
     String col_name;
     String row_name;
