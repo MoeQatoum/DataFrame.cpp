@@ -21,17 +21,18 @@
 #endif
 
 namespace df {
-  using sizetype = long long;
 
 #ifdef QT_IMPLEMENTATION
   #define List QList
   #define clog qDebug()
+  using sizetype   = qsizetype;
   using String     = QString;
   using StringList = QStringList;
   using IndexHash  = QMap<QString, unsigned long>;
 #else
   #define List std::vector
   #define clog std::cout
+  using sizetype   = std::size_t;
   using String     = std::string;
   using StringList = std::vector<String>;
   using IndexHash  = std::map<String, unsigned long>;
