@@ -53,13 +53,13 @@ public:
       return m_d;
     }
 
-    friend const Iterator operator+(const size_t& lhs, const Iterator& rhs) {
+    friend const Iterator operator+(const sizetype& lhs, const Iterator& rhs) {
       Iterator tmp{rhs};
       tmp += lhs;
       return tmp;
     }
 
-    friend const Iterator operator+(const Iterator& lhs, const size_t& rhs) {
+    friend const Iterator operator+(const Iterator& lhs, const sizetype& rhs) {
       Iterator tmp{lhs};
       tmp += rhs;
       return tmp;
@@ -76,7 +76,7 @@ public:
       return tmp;
     }
 
-    void operator+=(size_t off) {
+    void operator+=(sizetype off) {
       m_d += off;
     }
 
@@ -84,7 +84,7 @@ public:
       return lhs.m_d - rhs.m_d;
     }
 
-    friend Iterator operator-(const Iterator& lhs, const size_t& rhs) {
+    friend Iterator operator-(const Iterator& lhs, const sizetype& rhs) {
       Iterator tmp{lhs};
       tmp -= rhs;
       return tmp;
@@ -101,7 +101,7 @@ public:
       return tmp;
     }
 
-    void operator-=(size_t off) {
+    void operator-=(sizetype off) {
       m_d -= off;
     }
 
@@ -143,10 +143,8 @@ private:
     using DataFrameIterator = typename Iterable::DataFrameIterator;
     using RowSeries         = typename Iterable::RowSeries;
 
-    using size_t = size_t;
-
 public:
-    DataFrameRowIterator(DataFrameIterator df_begin, size_t row_size)
+    DataFrameRowIterator(DataFrameIterator df_begin, sizetype row_size)
         : m_df_begin(df_begin),
           m_row_size(row_size),
           m_current_row_idx(0) {
@@ -165,7 +163,7 @@ public:
       return RowSeries(m_df_begin, m_current_row_idx, m_row_size);
     }
 
-    size_t current_row_idx() {
+    sizetype current_row_idx() {
       return m_current_row_idx;
     }
 
@@ -207,39 +205,35 @@ public:
       return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
     }
 
-    friend bool operator<(const DataFrameRowIterator& lhs, const size_t& rhs) {
+    friend bool operator<(const DataFrameRowIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_row_idx < rhs;
     }
 
-    friend bool operator<(const size_t& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator<(const sizetype& lhs, const DataFrameRowIterator& rhs) {
       return lhs < rhs.m_current_row_idx;
     }
 
-    friend bool operator>(const DataFrameRowIterator& lhs, const size_t& rhs) {
+    friend bool operator>(const DataFrameRowIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_row_idx > rhs;
     }
 
-    friend bool operator>(const size_t& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator>(const sizetype& lhs, const DataFrameRowIterator& rhs) {
       return lhs > rhs.m_current_row_idx;
     }
 
 private:
     DataFrameIterator m_df_begin;
-    size_t            m_row_size;
-    size_t            m_current_row_idx;
+    sizetype          m_row_size;
+    sizetype          m_current_row_idx;
   };
 
   template<typename Iterable>
   class DataFrameColIterator {
-    using ValueType     = typename Iterable::ValueType;
     using DataFrameIter = typename Iterable::DataFrameIterator;
     using ColumnSeries  = typename Iterable::ColumnSeries;
-    using ColIterator   = typename ColumnSeries::Iterator;
-
-    using size_t = size_t;
 
 public:
-    DataFrameColIterator(DataFrameIter df_begin, size_t col_size, size_t row_size)
+    DataFrameColIterator(DataFrameIter df_begin, sizetype col_size, sizetype row_size)
         : m_df_begin(df_begin),
           m_col_size(col_size),
           m_row_size(row_size),
@@ -260,11 +254,11 @@ public:
       return ColumnSeries(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
     }
 
-    size_t current_col_idx() {
+    sizetype current_col_idx() {
       return m_current_col_idx;
     }
 
-    DataFrameColIterator operator+(const size_t& off) {
+    DataFrameColIterator operator+(const sizetype& off) {
       DataFrameColIterator tmp{*this};
       tmp += off;
       return tmp;
@@ -281,7 +275,7 @@ public:
       return tmp;
     }
 
-    void operator+=(size_t off) {
+    void operator+=(sizetype off) {
       m_current_col_idx += off;
     }
 
@@ -301,32 +295,32 @@ public:
       return lhs.m_d > (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
     }
 
-    friend bool operator<(const DataFrameColIterator& lhs, const size_t& rhs) {
+    friend bool operator<(const DataFrameColIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_col_idx < rhs;
     }
 
-    friend bool operator<(const size_t& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator<(const sizetype& lhs, const DataFrameColIterator& rhs) {
       return lhs < rhs.m_current_col_idx;
     }
 
-    friend bool operator>(const DataFrameColIterator& lhs, const size_t& rhs) {
+    friend bool operator>(const DataFrameColIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_col_idx > rhs;
     }
 
-    friend bool operator>(const size_t& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator>(const sizetype& lhs, const DataFrameColIterator& rhs) {
       return lhs > rhs.m_current_col_idx;
     }
 
 private:
     DataFrameIter m_df_begin;
-    size_t        m_col_size;
-    size_t        m_row_size;
-    size_t        m_current_col_idx;
+    sizetype      m_col_size;
+    sizetype      m_row_size;
+    sizetype      m_current_col_idx;
   };
 
   struct Shape {
-    size_t col_count;
-    size_t row_count;
+    sizetype col_count;
+    sizetype row_count;
 #ifdef QT_IMPLEMENTATION
     friend QDebug operator<<(QDebug dbg, const Shape& shape) {
       dbg.noquote();
@@ -354,26 +348,41 @@ public:
 
 public:
     DataFrame(const StringList& col_names, const StringList& row_names) {
-      m_col_count    = static_cast<size_t>(col_names.size());
-      m_row_count    = static_cast<size_t>(row_names.size());
+      m_col_count    = static_cast<sizetype>(col_names.size());
+      m_row_count    = static_cast<sizetype>(row_names.size());
       m_col_size     = m_row_count;
       m_row_size     = m_col_count;
       m_current_size = m_col_count * m_row_count;
       m_d            = new ValueType[m_current_size];
 
-      for (size_t i = 0; i < m_col_count; i++) {
+      m_max_col_name_size = 0;
+      m_max_row_name_size = 0;
+
+      for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_col_idx_map.insert(col_names[i], i);
+        if (col_names[i].size() > m_max_col_name_size) {
+          m_max_col_name_size = col_names[i].size();
+        }
 #else
         m_col_idx_map.insert({col_names[i], i});
+        if (col_names[i].size() > m_max_col_name_size) {
+          m_max_col_name_size = col_names[i].size();
+        }
 #endif
       }
 
-      for (size_t i = 0; i < m_row_count; i++) {
+      for (sizetype i = 0; i < m_row_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_row_idx_map.insert(row_names[i], i);
+        if (row_names[i].size() > m_max_row_name_size) {
+          m_max_row_name_size = row_names[i].size();
+        }
 #else
         m_row_idx_map.insert({row_names[i], i});
+        if (row_names[i].size() > m_max_row_name_size) {
+          m_max_row_name_size = row_names[i].size();
+        }
 #endif
       }
 
@@ -384,7 +393,7 @@ public:
 
       // 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
 
-      for (size_t i = 0; i < m_current_size; i++) {
+      for (sizetype i = 0; i < m_current_size; i++) {
         m_d[i].idx.global_idx = i;
 
         m_d[i].idx.col_idx  = i % m_col_count;
@@ -403,8 +412,12 @@ public:
           m_col_count(other.m_col_count),
           m_row_size(other.m_row_size),
           m_row_count(other.m_row_count),
+          m_floatPrecision(other.m_floatPrecision),
+          m_spaceAdjustment(other.m_spaceAdjustment),
+          m_max_col_name_size(other.m_max_col_name_size),
+          m_max_row_name_size(other.m_max_row_name_size),
           m_d(new ValueType[m_current_size]) {
-      for (size_t idx = 0; idx < m_current_size; idx++) {
+      for (sizetype idx = 0; idx < m_current_size; idx++) {
         m_d[idx] = other.m_d[idx];
       }
     }
@@ -419,22 +432,22 @@ public:
 
     DataFrame operator=(const DataFrame& other) = delete;
 
-    ValueType& operator[](const size_t& idx) {
+    ValueType& operator[](const sizetype& idx) {
       return *(m_d + idx);
     }
 
-    const ValueType& operator[](const size_t& idx) const {
+    const ValueType& operator[](const sizetype& idx) const {
       return *(m_d + idx);
     }
 
-    ValueType& operator[](const size_t& col_idx, const size_t& row_idx) {
+    ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) {
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
 
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
 
-    const ValueType& operator[](const size_t& col_idx, const size_t& row_idx) const {
+    const ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) const {
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
 
@@ -445,8 +458,8 @@ public:
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
-      size_t col_idx = m_col_idx_map[col_name];
-      size_t row_idx = m_row_idx_map[row_name];
+      sizetype col_idx = m_col_idx_map[col_name];
+      sizetype row_idx = m_row_idx_map[row_name];
 
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
@@ -460,11 +473,11 @@ public:
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
 #ifdef QT_IMPLEMENTATION
-      size_t col_idx = m_col_idx_map[col_name];
-      size_t row_idx = m_row_idx_map[row_name];
+      sizetype col_idx = m_col_idx_map[col_name];
+      sizetype row_idx = m_row_idx_map[row_name];
 #else
-      size_t col_idx = m_col_idx_map.at(col_name);
-      size_t row_idx = m_row_idx_map.at(row_name);
+      sizetype col_idx = m_col_idx_map.at(col_name);
+      sizetype row_idx = m_row_idx_map.at(row_name);
 #endif
 
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
@@ -478,11 +491,11 @@ public:
       return DataFrame(*this);
     }
 
-    size_t get_col_idx(String col) {
+    sizetype get_col_idx(String col) {
       return m_col_idx_map[col];
     }
 
-    std::optional<String> get_col_name(size_t col_idx) {
+    std::optional<String> get_col_name(sizetype col_idx) {
 #ifdef QT_IMPLEMENTATION
       for (const String& col_name : m_col_idx_map.keys()) {
         if (m_col_idx_map[col_name] == col_idx) {
@@ -499,11 +512,11 @@ public:
       return std::nullopt;
     }
 
-    size_t get_row_idx(String row) {
+    sizetype get_row_idx(String row) {
       return m_row_idx_map[row];
     }
 
-    std::optional<String> get_row_name(size_t row_idx) {
+    std::optional<String> get_row_name(sizetype row_idx) {
 #ifdef QT_IMPLEMENTATION
       for (const String& row_name : m_row_idx_map.keys()) {
         if (m_row_idx_map[row_name] == row_idx) {
@@ -520,11 +533,11 @@ public:
       return std::nullopt;
     }
 
-    ValueType& at(size_t idx) {
+    ValueType& at(sizetype idx) {
       return m_d[idx];
     }
 
-    const ValueType& at(size_t idx) const {
+    const ValueType& at(sizetype idx) const {
       return m_d[idx];
     }
 
@@ -544,31 +557,31 @@ public:
       return DataFrameIterator(m_d + m_current_size);
     }
 
-    constexpr size_t size() const {
+    constexpr sizetype size() const {
       return m_current_size;
     }
 
-    constexpr size_t col_size() const {
+    constexpr sizetype col_size() const {
       return m_col_size;
     }
 
-    constexpr size_t col_count() {
+    constexpr sizetype col_count() {
       return m_col_count;
     }
 
-    constexpr size_t col_count() const {
+    constexpr sizetype col_count() const {
       return m_col_count;
     }
 
-    constexpr size_t row_size() const {
+    constexpr sizetype row_size() const {
       return m_row_size;
     }
 
-    constexpr size_t row_count() {
+    constexpr sizetype row_count() {
       return m_row_count;
     }
 
-    constexpr size_t row_count() const {
+    constexpr sizetype row_count() const {
       return m_row_count;
     }
 
@@ -576,7 +589,7 @@ public:
       return {.col_count = m_col_count, .row_count = m_row_count};
     }
 
-    ColumnSeries get_col(size_t col_idx) {
+    ColumnSeries get_col(sizetype col_idx) {
       return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
     }
 
@@ -584,7 +597,7 @@ public:
       return ColumnSeries{begin() + get_col_idx(col_name), m_col_size, m_row_size};
     }
 
-    RowSeries get_row(size_t row_idx) {
+    RowSeries get_row(sizetype row_idx) {
       return RowSeries{begin(), row_idx, m_row_size};
     }
 
@@ -601,7 +614,7 @@ public:
     }
 
     DataFrame aec_sort_rows(String col_name, bool inplace = true) {
-      size_t       col_idx = get_col_idx(col_name);
+      sizetype     col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
@@ -613,10 +626,10 @@ public:
 
       sorted_cells[0] = col[0];
 
-      for (size_t idx = 0; idx < col.size(); idx++) {
-        bool   lower_found = false;
-        size_t insert_idx  = 0;
-        for (size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+      for (sizetype idx = 0; idx < col.size(); idx++) {
+        bool     lower_found = false;
+        sizetype insert_idx  = 0;
+        for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
           if (col[idx]->value < sorted_cells[sorted_idx]->value) {
             lower_found = true;
             insert_idx  = sorted_idx;
@@ -624,10 +637,10 @@ public:
           }
         }
         if (lower_found) {
-          for (size_t i = idx - 1; i >= insert_idx; i--) {
+          for (sizetype i = idx - 1; i >= insert_idx; i--) {
             sorted_cells[i + 1] = sorted_cells[i];
 
-            // avoid size_t (aka df_ui32) underflow
+            // avoidsizetype (aka df_ui32) underflow
             if (i == 0) {
               break;
             }
@@ -639,10 +652,10 @@ public:
       }
 
       // sort
-      size_t     idx       = 0;
+      sizetype   idx       = 0;
       ValueType* temp_vals = new ValueType[m_current_size];
 
-      for (size_t i = 0; i < col.size(); i++) {
+      for (sizetype i = 0; i < col.size(); i++) {
         for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
           temp_vals[idx] = *c;
           idx++;
@@ -652,7 +665,7 @@ public:
 
       delete[] sorted_cells;
 
-      for (size_t i = 0; i < m_current_size; i++) {
+      for (sizetype i = 0; i < m_current_size; i++) {
         m_d[i] = temp_vals[i];
       }
       delete[] temp_vals;
@@ -661,7 +674,7 @@ public:
     }
 
     DataFrame dec_sort_rows(String col_name, bool inplace = true) {
-      size_t       col_idx = get_col_idx(col_name);
+      sizetype     col_idx = get_col_idx(col_name);
       ColumnSeries col     = get_column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
@@ -673,10 +686,10 @@ public:
 
       sorted_cells[0] = col[0];
 
-      for (size_t idx = 0; idx < col.size(); idx++) {
-        bool   higher_found = false;
-        size_t insert_idx   = 0;
-        for (size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
+      for (sizetype idx = 0; idx < col.size(); idx++) {
+        bool     higher_found = false;
+        sizetype insert_idx   = 0;
+        for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
           if (col[idx]->value > sorted_cells[sorted_idx]->value) {
             higher_found = true;
             insert_idx   = sorted_idx;
@@ -684,10 +697,9 @@ public:
           }
         }
         if (higher_found) {
-          for (size_t i = idx - 1; i >= insert_idx; i--) {
+          for (sizetype i = idx - 1; i >= insert_idx; i--) {
             sorted_cells[i + 1] = sorted_cells[i];
 
-            // avoid size_t (aka df_ui32) underflow
             if (i == 0) {
               break;
             }
@@ -698,11 +710,10 @@ public:
         }
       }
 
-      // sort
-      size_t     idx       = 0;
+      sizetype   idx       = 0;
       ValueType* temp_vals = new ValueType[m_current_size];
 
-      for (size_t i = 0; i < col.size(); i++) {
+      for (sizetype i = 0; i < col.size(); i++) {
         for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
           temp_vals[idx] = *c;
           idx++;
@@ -712,7 +723,7 @@ public:
 
       delete[] sorted_cells;
 
-      for (size_t i = 0; i < m_current_size; i++) {
+      for (sizetype i = 0; i < m_current_size; i++) {
         m_d[i] = temp_vals[i];
       }
       delete[] temp_vals;
@@ -720,90 +731,193 @@ public:
       return *this;
     }
 
-    void print(size_t head = 0, size_t tail = 0) {
-      for (size_t i = 0; i < m_col_count; i++) {
-        if (i == 0) {
-#ifdef QT_IMPLEMENTATION
-          printf("%25s", get_col_name(i).value().toUtf8().constData());
-#else
-          printf("%25s", get_col_name(i).value().c_str());
-#endif
-        } else if (i == m_col_count - 1) {
-#ifdef QT_IMPLEMENTATION
-          printf("%20s\n", get_col_name(i).value().toUtf8().constData());
-#else
-          printf("%20s\n", get_col_name(i).value().c_str());
-#endif
-        } else {
-#ifdef QT_IMPLEMENTATION
-          printf("%20s", get_col_name(i).value().toUtf8().constData());
-#else
-          printf("%20s", get_col_name(i).value().c_str());
-#endif
-        }
-      }
+    void withFloatPrecision(sizetype precision) {
+      m_floatPrecision = precision;
+    }
 
-      printf("idx\n");
+    void withSpaceAdjustment(sizetype adjustmentSpace) {
+      m_spaceAdjustment = adjustmentSpace;
+    }
+
+#ifdef QT_IMPLEMENTATION
+    void print(sizetype head = 0, sizetype tail = 0) {
+      QDebug   dbg       = clog.noquote().nospace();
+      sizetype spacing   = 5;
+      sizetype idx_space = 4;
+
+      sizetype row_name_space = m_max_row_name_size + spacing;
+      sizetype col_spacing    = m_max_col_name_size + spacing;
 
       if (head > 0 || tail > 0) {
-        if (head > 0) {
-          for (size_t i = 0; i < head * m_row_size; i++) {
-            if (i % m_col_count == 0) {
-#ifdef QT_IMPLEMENTATION
-              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
-#else
-              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
-#endif
-            }
-            printf("%20d", m_d[i].value);
-            if (((i + 1) % m_col_count) == 0 && i != 0) {
-              printf("\n");
-            }
-          }
+        dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
+        for (const String& col_name : m_col_idx_map.keys()) {
+          dbg << String("%1").arg(col_name, -(m_max_col_name_size + spacing));
         }
+        dbg << "\n";
+      }
 
-        if (tail > 0) {
-          for (size_t i = m_current_size - (tail * m_row_size); i < m_current_size; i++) {
-            if (i % m_col_count == 0) {
-#ifdef QT_IMPLEMENTATION
-              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
-#else
-              printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
-#endif
-            }
-            printf("%20d", m_d[i].value);
-            if (((i + 1) % m_col_count) == 0 && i != 0) {
-              printf("\n");
+      if (head > 0) {
+        DF_ASSERT(head <= m_row_count, "tail is bigger then row count");
+        for (sizetype i = 0; i < head; i++) {
+          const auto& row = get_row(i);
+          dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+          for (const auto& c : row) {
+            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+              dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
+            } else {
+              dbg << String("%1").arg(c->value, -(col_spacing));
             }
           }
-        }
-      } else {
-        for (size_t i = 0; i < m_current_size; i++) {
-          if (i % m_col_count == 0) {
-#ifdef QT_IMPLEMENTATION
-            printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().toUtf8().constData());
-#else
-            printf("%3lu %5s", ((i + 1) / m_col_count), get_row_name(i / m_col_count).value().c_str());
-#endif
-          }
-          printf("%20d", m_d[i].value);
-          if (((i + 1) % m_col_count) == 0 && i != 0) {
-            printf("\n");
-          }
+          dbg << "\n";
         }
       }
-      printf("\n");
+
+      if (tail > 0) {
+        DF_ASSERT(tail <= m_row_count && tail >= 1, "tail is bigger then row count");
+        for (sizetype i = tail - 1; i < m_row_count; i++) {
+          const auto& row = get_row(i);
+          dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+          for (const auto& c : row) {
+            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+              dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
+            } else {
+              dbg << String("%1").arg(c->value, -(col_spacing));
+            }
+          }
+          dbg << "\n";
+        }
+      }
     }
+
+    friend QDebug operator<<(QDebug dbg, DataFrame& df) {
+      dbg.noquote().nospace();
+      sizetype spacing   = 5;
+      sizetype idx_space = 4;
+
+      sizetype row_name_space = df.m_max_row_name_size + spacing;
+      sizetype col_spacing    = df.m_max_col_name_size + spacing;
+
+      dbg << String("%1").arg("idx", -(df.m_max_row_name_size + spacing + idx_space));
+      for (const String& col_name : df.m_col_idx_map.keys()) {
+        dbg << String("%1").arg(col_name, -(df.m_max_col_name_size + spacing));
+      }
+      dbg << "\n";
+
+      for (sizetype i = 0; i < df.m_row_count; i++) {
+        const auto& row = df.get_row(i);
+        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+        for (const auto& c : row) {
+          if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            dbg << String("%1").arg(String::number(c->value, 'f', df.m_floatPrecision), -10);
+          } else {
+            dbg << String("%1").arg(c->value, -(col_spacing));
+          }
+        }
+        dbg << "\n";
+      }
+      return dbg;
+    }
+#else
+    void print(sizetype head = 0, sizetype tail = 0) {
+      sizetype spacing   = 5;
+      sizetype idx_space = 4;
+
+      sizetype row_name_space = m_max_row_name_size + spacing;
+      sizetype col_spacing    = m_max_col_name_size + spacing;
+
+      if (head > 0 || tail > 0) {
+        clog << std::left << std::setw((m_max_row_name_size + spacing + idx_space)) << "idx";
+        for (const auto& [col_name, v] : m_col_idx_map) {
+          clog << std::left << std::setw(m_max_col_name_size + spacing) << col_name;
+        }
+        clog << "\n";
+      }
+
+      if (head > 0) {
+        DF_ASSERT(head <= m_row_count, "tail is bigger then row count");
+        for (sizetype i = 0; i < head; i++) {
+          const auto& row = get_row(i);
+          clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space)
+               << row.name();
+          for (const auto& c : row) {
+            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+              clog.precision(m_floatPrecision);
+              clog << std::left << std::setw(col_spacing) << c->value;
+              clog.precision(0);
+            } else {
+              clog << std::left << std::setw(col_spacing) << c->value;
+            }
+          }
+          clog << "\n";
+        }
+      }
+
+      if (tail > 0) {
+        DF_ASSERT(tail <= m_row_count && tail >= 1, "tail is bigger then row count");
+        for (sizetype i = tail - 1; i < m_row_count; i++) {
+          const auto& row = get_row(i);
+          clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space)
+               << row.name();
+          for (const auto& c : row) {
+            if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+              clog.precision(m_floatPrecision);
+              clog << std::left << std::setw(col_spacing) << c->value;
+              clog.precision(0);
+            } else {
+              clog << std::left << std::setw(col_spacing) << c->value;
+            }
+          }
+          clog << "\n";
+        }
+      }
+    }
+
+    friend ostream& operator<<(ostream& os, DataFrame& df) {
+      sizetype spacing   = 5;
+      sizetype idx_space = 4;
+
+      sizetype row_name_space = df.m_max_row_name_size + spacing;
+      sizetype col_spacing    = df.m_max_col_name_size + spacing;
+
+      os << std::left << std::setw(df.m_max_row_name_size + spacing + idx_space) << "idx";
+      for (const auto& [col_name, v] : df.m_col_idx_map) {
+        os << std::left << std::setw(df.m_max_col_name_size + spacing) << col_name;
+      }
+      os << "\n";
+
+      for (sizetype i = 0; i < df.m_row_count; i++) {
+        const auto& row = df.get_row(i);
+        os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
+        for (const auto& c : row) {
+          if (std::is_same<T, f32>::value || std::is_same<T, f64>::value || std::is_same<T, f128>::value) {
+            os.precision(df.m_floatPrecision);
+            os << std::left << std::setw(col_spacing) << c->value;
+            os.precision(0);
+          } else {
+            os << std::left << std::setw(col_spacing) << c->value;
+          }
+        }
+        os << "\n";
+      }
+      return os;
+    }
+#endif
 
 private:
     IndexHash  m_col_idx_map;
     IndexHash  m_row_idx_map;
-    size_t     m_current_size;
-    size_t     m_col_size;
-    size_t     m_col_count;
-    size_t     m_row_size;
-    size_t     m_row_count;
+    sizetype   m_current_size;
+    sizetype   m_col_size;
+    sizetype   m_col_count;
+    sizetype   m_row_size;
+    sizetype   m_row_count;
     ValueType* m_d;
+
+    // logging
+    sizetype m_floatPrecision;
+    sizetype m_spaceAdjustment;
+    sizetype m_max_col_name_size;
+    sizetype m_max_row_name_size;
   };
 } // namespace df
 #endif // DATA_FRAME_H
