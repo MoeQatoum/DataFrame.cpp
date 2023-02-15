@@ -76,6 +76,18 @@ namespace df {
       value = val;
     }
 
+    void operator++() {
+      value++;
+    }
+
+    void operator+=(T off) {
+      value += off;
+    }
+
+    void operator-=(T off) {
+      value -= off;
+    }
+
 #ifdef QT_IMPLEMENTATION
     friend QDebug operator<<(QDebug dbg, const Cell<T>& cell) {
       dbg.noquote();
