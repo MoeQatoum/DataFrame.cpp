@@ -940,7 +940,7 @@ private:
     ValueType* m_d;
 
     // logging
-    sizetype m_floatPrecision;
+    long     m_floatPrecision;
     sizetype m_spaceAdjustment;
     sizetype m_max_col_name_size;
     sizetype m_max_row_name_size;
