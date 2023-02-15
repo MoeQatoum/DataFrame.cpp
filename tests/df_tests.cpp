@@ -8,7 +8,8 @@
 
 using namespace df;
 
-DataFrame<long> create_dataframe() {
+template<typename T>
+DataFrame<T> create_dataframe() {
   StringList col_names{};
   for (sizetype i = 1; i <= TEST_COL_COUNT; i++) {
 #ifdef QT_IMPLEMENTATION
@@ -27,27 +28,43 @@ DataFrame<long> create_dataframe() {
 #endif
   }
 
-  DataFrame<long> df{col_names, row_names};
+  DataFrame<T> df{col_names, row_names};
 
   return df;
 }
 
 TEST(df_iter_tests, dfIter) {
-  DataFrame<long> df = create_dataframe();
+  DataFrame<int> df = create_dataframe<int>();
 
-  for (sizetype i = 0; i < df.size(); i++) {
-    df[i] = (long)i;
+  for (int i = 0; i < df.size(); i++) {
+    df[(sizetype)i] = i;
   }
 
-  sizetype value = 0;
+  int value = 0;
   for (auto c : df) {
     EXPECT_EQ(value, c.value);
     value++;
   }
 }
 
+TEST(df_iter_tests, dfIterModifyValues) {
+  DataFrame<int> df = create_dataframe<int>();
+
+  for (int i = 0; i < df.size(); i++) {
+    df[i] = i;
+  }
+
+  for (auto& c : df) {
+    c.value = 999;
+  }
+
+  for (auto& c : df) {
+    EXPECT_EQ(999, c.value);
+  }
+}
+
 TEST(df_iter_tests, dfRowIter) {
-  DataFrame<long> df = create_dataframe();
+  DataFrame<long> df = create_dataframe<long>();
 
   for (sizetype i = 0; i < df.size(); i++) {
     df[i] = (long)i;
@@ -67,7 +84,7 @@ TEST(df_iter_tests, dfRowIter) {
 }
 
 TEST(df_iter_tests, dfColIter) {
-  DataFrame<long> df = create_dataframe();
+  DataFrame<long> df = create_dataframe<long>();
 
   for (sizetype i = 0; i < df.size(); i++) {
     df[i] = (long)i;
@@ -82,7 +99,7 @@ TEST(df_iter_tests, dfColIter) {
 }
 
 TEST(df_copy_tests, dfCopyShapeEquality) {
-  DataFrame<long> df_orig = create_dataframe();
+  DataFrame<long> df_orig = create_dataframe<long>();
   DataFrame<long> df_copy = df_orig.copy();
 
   EXPECT_EQ(df_orig.shape().col_count, df_copy.shape().col_count);
@@ -93,7 +110,7 @@ TEST(df_copy_tests, dfCopyShapeEquality) {
 }
 
 TEST(df_copy_tests, dfCopyColNamesEquality) {
-  DataFrame<long> df_orig = create_dataframe();
+  DataFrame<long> df_orig = create_dataframe<long>();
   DataFrame<long> df_copy = df_orig.copy();
 
   for (sizetype i = 0; i < df_orig.col_size(); i++) {
@@ -102,7 +119,7 @@ TEST(df_copy_tests, dfCopyColNamesEquality) {
 }
 
 TEST(df_copy_tests, dfCopyRowNamesEquality) {
-  DataFrame<long> df_orig = create_dataframe();
+  DataFrame<long> df_orig = create_dataframe<long>();
   DataFrame<long> df_copy = df_orig.copy();
 
   for (sizetype i = 0; i < df_orig.row_size(); i++) {
@@ -111,7 +128,7 @@ TEST(df_copy_tests, dfCopyRowNamesEquality) {
 }
 
 TEST(df_copy_tests, dfCopy_verifyDataAddr) {
-  DataFrame<long> df_orig = create_dataframe();
+  DataFrame<long> df_orig = create_dataframe<long>();
   DataFrame<long> df_copy = df_orig.copy();
 
   for (sizetype i = 0; i < df_orig.size(); i++) {
@@ -120,7 +137,7 @@ TEST(df_copy_tests, dfCopy_verifyDataAddr) {
 }
 
 TEST(df_sort, dfRowsAscendingSort) {
-  DataFrame<long> df = create_dataframe();
+  DataFrame<long> df = create_dataframe<long>();
 
   for (sizetype i = 0; i < df.size(); i++) {
     df[i] = (long)rand();
