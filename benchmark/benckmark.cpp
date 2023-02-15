@@ -19,7 +19,7 @@ using namespace df;
 #define DF_BENCH
 #define ROW_BENCH
 #define COL_BENCH
-#define SORT_BENCH
+// #define SORT_BENCH
 #define ROW_SORT_BENCH
 
 template<typename TimeUnit, unsigned long N>
