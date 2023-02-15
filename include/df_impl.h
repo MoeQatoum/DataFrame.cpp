@@ -3,7 +3,6 @@
 
 #include "df_common.h"
 
-#include "df_algo.h"
 #include "df_cell.h"
 #include "df_col_series.h"
 #include "df_row_series.h"
@@ -728,6 +727,132 @@ public:
       return *this;
     }
 
+#ifdef QT_IMPLEMENTATION
+
+    int setFloatPrecision(int precision) {
+      m_floatPrecision = precision;
+    }
+
+    int floatPrecision() {
+      return m_floatPrecision;
+    }
+
+    int floatPrecision() const {
+      return m_floatPrecision;
+    }
+
+    int setSpaceAdjustment(int spaceAdjustment) {
+      m_spaceAdjustment = spaceAdjustment;
+    }
+
+    int spaceAdjustment() {
+      return m_spaceAdjustment;
+    }
+
+    int spaceAdjustment() const {
+      return m_spaceAdjustment;
+    }
+
+    int set_max_col_name_size(int size) {
+      m_max_col_name_size = size;
+    }
+
+    int max_col_name_size() {
+      return m_max_col_name_size;
+    }
+
+    int max_col_name_size() const {
+      return m_max_col_name_size;
+    }
+
+    int set_max_row_name_size(int size) {
+      m_max_row_name_size = size;
+    }
+
+    int max_row_name_size() {
+      return m_max_row_name_size;
+    }
+
+    int max_row_name_size() const {
+      return m_max_row_name_size;
+    }
+
+    void print(long range = 0) {
+      DF_ASSERT(tail <= 0, "tail must be grater than 0");
+
+      QDebug dbg       = clog.noquote().nospace();
+      int    spacing   = 5;
+      int    idx_space = 4;
+
+      int row_name_space = m_max_row_name_size + spacing;
+      int col_spacing    = m_max_col_name_size + spacing;
+
+      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
+      for (const String& col_name : m_col_idx_map.keys()) {
+        dbg << String("%1").arg(col_name, -(m_max_col_name_size + spacing));
+      }
+      dbg << "\n";
+
+      DF_ASSERT(tail > m_row_count, "tail is grater than row count");
+
+      sizetype range_start;
+      sizetype range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = static_cast<sizetype>(range);
+      } else {
+        range_start = m_row_count + range;
+        range_end   = m_row_count;
+      }
+
+      for (sizetype idx = range_start; idx < range_end; idx++) {
+        const auto& row = get_row(idx);
+        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+        for (const auto& c : row) {
+          if (std::is_floating_point_v<T>) {
+            dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -(m_floatPrecision + col_spacing));
+          } else {
+            dbg << String("%1").arg(c->value, -(col_spacing));
+          }
+        }
+        dbg << "\n";
+      }
+    }
+
+    friend QDebug operator<<(QDebug dbg, DataFrame& df) {
+      dbg.noquote().nospace();
+      int spacing   = 5;
+      int idx_space = 4;
+
+      int row_name_space = df.m_max_row_name_size + spacing;
+      int col_spacing    = df.m_max_col_name_size + spacing;
+
+      dbg << String("%1").arg("idx", -(df.m_max_row_name_size + spacing + idx_space));
+      for (const String& col_name : df.m_col_idx_map.keys()) {
+        dbg << String("%1").arg(col_name, -(df.m_max_col_name_size + spacing));
+      }
+      dbg << "\n";
+
+      for (sizetype i = 0; i < df.m_row_count; i++) {
+        const auto& row = df.get_row(i);
+        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+        for (const auto& c : row) {
+          if (std::is_floating_point_v<T>) {
+            dbg << String("%1").arg(String::number(c->value, 'f', df.m_floatPrecision),
+                                    -(df.m_floatPrecision + col_spacing));
+          } else {
+            dbg << String("%1").arg(c->value, -(col_spacing));
+          }
+        }
+        dbg << "\n";
+      }
+      return dbg;
+    }
+
+#else
     sizetype setFloatPrecision(sizetype precision) {
       m_floatPrecision = precision;
     }
@@ -776,83 +901,6 @@ public:
       return m_max_row_name_size;
     }
 
-#ifdef QT_IMPLEMENTATION
-
-    void print(long range = 0) {
-      DF_ASSERT(tail <= 0, "tail must be grater than 0");
-
-      QDebug dbg       = clog.noquote().nospace();
-      long   spacing   = 5;
-      long   idx_space = 4;
-
-      long row_name_space = m_max_row_name_size + spacing;
-      long col_spacing    = m_max_col_name_size + spacing;
-
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const String& col_name : m_col_idx_map.keys()) {
-        dbg << String("%1").arg(col_name, -(m_max_col_name_size + spacing));
-      }
-      dbg << "\n";
-
-      DF_ASSERT(tail > m_row_count, "tail is grater than row count");
-
-      sizetype range_start;
-      sizetype range_end;
-      if (range == 0) {
-        range_start = 0;
-        range_end   = m_row_count;
-      } else if (range > 0) {
-        range_start = 0;
-        range_end   = static_cast<sizetype>(range);
-      } else {
-        range_start = m_row_count + range;
-        range_end   = m_row_count;
-      }
-
-      for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& row = get_row(idx);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
-        for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
-          } else {
-            dbg << String("%1").arg(c->value, -(col_spacing));
-          }
-        }
-        dbg << "\n";
-      }
-    }
-
-    friend QDebug operator<<(QDebug dbg, DataFrame& df) {
-      dbg.noquote().nospace();
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
-
-      sizetype row_name_space = df.m_max_row_name_size + spacing;
-      sizetype col_spacing    = df.m_max_col_name_size + spacing;
-
-      dbg << String("%1").arg("idx", -(df.m_max_row_name_size + spacing + idx_space));
-      for (const String& col_name : df.m_col_idx_map.keys()) {
-        dbg << String("%1").arg(col_name, -(df.m_max_col_name_size + spacing));
-      }
-      dbg << "\n";
-
-      for (sizetype i = 0; i < df.m_row_count; i++) {
-        const auto& row = df.get_row(i);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
-        for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            dbg << String("%1").arg(String::number(c->value, 'f', df.m_floatPrecision), -10);
-          } else {
-            dbg << String("%1").arg(c->value, -(col_spacing));
-          }
-        }
-        dbg << "\n";
-      }
-      return dbg;
-    }
-
-#else
     void print(long range = 0) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0.");
 
@@ -941,10 +989,17 @@ private:
     ValueType* m_d;
 
     // logging
-    long m_floatPrecision;
-    long m_spaceAdjustment;
-    long m_max_col_name_size;
-    long m_max_row_name_size;
+#ifdef QT_IMPLEMENTATION
+    int m_floatPrecision;
+    int m_spaceAdjustment;
+    int m_max_col_name_size;
+    int m_max_row_name_size;
+#else
+    sizetype m_floatPrecision;
+    sizetype m_spaceAdjustment;
+    sizetype m_max_col_name_size;
+    sizetype m_max_row_name_size;
+#endif
   };
 
 } // namespace df

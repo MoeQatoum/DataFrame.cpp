@@ -25,7 +25,7 @@ namespace df {
 #ifdef QT_IMPLEMENTATION
   #define List QList
   #define clog qDebug()
-  using sizetype   = qsizetype;
+  using sizetype   = unsigned long;
   using String     = QString;
   using StringList = QStringList;
   using IndexHash  = QMap<QString, long>;
@@ -35,7 +35,7 @@ namespace df {
   using sizetype   = std::size_t;
   using String     = std::string;
   using StringList = std::vector<String>;
-  using IndexHash  = std::map<String, unsigned long>;
+  using IndexHash  = std::map<String, long>;
   using ostream    = std::ostream;
 #endif
 

@@ -120,13 +120,13 @@ namespace df {
 
     DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
-    sizetype spacing   = 5;
-    sizetype idx_space = 4;
-
-    sizetype row_name_space = df.max_row_name_size() + spacing;
-    sizetype col_spacing    = df.max_col_name_size() + spacing;
-
 #ifdef QT_IMPLEMENTATION
+    int spacing   = 5;
+    int idx_space = 4;
+
+    int row_name_space = df.max_row_name_size() + spacing;
+    int col_spacing    = df.max_col_name_size() + spacing;
+
     QDebug dbg = clog.noquote().nospace();
 
     dbg << String("%1").arg("idx", -(df.max_row_name_size() + spacing + idx_space));
@@ -135,25 +135,26 @@ namespace df {
     }
     dbg << "\n";
 
-    sizetype range_start;
-    sizetype range_end;
+    qsizetype range_start;
+    qsizetype range_end;
     if (range == 0) {
       range_start = 0;
       range_end   = sorted_rows.size();
     } else if (range > 0) {
       range_start = 0;
-      range_end   = static_cast<sizetype>(range);
+      range_end   = static_cast<qsizetype>(range);
     } else {
-      range_start = sorted_rows.size() + static_cast<sizetype>(range);
+      range_start = sorted_rows.size() + static_cast<qsizetype>(range);
       range_end   = sorted_rows.size();
     }
 
-    for (sizetype idx = range_start; idx < range_end; idx++) {
+    for (qsizetype idx = range_start; idx < range_end; idx++) {
       const RowSeries<T>& row = sorted_rows[idx];
       dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
       for (const auto& c : row) {
         if (std::is_floating_point_v<T>) {
-          dbg << String("%1").arg(String::number(c->value, 'f', df.floatPrecision()), -10);
+          dbg << String("%1").arg(String::number(c->value, 'f', df.floatPrecision()),
+                                  -(df.floatPrecision() + col_spacing));
         } else {
           dbg << String("%1").arg(c->value, -(col_spacing));
         }
@@ -161,6 +162,12 @@ namespace df {
       dbg << "\n";
     }
 #else
+    sizetype spacing   = 5;
+    sizetype idx_space = 4;
+
+    sizetype row_name_space = df.max_row_name_size() + spacing;
+    sizetype col_spacing    = df.max_col_name_size() + spacing;
+
     clog << std::left << std::setw((df.max_row_name_size() + spacing + idx_space)) << "idx";
     for (auto& c : sorted_rows[0]) {
       clog << std::left << std::setw(df.max_col_name_size() + spacing) << c->idx.col_name;
