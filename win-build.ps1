@@ -42,9 +42,13 @@ if ($cleanBuild -eq $true) {
 if ($COMPILER -eq "msvc") {
     Write-Host $INSTALL_PREFIX
     cmake -S . -B $BUILD_PATH -G "Visual Studio 17 2022" -T "host=x64" -A x64 `
-        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
-        -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX `
-        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES 
+    -DDF_BUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES `
+    -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK `
+    -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS `
+    -DDF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES `
+    -DDF_QT_IMPLEMENTATION:BOOL=$USE_QT_IMPLEMENTATION `
+    -DCMAKE_BUILD_TYPE:STRING=$CONFIG `
+    -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE 
     if ( -not $? ) {
         Write-Error "Cmake configraion failed"
         exit 1
@@ -55,15 +59,18 @@ elseif ($COMPILER -eq "clang") {
     cmake -S . -B $BUILD_PATH -G "Unix Makefiles" `
         "-DCMAKE_C_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\Llvm\x64\bin\clang.exe" `
         "-DCMAKE_CXX_COMPILER:FILEPATH=C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\Llvm\x64\bin\clang.exe" `
+        -DDF_BUILD_EXAMPLES:BOOL=$BUILD_EXAMPLES `
+        -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK `
+        -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS `
+        -DDF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES `
+        -DDF_QT_IMPLEMENTATION:BOOL=$USE_QT_IMPLEMENTATION `
         -DCMAKE_BUILD_TYPE:STRING=$CONFIG `
-        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
-        -DCMAKE_INSTALL_PREFIX:FILEPATH=$INSTALL_PREFIX `
-        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES  
+        -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE 
     if ( -not $? ) {
         Write-Error "Cmake configraion failed"
         exit 1
     }
-    cmake --build $BUILD_PATH --config $CONFIG --target $target -j
+    cmake --build $BUILD_PATH --target $target -j
 }
 
 if ( -not $? ) {
