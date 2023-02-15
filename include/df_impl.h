@@ -357,6 +357,7 @@ public:
 
       m_max_col_name_size = 0;
       m_max_row_name_size = 0;
+      m_floatPrecision    = 8;
 
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
