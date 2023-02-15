@@ -28,7 +28,7 @@ namespace df {
   using sizetype   = qsizetype;
   using String     = QString;
   using StringList = QStringList;
-  using IndexHash  = QMap<QString, unsigned long>;
+  using IndexHash  = QMap<QString, long>;
 #else
   #define List std::vector
   #define clog std::cout
