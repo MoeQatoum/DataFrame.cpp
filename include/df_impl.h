@@ -776,39 +776,8 @@ public:
     }
 
 #ifdef QT_IMPLEMENTATION
-    void head(sizetype head) {
-      DF_ASSERT(head <= 0, "head must be grater than 0");
 
-      QDebug   dbg       = clog.noquote().nospace();
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
-
-      sizetype row_name_space = m_max_row_name_size + spacing;
-      sizetype col_spacing    = m_max_col_name_size + spacing;
-
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const String& col_name : m_col_idx_map.keys()) {
-        dbg << String("%1").arg(col_name, -(m_max_col_name_size + spacing));
-      }
-      dbg << "\n";
-
-      DF_ASSERT(head > m_row_count, "head is grater than row count");
-
-      for (sizetype i = 0; i < head; i++) {
-        const auto& row = get_row(i);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
-        for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -10);
-          } else {
-            dbg << String("%1").arg(c->value, -(col_spacing));
-          }
-        }
-        dbg << "\n";
-      }
-    }
-
-    void tail(sizetype tail) {
+    void print(long range) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0");
 
       QDebug   dbg       = clog.noquote().nospace();
@@ -826,8 +795,21 @@ public:
 
       DF_ASSERT(tail > m_row_count, "tail is grater than row count");
 
-      for (sizetype i = m_row_count - tail; i < m_row_count; i++) {
-        const auto& row = get_row(i);
+      sizetype range_start;
+      sizetype range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = static_cast<sizetype>(range);
+      } else {
+        range_start = m_row_count + range;
+        range_end   = m_row_count;
+      }
+
+      for (sizetype idx = range_start; idx < range_end; idx++) {
+        const auto& row = get_row(idx);
         dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
         for (const auto& c : row) {
           if (std::is_floating_point_v<T>) {
@@ -870,40 +852,7 @@ public:
     }
 
 #else
-    void head(sizetype head = 0) {
-      DF_ASSERT(head <= 0, "head must be grater then 0");
-
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
-
-      sizetype row_name_space = m_max_row_name_size + spacing;
-      sizetype col_spacing    = m_max_col_name_size + spacing;
-
-      clog << std::left << std::setw((m_max_row_name_size + spacing + idx_space)) << "idx";
-      for (const auto& [col_name, v] : m_col_idx_map) {
-        clog << std::left << std::setw(m_max_col_name_size + spacing) << col_name;
-      }
-      clog << "\n";
-
-      DF_ASSERT(head > m_row_count, "head is bigger than row count");
-
-      for (sizetype i = 0; i < head; i++) {
-        const auto& row = get_row(i);
-        clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
-        for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            clog.precision(m_floatPrecision);
-            clog << std::left << std::setw(col_spacing) << c->value;
-            clog.precision(0);
-          } else {
-            clog << std::left << std::setw(col_spacing) << c->value;
-          }
-        }
-        clog << "\n";
-      }
-    }
-
-    void tail(sizetype tail) {
+    void print(long range) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0.");
 
       sizetype spacing   = 5;
@@ -920,8 +869,21 @@ public:
 
       DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
-      for (sizetype i = m_row_count - tail; i < m_row_count; i++) {
-        const auto& row = get_row(i);
+      sizetype range_start;
+      sizetype range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = static_cast<sizetype>(range);
+      } else {
+        range_start = m_row_count + range;
+        range_end   = m_row_count;
+      }
+
+      for (sizetype idx = range_start; idx < range_end; idx++) {
+        const auto& row = get_row(idx);
         clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
           if (std::is_floating_point_v<T>) {

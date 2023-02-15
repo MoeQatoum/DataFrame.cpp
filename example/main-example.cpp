@@ -104,10 +104,10 @@ int main() {
   clog << "------------------LOGGING------------------\n";
 
   clog << "-- head:\n";
-  unsorted_dec_df.head(3);
+  unsorted_dec_df.print(3);
 
   clog << "-- tail:\n";
-  unsorted_dec_df.tail(3);
+  unsorted_dec_df.print(-4);
 
   // dec_inplace_sort_df.print(3, 3);
   // clog << dec_inplace_sort_df;
