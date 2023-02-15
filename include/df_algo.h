@@ -115,6 +115,40 @@ namespace df {
     return sorted_rows;
   }
 
+  template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df) {
+#ifdef QT_IMPLEMENTATION
+#else
+    sizetype spacing   = 5;
+    sizetype idx_space = 4;
+
+    sizetype row_name_space = df.max_row_name_size() + spacing;
+    sizetype col_spacing    = df.max_col_name_size() + spacing;
+
+    clog << std::left << std::setw((df.max_row_name_size() + spacing + idx_space)) << "idx";
+    for (auto& c : sorted_rows[0]) {
+      clog << std::left << std::setw(df.max_col_name_size() + spacing) << c->idx.col_name;
+    }
+    clog << "\n";
+
+    DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
+
+    for (auto& row : sorted_rows) {
+      clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
+      for (const auto& c : row) {
+        if (std::is_floating_point_v<T>) {
+          clog.precision(df.floatPrecision());
+          clog << std::left << std::setw(col_spacing + df.floatPrecision()) << c->value;
+          clog.precision(0);
+        } else {
+          clog << std::left << std::setw(col_spacing) << c->value;
+        }
+      }
+      clog << "\n";
+    }
+#endif
+  }
+
 } // namespace df
 
 #endif // DATA_FRAME_UTILS_H

@@ -727,12 +727,52 @@ public:
       return *this;
     }
 
-    void withFloatPrecision(sizetype precision) {
+    sizetype setFloatPrecision(sizetype precision) {
       m_floatPrecision = precision;
     }
 
-    void withSpaceAdjustment(sizetype adjustmentSpace) {
-      m_spaceAdjustment = adjustmentSpace;
+    sizetype floatPrecision() {
+      return m_floatPrecision;
+    }
+
+    sizetype floatPrecision() const {
+      return m_floatPrecision;
+    }
+
+    sizetype setSpaceAdjustment(sizetype spaceAdjustment) {
+      m_spaceAdjustment = spaceAdjustment;
+    }
+
+    sizetype spaceAdjustment() {
+      return m_spaceAdjustment;
+    }
+
+    sizetype spaceAdjustment() const {
+      return m_spaceAdjustment;
+    }
+
+    sizetype set_max_col_name_size(sizetype size) {
+      m_max_col_name_size = size;
+    }
+
+    sizetype max_col_name_size() {
+      return m_max_col_name_size;
+    }
+
+    sizetype max_col_name_size() const {
+      return m_max_col_name_size;
+    }
+
+    sizetype set_max_row_name_size(sizetype size) {
+      m_max_row_name_size = size;
+    }
+
+    sizetype max_row_name_size() {
+      return m_max_row_name_size;
+    }
+
+    sizetype max_row_name_size() const {
+      return m_max_row_name_size;
     }
 
 #ifdef QT_IMPLEMENTATION
@@ -943,5 +983,6 @@ private:
     sizetype m_max_col_name_size;
     sizetype m_max_row_name_size;
   };
+
 } // namespace df
 #endif // DATA_FRAME_H
