@@ -826,7 +826,7 @@ public:
 
       DF_ASSERT(tail > m_row_count, "tail is grater than row count");
 
-      for (sizetype i = tail - 1; i < m_row_count; i++) {
+      for (sizetype i = m_row_count - tail; i < m_row_count; i++) {
         const auto& row = get_row(i);
         dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
         for (const auto& c : row) {
@@ -920,7 +920,7 @@ public:
 
       DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
-      for (sizetype i = tail - 1; i < m_row_count; i++) {
+      for (sizetype i = m_row_count - tail; i < m_row_count; i++) {
         const auto& row = get_row(i);
         clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {

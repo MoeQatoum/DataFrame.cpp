@@ -106,7 +106,7 @@ int main() {
   clog << "-- head:\n";
   unsorted_dec_df.head(3);
 
-  clog << "\n-- tail:\n";
+  clog << "-- tail:\n";
   unsorted_dec_df.tail(3);
 
   // dec_inplace_sort_df.print(3, 3);
