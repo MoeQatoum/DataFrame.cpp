@@ -357,6 +357,7 @@ public:
       m_max_col_name_size = 0;
       m_max_row_name_size = 0;
       m_floatPrecision    = 8;
+      m_spaceAdjustment   = 5;
 
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
@@ -813,7 +814,7 @@ public:
         dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
         for (const auto& c : row) {
           if (std::is_floating_point_v<T>) {
-            dbg << String("%1").arg(String::number(c->value, 'f', m_floatPrecision), -(m_floatPrecision + col_spacing));
+            dbg << String("%1").arg(c->value, -(m_floatPrecision + col_spacing), 'f', m_floatPrecision);
           } else {
             dbg << String("%1").arg(c->value, -(col_spacing));
           }
@@ -841,8 +842,8 @@ public:
         dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
         for (const auto& c : row) {
           if (std::is_floating_point_v<T>) {
-            dbg << String("%1").arg(String::number(c->value, 'f', df.m_floatPrecision),
-                                    -(df.m_floatPrecision + col_spacing));
+            dbg << String("%1").arg(c->value, -(df.floatPrecision() + col_spacing), 'f', df.floatPrecision());
+
           } else {
             dbg << String("%1").arg(c->value, -(col_spacing));
           }
