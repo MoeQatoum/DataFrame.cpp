@@ -787,7 +787,7 @@ public:
       int    idx_space = 4;
 
       int row_name_space = m_max_row_name_size + spacing;
-      int col_spacing    = m_max_col_name_size + spacing + m_floatPrecision;
+      int col_spacing    = m_max_col_name_size + spacing;
 
       dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
       for (const String& col_name : m_col_idx_map.keys()) {
@@ -869,7 +869,7 @@ public:
       int idx_space = 4;
 
       int row_name_space = df.m_max_row_name_size + spacing;
-      int col_spacing    = df.m_max_col_name_size + spacing + df.m_floatPrecision;
+      int col_spacing    = df.m_max_col_name_size + spacing;
 
       dbg << String("%1").arg("idx", -(row_name_space + idx_space));
       for (const String& col_name : df.m_col_idx_map.keys()) {
@@ -971,11 +971,10 @@ public:
       sizetype idx_space = 4;
 
       sizetype row_name_space = m_max_row_name_size + spacing;
-      sizetype col_spacing    = 0;
+      int      col_spacing    = m_max_col_name_size + spacing;
+
       if (std::is_floating_point_v<T>) {
-        col_spacing = m_max_col_name_size + spacing + m_floatPrecision;
-      } else {
-        col_spacing = m_max_col_name_size + spacing;
+        clog.precision(m_floatPrecision + 1);
       }
 
       clog << std::left << std::setw((row_name_space + idx_space)) << "idx";
@@ -1001,13 +1000,7 @@ public:
         const auto& row = get_row(idx);
         clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            clog.precision(m_floatPrecision);
-            clog << std::left << std::setw(col_spacing) << c->value;
-            clog.precision(0);
-          } else {
-            clog << std::left << std::setw(col_spacing) << c->value;
-          }
+          clog << std::left << std::setw(col_spacing) << c->value;
         }
         clog << "\n";
       }
@@ -1018,11 +1011,10 @@ public:
       sizetype idx_space = 4;
 
       sizetype row_name_space = df.m_max_row_name_size + spacing;
-      sizetype col_spacing    = 0;
+      int      col_spacing    = df.m_max_col_name_size + spacing;
+
       if (std::is_floating_point_v<T>) {
-        col_spacing = df.m_max_col_name_size + spacing + df.m_floatPrecision;
-      } else {
-        col_spacing = df.m_max_col_name_size + spacing;
+        clog.precision(df.m_floatPrecision + 1);
       }
 
       os << std::left << std::setw(row_name_space + idx_space) << "idx";
@@ -1035,13 +1027,7 @@ public:
         const auto& row = df.get_row(i);
         os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
-          if (std::is_floating_point_v<T>) {
-            os.precision(df.m_floatPrecision);
-            os << std::left << std::setw(col_spacing) << c->value;
-            os.precision(0);
-          } else {
-            os << std::left << std::setw(col_spacing) << c->value;
-          }
+          clog << std::left << std::setw(col_spacing) << c->value;
         }
         os << "\n";
       }
