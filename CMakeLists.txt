@@ -31,6 +31,9 @@ if (DF_QT_IMPLEMENTATION)
     target_compile_definitions(${DATA_FRAME} INTERFACE
         QT_IMPLEMENTATION
     )
+    message(STATUS "Building dataframelib with QT_IMPLEMENTATION.")
+else()
+    message(STATUS "Building dataframelib with std implementation.")
 endif(DF_QT_IMPLEMENTATION)
 
 target_include_directories(${DATA_FRAME} INTERFACE
@@ -39,7 +42,7 @@ target_include_directories(${DATA_FRAME} INTERFACE
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME} INTERFACE
-        -O3 -Wconversion -Wno-c++98-compat #-static-libstdc++
+        -O3 #-Wconversion -Wno-c++98-compat #-static-libstdc++
         #profile CPU with as small performance impact as possible: use -pg
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
