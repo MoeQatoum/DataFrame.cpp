@@ -832,8 +832,8 @@ public:
       int col_spacing    = m_max_col_name_size + spacing;
 
       dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const String& col_name : m_col_idx_map.keys()) {
-        dbg << String("%1").arg(col_name, -(col_spacing));
+      for (const auto& cell : get_row(0)) {
+        dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
       }
       dbg << "\n";
 
@@ -854,9 +854,9 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const auto& row = get_row(idx);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
+        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -row_name_space);
         for (const auto& c : row) {
-          dbg << String("%1").arg(c->value, -(col_spacing));
+          dbg << String("%1").arg(c->value, -col_spacing);
         }
         dbg << "\n";
       }
