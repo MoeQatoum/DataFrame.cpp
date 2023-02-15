@@ -780,12 +780,12 @@ public:
     void print(long range = 0) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0");
 
-      QDebug   dbg       = clog.noquote().nospace();
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
+      QDebug dbg       = clog.noquote().nospace();
+      long   spacing   = 5;
+      long   idx_space = 4;
 
-      sizetype row_name_space = m_max_row_name_size + spacing;
-      sizetype col_spacing    = m_max_col_name_size + spacing;
+      long row_name_space = m_max_row_name_size + spacing;
+      long col_spacing    = m_max_col_name_size + spacing;
 
       dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
       for (const String& col_name : m_col_idx_map.keys()) {
@@ -940,10 +940,10 @@ private:
     ValueType* m_d;
 
     // logging
-    long     m_floatPrecision;
-    sizetype m_spaceAdjustment;
-    sizetype m_max_col_name_size;
-    sizetype m_max_row_name_size;
+    long m_floatPrecision;
+    long m_spaceAdjustment;
+    long m_max_col_name_size;
+    long m_max_row_name_size;
   };
 
 } // namespace df
