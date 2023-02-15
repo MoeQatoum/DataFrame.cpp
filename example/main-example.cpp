@@ -30,7 +30,7 @@ int main() {
   for (sizetype i = 0; i < df.size(); ++i) {
     df[i] = static_cast<long>(i);
   }
-  df.print();
+  clog << df;
 
   for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
     for (auto& c : col_iter.current_col()) {
@@ -43,7 +43,7 @@ int main() {
     }
     clog << "\n";
   }
-  df.print();
+  clog << df;
 
   for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
     for (auto& c : row_iter.current_row()) {
@@ -57,7 +57,7 @@ int main() {
     clog << "\n";
   }
 
-  df.print();
+  clog << df;
 
   clog << "---------------------------------------------------------------------\ncopy:\n";
   StringList n_col_names{};
@@ -84,16 +84,16 @@ int main() {
     n_df[i] = static_cast<long>(i);
   }
 
-  n_df.print();
+  clog << n_df;
   DataFrame<long> new_df = n_df.copy();
-  n_df.print();
+  clog << n_df;
   for (sizetype i = 0; i < new_df.size(); i++) {
     clog << new_df[i].value << ", ";
     new_df[i].value = 999;
   }
 
-  n_df.print();
-  new_df.print();
+  clog << n_df;
+  clog << new_df;
 
   clog << "---------------------------------------------------------------------\naec sort:\n";
   DataFrame<long> unsorted_df = df.copy();
@@ -101,7 +101,7 @@ int main() {
     unsorted_df[i] = rand() % static_cast<long>(unsorted_df.size());
   }
 
-  unsorted_df.print();
+  clog << unsorted_df;
 
   List<RowSeries<long>> sorted_rows = asc_sort_rows(unsorted_df, "col-2");
 
@@ -115,7 +115,7 @@ int main() {
     }
   }
 
-  sorted_df.print();
+  clog << sorted_df;
 
   clog << "---------------------------------------------------------------------\ndec sort:\n";
   DataFrame<long> dec_unsorted_df = df.copy();
@@ -123,7 +123,7 @@ int main() {
     dec_unsorted_df[i] = rand() % static_cast<long>(dec_unsorted_df.size());
   }
 
-  dec_unsorted_df.print();
+  clog << dec_unsorted_df;
 
   List<RowSeries<long>> dec_sorted_rows = dec_sort_rows(dec_unsorted_df, "col-2");
 
@@ -137,43 +137,45 @@ int main() {
     }
   }
 
-  sorted_df.print();
+  clog << sorted_df;
 
   clog << "---------------------------------------------------------------------\ninplace aec sort:\n";
-  DataFrame<long> inplace_sort_df = df.copy();
-  for (sizetype i = 0; i < inplace_sort_df.size(); i++) {
-    inplace_sort_df[i] = rand() % static_cast<long>(unsorted_df.size());
+  DataFrame<long> unsorted_aec_df = df.copy();
+  for (sizetype i = 0; i < unsorted_aec_df.size(); i++) {
+    unsorted_aec_df[i] = rand() % static_cast<long>(unsorted_df.size());
   }
 
   for (sizetype i = 0; i < unsorted_df.size(); i++) {
     unsorted_df[i] = rand() % static_cast<long>(unsorted_df.size());
   }
 
-  inplace_sort_df.print();
-  inplace_sort_df.asc_sort_rows("col-2").print();
+  clog << unsorted_aec_df;
+  DataFrame<long> sorted_aec_df = unsorted_aec_df.asc_sort_rows("col-2");
+  clog << sorted_aec_df;
 
   clog << "---------------------------------------------------------------------\ninplace dec sort:\n";
-  DataFrame<long> dec_inplace_sort_df = df.copy();
-  for (sizetype i = 0; i < dec_inplace_sort_df.size(); i++) {
-    dec_inplace_sort_df[i] = rand() % static_cast<long>(unsorted_df.size());
+  DataFrame<long> unsorted_dec_df = df.copy();
+  for (sizetype i = 0; i < unsorted_dec_df.size(); i++) {
+    unsorted_dec_df[i] = rand() % static_cast<long>(unsorted_df.size());
   }
 
-  for (sizetype i = 0; i < dec_inplace_sort_df.size(); i++) {
+  for (sizetype i = 0; i < unsorted_dec_df.size(); i++) {
     unsorted_df[i] = rand() % static_cast<long>(unsorted_df.size());
   }
 
-  dec_inplace_sort_df.print();
-  dec_inplace_sort_df.dec_sort_rows("col-2").print();
+  clog << unsorted_dec_df;
+  DataFrame<long> sorted_dec_df = unsorted_dec_df.dec_sort_rows("col-2");
+  clog << sorted_dec_df;
 
   clog << "---------------------------------------------------------------------\nhead:\n";
-  dec_inplace_sort_df.print(3, 0);
+  unsorted_dec_df.head(3);
 
   clog << "---------------------------------------------------------------------\ntail:\n";
-  dec_inplace_sort_df.print(0, 3);
+  unsorted_dec_df.tail(3);
 
-  clog << "---------------------------------------------------------------------\nhead and tail:\n";
-  dec_inplace_sort_df.print(3, 3);
-  clog << dec_inplace_sort_df;
+  // clog << "---------------------------------------------------------------------\nhead and tail:\n";
+  // dec_inplace_sort_df.print(3, 3);
+  // clog << dec_inplace_sort_df;
 
   return 0;
 }
