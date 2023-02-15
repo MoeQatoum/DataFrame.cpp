@@ -80,6 +80,18 @@ namespace df {
       value++;
     }
 
+    void operator++(int) {
+      ++value;
+    }
+
+    void operator--() {
+      value--;
+    }
+
+    void operator--(int) {
+      --value;
+    }
+
     void operator+=(T off) {
       value += off;
     }
