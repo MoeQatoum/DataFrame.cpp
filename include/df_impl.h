@@ -777,7 +777,7 @@ public:
 
 #ifdef QT_IMPLEMENTATION
 
-    void print(long range) {
+    void print(long range = 0) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0");
 
       QDebug   dbg       = clog.noquote().nospace();
@@ -852,7 +852,7 @@ public:
     }
 
 #else
-    void print(long range) {
+    void print(long range = 0) {
       DF_ASSERT(tail <= 0, "tail must be grater than 0.");
 
       sizetype spacing   = 5;
