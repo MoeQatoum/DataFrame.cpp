@@ -81,6 +81,10 @@ int main() {
   List<RowSeries<long>> aec_sorted_rows = asc_sort_rows(unsorted_df, "col-2");
   clog << "asc rows log algo: \n";
   log_sorted_rows(aec_sorted_rows, unsorted_df);
+  clog << "asc rows log algo head 5: \n";
+  log_sorted_rows(aec_sorted_rows, unsorted_df, 5);
+  clog << "asc rows log algo tail 3: \n";
+  log_sorted_rows(aec_sorted_rows, unsorted_df, -3);
 
   clog << "\n-- dec sort:\n";
   List<RowSeries<long>> dec_sorted_rows = dec_sort_rows(unsorted_df, "col-2");

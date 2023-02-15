@@ -116,7 +116,7 @@ namespace df {
   }
 
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df) {
+  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df, long range = 0) {
 #ifdef QT_IMPLEMENTATION
 #else
     sizetype spacing   = 5;
@@ -133,7 +133,21 @@ namespace df {
 
     DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
-    for (auto& row : sorted_rows) {
+    sizetype range_start;
+    sizetype range_end;
+    if (range == 0) {
+      range_start = 0;
+      range_end   = sorted_rows.size();
+    } else if (range > 0) {
+      range_start = 0;
+      range_end   = static_cast<sizetype>(range);
+    } else {
+      range_start = sorted_rows.size() + static_cast<sizetype>(range);
+      range_end   = sorted_rows.size();
+    }
+
+    for (sizetype idx = range_start; idx < range_end; idx++) {
+      const RowSeries<T>& row = sorted_rows[idx];
       clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
       for (const auto& c : row) {
         if (std::is_floating_point_v<T>) {
