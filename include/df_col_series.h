@@ -51,6 +51,22 @@ namespace df {
       return *(m_d + idx);
     }
 
+    ValueType operator[](const String& row_name) {
+      for (sizetype idx = 0; idx < m_size; idx++) {
+        if (*(m_d + idx)->idx.row_name == row_name) {
+          return *(m_d + idx);
+        }
+      }
+
+#ifdef QT_IMPLEMENTATION
+      qWarning() << "row name not found.";
+      qTerminate();
+#else
+      std::cerr << "row name not found.";
+      abort();
+#endif
+    }
+
     ColumnData<T> copy_data() {
       ColumnData<T> data{m_size};
       for (sizetype i = 0; i < m_size; i++) {
