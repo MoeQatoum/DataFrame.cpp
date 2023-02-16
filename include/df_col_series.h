@@ -53,7 +53,7 @@ namespace df {
 
     ValueType operator[](const String& row_name) {
       for (sizetype idx = 0; idx < m_size; idx++) {
-        if (*(m_d + idx)->idx.row_name == row_name) {
+        if ((*(m_d + idx))->idx.row_name == row_name) {
           return *(m_d + idx);
         }
       }
