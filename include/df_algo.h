@@ -5,6 +5,9 @@
 
 namespace df {
   template<typename T>
+  class Cell;
+
+  template<typename T>
   class DataFrame;
 
   template<typename T>
@@ -15,9 +18,8 @@ namespace df {
 
   template<typename T>
   void fill_df(DataFrame<T>& df, T fill_value) {
-    // static_assert(std::is_same_v<T, U>, "fill_value has type of ");
     for (auto& c : df) {
-      c = fill_value;
+      c.value = fill_value;
     }
   }
 
@@ -123,9 +125,13 @@ namespace df {
 
 #ifdef QT_IMPLEMENTATION
   template<typename T, std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
-  void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
+  void
+    log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0, StringList excluded_cols = {}) {
 
     DF_ASSERT(range <= df.row_count() || range >= -df.row_count(), "out of allowed range");
+
+    std::function<bool(StringList&, String&)> contains
+      = [](StringList& excluded_cols, String& cur_col_name) { return excluded_cols.contains(cur_col_name); };
 
     int spacing   = 5;
     int idx_space = 4;
@@ -137,7 +143,9 @@ namespace df {
 
     dbg << String("%1").arg("idx", -(row_name_space + idx_space));
     for (auto& c : sorted_rows[0]) {
-      dbg << String("%1").arg(c->idx.col_name, -(col_spacing));
+      if (!contains(excluded_cols, c->idx.col_name)) {
+        dbg << String("%1").arg(c->idx.col_name, -(col_spacing));
+      }
     }
     dbg << "\n";
 
@@ -155,10 +163,12 @@ namespace df {
     }
 
     for (int idx = range_start; idx < range_end; idx++) {
-      const Row<T>& row = sorted_rows[idx];
+      const RowSeries<T>& row = sorted_rows[idx];
       dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
       for (const auto& c : row) {
-        dbg << String("%1").arg(c->value, -(col_spacing), 'f', df.floatPrecision());
+        if (!contains(excluded_cols, c->idx.col_name)) {
+          dbg << String("%1").arg(c->value, -(col_spacing), 'f', df.floatPrecision());
+        }
       }
       dbg << "\n";
     }
@@ -207,16 +217,17 @@ namespace df {
   }
 #else
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-  void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
-    int spacing   = 5;
-    int idx_space = 4;
+  void
+    log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0, StringList excluded_cols = {}) {
 
-    int row_name_space = df.max_row_name_size() + spacing;
-    int col_spacing    = 0;
+    sizetype spacing   = 5;
+    sizetype idx_space = 4;
+
+    sizetype row_name_space = df.max_row_name_size() + spacing;
+    sizetype col_spacing    = df.max_col_name_size() + spacing;
+
     if (std::is_floating_point_v<T>) {
-      col_spacing = df.max_col_name_size() + spacing + df.floatPrecision();
-    } else {
-      col_spacing = df.max_col_name_size() + spacing;
+      clog.precision(df.floatPrecision() + 1);
     }
 
     clog << std::left << std::setw(row_name_space + idx_space) << "idx";
@@ -238,15 +249,18 @@ namespace df {
       range_end   = sorted_rows.size();
     }
 
+    std::function<bool(StringList&, String&)> contains = [](StringList& excluded_cols_list, String& cur_col_name) {
+      return std::find_if(excluded_cols_list.begin(),
+                          excluded_cols_list.end(),
+                          [cur_col_name](String col_name) { return cur_col_name == col_name; })
+             == excluded_cols_list.end();
+    };
+
     for (int idx = range_start; idx < range_end; idx++) {
       const Row<T>& row = sorted_rows[idx];
       clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
       for (const auto& c : row) {
-        if (std::is_floating_point_v<T>) {
-          clog.precision(df.floatPrecision());
-          clog << std::left << std::setw(col_spacing) << c->value;
-          clog.precision(0);
-        } else {
+        if (contains(excluded_cols, c->idx.col_name)) {
           clog << std::left << std::setw(col_spacing) << c->value;
         }
       }
