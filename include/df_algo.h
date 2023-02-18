@@ -117,7 +117,7 @@ namespace df {
 
 #ifdef QT_IMPLEMENTATION
   template<typename T, std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
-  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
+  void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
 
     DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
@@ -149,7 +149,7 @@ namespace df {
     }
 
     for (int idx = range_start; idx < range_end; idx++) {
-      const RowSeries<T>& row = sorted_rows[idx];
+      const Row<T>& row = sorted_rows[idx];
       dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
       for (const auto& c : row) {
         dbg << String("%1").arg(c->value, -(col_spacing), 'f', df.floatPrecision());
@@ -159,7 +159,7 @@ namespace df {
   }
 
   template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
-  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
+  void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
 
     DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
 
@@ -191,7 +191,7 @@ namespace df {
     }
 
     for (int idx = range_start; idx < range_end; idx++) {
-      const RowSeries<T>& row = sorted_rows[idx];
+      const Row<T>& row = sorted_rows[idx];
       dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
       for (const auto& c : row) {
         dbg << String("%1").arg(c->value, -(col_spacing));
