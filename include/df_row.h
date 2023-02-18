@@ -27,13 +27,13 @@ namespace df {
   };
 
   template<typename T>
-  struct RowSeries {
+  struct Row {
 
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
-    using RowIterator       = Iterator<RowSeries>;
+    using RowIterator       = Iterator<Row>;
 
-    RowSeries(DataFrameIterator row_begin, sizetype row_idx, sizetype row_size) {
+    Row(DataFrameIterator row_begin, sizetype row_idx, sizetype row_size) {
       m_size = row_size;
       m_d    = new ValueType[m_size];
 
@@ -42,13 +42,13 @@ namespace df {
       }
     }
 
-    RowSeries(const RowSeries& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
+    Row(const Row& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
       for (sizetype i = 0; i < m_size; i++) {
         m_d[i] = other.m_d[i];
       }
     }
 
-    ~RowSeries() {
+    ~Row() {
       delete[] m_d;
     }
 
@@ -91,7 +91,7 @@ namespace df {
       return dbg;
     }
 #else
-    friend ostream& operator<<(ostream& os, const RowSeries& row) {
+    friend ostream& operator<<(ostream& os, const Row& row) {
       os << "RowSeries(size: " << row.m_size << ", "
          << "Items: \n";
       for (const ValueType& cell : row) {

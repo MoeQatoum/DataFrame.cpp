@@ -26,13 +26,13 @@ namespace df {
   };
 
   template<typename T>
-  struct ColumnSeries {
+  struct Column {
 
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
-    using ColIterator       = Iterator<ColumnSeries>;
+    using ColIterator       = Iterator<Column>;
 
-    ColumnSeries(DataFrameIterator col_begin, sizetype col_size, sizetype row_size) {
+    Column(DataFrameIterator col_begin, sizetype col_size, sizetype row_size) {
       m_size = col_size;
       m_d    = new ValueType[m_size];
 
@@ -41,9 +41,9 @@ namespace df {
       }
     }
 
-    ColumnSeries(const ColumnSeries& other) = delete;
+    Column(const Column& other) = delete;
 
-    ~ColumnSeries() {
+    ~Column() {
       delete[] m_d;
     }
 
@@ -86,7 +86,7 @@ namespace df {
       return dbg;
     }
 #else
-    friend ostream& operator<<(ostream& os, const ColumnSeries& col) {
+    friend ostream& operator<<(ostream& os, const Column& col) {
       os << "ColumnSeries(size: " << col.m_size << ", "
          << "Items: \n";
       for (const ValueType& cell : col) {

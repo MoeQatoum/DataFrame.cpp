@@ -4,8 +4,8 @@
 #include "df_common.h"
 
 #include "df_cell.h"
-#include "df_col_series.h"
-#include "df_row_series.h"
+#include "df_column.h"
+#include "df_row.h"
 
 namespace df {
 
@@ -339,8 +339,8 @@ private:
 public:
     using ValueType            = Cell<T>;
     using pValueType           = Cell<T>*;
-    using RowSeries            = RowSeries<T>;
-    using ColumnSeries         = ColumnSeries<T>;
+    using RowSeries            = Row<T>;
+    using ColumnSeries         = Column<T>;
     using DataFrameIterator    = Iterator<DataFrame<T>>;
     using DataFrameRowIterator = DataFrameRowIterator<DataFrame<T>>;
     using DataFrameColIterator = DataFrameColIterator<DataFrame<T>>;

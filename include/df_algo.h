@@ -8,21 +8,21 @@ namespace df {
   class DataFrame;
 
   template<typename T>
-  class RowSeries;
+  class Row;
 
   template<typename T>
-  class ColumnSeries;
+  class Column;
 
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-  List<RowSeries<T>> asc_sort_rows(DataFrame<T>& df, const String& col_name) {
-    using ValueType = typename ColumnSeries<T>::ValueType;
+  List<Row<T>> asc_sort_rows(DataFrame<T>& df, const String& col_name) {
+    using ValueType = typename Column<T>::ValueType;
 
-    sizetype        col_idx = df.get_col_idx(col_name);
-    ColumnSeries<T> col     = df.get_column(col_name);
+    sizetype  col_idx = df.get_col_idx(col_name);
+    Column<T> col     = df.get_column(col_name);
 
     ValueType* sorted_cells = new ValueType[col.size()];
 
-    List<RowSeries<T>> rows;
+    List<Row<T>> rows;
     for (auto row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
       rows.push_back(row_iterator.current_row());
     }
@@ -55,7 +55,7 @@ namespace df {
     }
 
     // sort
-    List<RowSeries<T>> sorted_rows;
+    List<Row<T>> sorted_rows;
     for (sizetype idx = 0; idx < col.size(); idx++) {
       sorted_rows.push_back(df.get_row(sorted_cells[idx]->idx.row_idx));
     }
@@ -65,15 +65,15 @@ namespace df {
   }
 
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-  List<RowSeries<T>> dec_sort_rows(DataFrame<T>& df, const String& col_name) {
-    using ValueType = typename ColumnSeries<T>::ValueType;
+  List<Row<T>> dec_sort_rows(DataFrame<T>& df, const String& col_name) {
+    using ValueType = typename Column<T>::ValueType;
 
-    sizetype        col_idx = df.get_col_idx(col_name);
-    ColumnSeries<T> col     = df.get_column(col_name);
+    sizetype  col_idx = df.get_col_idx(col_name);
+    Column<T> col     = df.get_column(col_name);
 
     ValueType* sorted_cells = new ValueType[col.size()];
 
-    List<RowSeries<T>> rows;
+    List<Row<T>> rows;
     for (auto row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
       rows.push_back(row_iterator.current_row());
     }
@@ -106,7 +106,7 @@ namespace df {
     }
 
     // sort
-    List<RowSeries<T>> sorted_rows;
+    List<Row<T>> sorted_rows;
     for (sizetype idx = 0; idx < col.size(); idx++) {
       sorted_rows.push_back(df.get_row(sorted_cells[idx]->idx.row_idx));
     }
@@ -201,7 +201,7 @@ namespace df {
   }
 #else
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-  void log_sorted_rows(const List<RowSeries<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
+  void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
     sizetype spacing   = 5;
     sizetype idx_space = 4;
 
@@ -233,7 +233,7 @@ namespace df {
     }
 
     for (sizetype idx = range_start; idx < range_end; idx++) {
-      const RowSeries<T>& row = sorted_rows[idx];
+      const Row<T>& row = sorted_rows[idx];
       clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
       for (const auto& c : row) {
         if (std::is_floating_point_v<T>) {
