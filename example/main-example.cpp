@@ -111,6 +111,8 @@ int main() {
 
   clog << "-- log row:\n";
   clog << unsorted_dec_df.get_row(1) << "\n";
+
+  clog << "-- log col:\n";
   clog << unsorted_dec_df.get_col(1) << "\n";
 
   // dec_inplace_sort_df.print(3, 3);
