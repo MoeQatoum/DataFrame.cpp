@@ -13,12 +13,19 @@ namespace df {
   template<typename T>
   class Column;
 
+  template<typename T>
+  void fill_df(DataFrame<T>& df, T fill_value) {
+    // static_assert(std::is_same_v<T, U>, "fill_value has type of ");
+    for (auto& c : df) {
+      c = fill_value;
+    }
+  }
+
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
   List<Row<T>> asc_sort_rows(DataFrame<T>& df, const String& col_name) {
     using ValueType = typename Column<T>::ValueType;
 
-    sizetype  col_idx = df.get_col_idx(col_name);
-    Column<T> col     = df.get_column(col_name);
+    Column<T> col = df.column(col_name);
 
     ValueType* sorted_cells = new ValueType[col.size()];
 
@@ -57,7 +64,7 @@ namespace df {
     // sort
     List<Row<T>> sorted_rows;
     for (sizetype idx = 0; idx < col.size(); idx++) {
-      sorted_rows.push_back(df.get_row(sorted_cells[idx]->idx.row_idx));
+      sorted_rows.push_back(df.row(sorted_cells[idx]->idx.row_idx));
     }
 
     delete[] sorted_cells;
@@ -68,8 +75,7 @@ namespace df {
   List<Row<T>> dec_sort_rows(DataFrame<T>& df, const String& col_name) {
     using ValueType = typename Column<T>::ValueType;
 
-    sizetype  col_idx = df.get_col_idx(col_name);
-    Column<T> col     = df.get_column(col_name);
+    Column<T> col = df.column(col_name);
 
     ValueType* sorted_cells = new ValueType[col.size()];
 
@@ -108,7 +114,7 @@ namespace df {
     // sort
     List<Row<T>> sorted_rows;
     for (sizetype idx = 0; idx < col.size(); idx++) {
-      sorted_rows.push_back(df.get_row(sorted_cells[idx]->idx.row_idx));
+      sorted_rows.push_back(df.row(sorted_cells[idx]->idx.row_idx));
     }
 
     delete[] sorted_cells;
@@ -119,7 +125,7 @@ namespace df {
   template<typename T, std::enable_if_t<std::is_floating_point_v<T>, bool> = true>
   void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
 
-    DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
+    DF_ASSERT(range <= df.row_count() || range >= -df.row_count(), "out of allowed range");
 
     int spacing   = 5;
     int idx_space = 4;
@@ -161,7 +167,7 @@ namespace df {
   template<typename T, std::enable_if_t<std::is_integral_v<T>, bool> = true>
   void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
 
-    DF_ASSERT(tail > m_row_count && tail >= 1, "tail is grater then row count");
+    DF_ASSERT(range <= df.row_count() || range >= -df.row_count(), "out of allowed range");
 
     int spacing   = 5;
     int idx_space = 4;
@@ -202,11 +208,11 @@ namespace df {
 #else
   template<typename T, std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
   void log_sorted_rows(const List<Row<T>>& sorted_rows, DataFrame<T>& df, int range = 0) {
-    sizetype spacing   = 5;
-    sizetype idx_space = 4;
+    int spacing   = 5;
+    int idx_space = 4;
 
-    sizetype row_name_space = df.max_row_name_size() + spacing;
-    sizetype col_spacing    = 0;
+    int row_name_space = df.max_row_name_size() + spacing;
+    int col_spacing    = 0;
     if (std::is_floating_point_v<T>) {
       col_spacing = df.max_col_name_size() + spacing + df.floatPrecision();
     } else {
@@ -232,7 +238,7 @@ namespace df {
       range_end   = sorted_rows.size();
     }
 
-    for (sizetype idx = range_start; idx < range_end; idx++) {
+    for (int idx = range_start; idx < range_end; idx++) {
       const Row<T>& row = sorted_rows[idx];
       clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
       for (const auto& c : row) {

@@ -79,7 +79,7 @@ public:
       m_d += off;
     }
 
-    friend long operator-(const Iterator& lhs, const Iterator& rhs) {
+    friend ptrdiff_t operator-(const Iterator& lhs, const Iterator& rhs) {
       return lhs.m_d - rhs.m_d;
     }
 
@@ -443,8 +443,10 @@ public:
     }
 
     const ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) const {
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
+      static_assert(col_idx > row_size(), "col index out of range");
+
+      // DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
+      // DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
 
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
@@ -580,23 +582,23 @@ public:
       return m_row_count;
     }
 
-    constexpr Shape shape() const {
+    Shape shape() const {
       return {.col_count = m_col_count, .row_count = m_row_count};
     }
 
-    ColumnSeries get_col(sizetype col_idx) {
+    ColumnSeries column(sizetype col_idx) {
       return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
     }
 
-    ColumnSeries get_column(String col_name) {
+    ColumnSeries column(String col_name) {
       return ColumnSeries{begin() + get_col_idx(col_name), m_col_size, m_row_size};
     }
 
-    RowSeries get_row(sizetype row_idx) {
+    RowSeries row(sizetype row_idx) {
       return RowSeries{begin(), row_idx, m_row_size};
     }
 
-    RowSeries get_row(String row_name) {
+    RowSeries row(String row_name) {
       return RowSeries{begin(), get_row_idx(row_name), m_row_size};
     }
 
@@ -611,7 +613,7 @@ public:
     template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
     DataFrame asc_sort_rows(String col_name, bool inplace = true) {
       sizetype     col_idx = get_col_idx(col_name);
-      ColumnSeries col     = get_column(col_name);
+      ColumnSeries col     = column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
 
@@ -652,7 +654,7 @@ public:
       ValueType* temp_vals = new ValueType[m_current_size];
 
       for (sizetype i = 0; i < col.size(); i++) {
-        for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
+        for (auto c : row(sorted_cells[i]->idx.row_idx)) {
           temp_vals[idx] = *c;
           idx++;
         }
@@ -672,7 +674,7 @@ public:
     template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
     DataFrame dec_sort_rows(String col_name, bool inplace = true) {
       sizetype     col_idx = get_col_idx(col_name);
-      ColumnSeries col     = get_column(col_name);
+      ColumnSeries col     = column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
 
@@ -711,7 +713,7 @@ public:
       ValueType* temp_vals = new ValueType[m_current_size];
 
       for (sizetype i = 0; i < col.size(); i++) {
-        for (auto c : get_row(sorted_cells[i]->idx.row_idx)) {
+        for (auto c : row(sorted_cells[i]->idx.row_idx)) {
           temp_vals[idx] = *c;
           idx++;
         }
@@ -780,7 +782,7 @@ public:
 
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void print(int range = 0) {
-      DF_ASSERT(tail <= 0, "tail must be grater than 0");
+      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    spacing   = 5;
@@ -795,8 +797,6 @@ public:
       }
       dbg << "\n";
 
-      DF_ASSERT(tail > m_row_count, "tail is grater than row count");
-
       sizetype range_start;
       sizetype range_end;
       if (range == 0) {
@@ -811,9 +811,10 @@ public:
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& row = get_row(idx);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
-        for (const auto& c : row) {
+        const auto& current_row = row(idx);
+        dbg << String("%1").arg(current_row.idx(), -idx_space)
+            << String("%1").arg(current_row.name(), -(row_name_space));
+        for (const auto& c : current_row) {
           dbg << String("%1").arg(c->value, -(col_spacing), 'f', m_floatPrecision);
         }
         dbg << "\n";
@@ -822,7 +823,7 @@ public:
 
     template<typename U = T, std::enable_if_t<std::is_integral_v<U>, bool> = true>
     void print(int range = 0) {
-      DF_ASSERT(tail <= 0, "tail must be grater than 0");
+      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    spacing   = 5;
@@ -832,12 +833,10 @@ public:
       int col_spacing    = m_max_col_name_size + spacing;
 
       dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const auto& cell : get_row(0)) {
+      for (const auto& cell : row(0)) {
         dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
       }
       dbg << "\n";
-
-      DF_ASSERT(tail > m_row_count, "tail is grater than row count");
 
       sizetype range_start;
       sizetype range_end;
@@ -853,9 +852,9 @@ public:
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& row = get_row(idx);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -row_name_space);
-        for (const auto& c : row) {
+        const auto& current_row = row(idx);
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
+        for (const auto& c : current_row) {
           dbg << String("%1").arg(c->value, -col_spacing);
         }
         dbg << "\n";
@@ -904,9 +903,10 @@ public:
       dbg << "\n";
 
       for (sizetype i = 0; i < df.m_row_count; i++) {
-        const auto& row = df.get_row(i);
-        dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
-        for (const auto& c : row) {
+        const auto& current_row = df.row(i);
+        dbg << String("%1").arg(current_row.idx(), -idx_space)
+            << String("%1").arg(current_row.name(), -(row_name_space));
+        for (const auto& c : current_row) {
           dbg << String("%1").arg(c->value, -(col_spacing));
         }
         dbg << "\n";
@@ -964,8 +964,7 @@ public:
     }
 
     void print(long range = 0) {
-      DF_ASSERT(range <= 0, "range must be grater than 0.");
-      DF_ASSERT(range > m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
 
       sizetype spacing   = 5;
       sizetype idx_space = 4;
@@ -997,9 +996,10 @@ public:
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& row = get_row(idx);
-        clog << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
-        for (const auto& c : row) {
+        const auto& current_row = row(idx);
+        clog << std::left << std::setw(idx_space) << current_row.idx() << std ::left << std::setw(row_name_space)
+             << current_row.name();
+        for (const auto& c : current_row) {
           clog << std::left << std::setw(col_spacing) << c->value;
         }
         clog << "\n";
@@ -1011,7 +1011,7 @@ public:
       sizetype idx_space = 4;
 
       sizetype row_name_space = df.m_max_row_name_size + spacing;
-      int      col_spacing    = df.m_max_col_name_size + spacing;
+      sizetype col_spacing    = df.m_max_col_name_size + spacing;
 
       if (std::is_floating_point_v<T>) {
         clog.precision(df.m_floatPrecision + 1);
@@ -1024,7 +1024,7 @@ public:
       os << "\n";
 
       for (sizetype i = 0; i < df.m_row_count; i++) {
-        const auto& row = df.get_row(i);
+        const auto& row = df.row(i);
         os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
           clog << std::left << std::setw(col_spacing) << c->value;
