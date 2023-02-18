@@ -163,7 +163,7 @@ namespace df {
     }
 
     for (int idx = range_start; idx < range_end; idx++) {
-      const RowSeries<T>& row = sorted_rows[idx];
+      const Row<T>& row = sorted_rows[idx];
       dbg << String("%1").arg(row.idx(), -idx_space) << String("%1").arg(row.name(), -(row_name_space));
       for (const auto& c : row) {
         if (!contains(excluded_cols, c->idx.col_name)) {
