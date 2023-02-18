@@ -30,7 +30,7 @@ namespace df {
   struct Row {
 
     using ValueType         = typename DataFrame<T>::pValueType;
-    using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
+    using DataFrameIterator = typename DataFrame<T>::Iterator;
     using RowIterator       = Iterator<Row>;
 
     Row(DataFrameIterator row_begin, sizetype row_idx, sizetype row_size) {

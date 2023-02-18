@@ -203,7 +203,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().row_count - 1);
     nsec_timer.tick();
-    auto row = df.get_row(rand_idx);
+    auto row = df.row(rand_idx);
     for (const auto& c : row) {
       auto v = c->value;
     }
@@ -215,7 +215,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().row_count - 1);
     usec_timer.tick();
-    auto row = df.get_row(rand_idx);
+    auto row = df.row(rand_idx);
     for (auto& c : row) {
       c->value = 789789.789;
     }
@@ -261,7 +261,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().col_count - 1);
     nsec_timer.tick();
-    auto col = df.get_col(rand_idx);
+    auto col = df.col(rand_idx);
     for (auto& c : col) {
       auto v = c->value;
     }
@@ -274,7 +274,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().col_count - 1);
     usec_timer.tick();
-    auto col = df.get_col(rand_idx);
+    auto col = df.col(rand_idx);
     for (auto& c : col) {
       c->value = 123123.123;
     }

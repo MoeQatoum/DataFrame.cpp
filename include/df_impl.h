@@ -17,10 +17,10 @@ namespace df {
     using ValueType = typename Iterable::ValueType;
 
     template<typename>
-    friend class DataFrameRowIterator;
+    friend class RowIterator;
 
     template<typename>
-    friend class DataFrameColIterator;
+    friend class ColumnIterator;
 
 public:
     Iterator(ValueType* data_p) : m_d(data_p) {
@@ -138,85 +138,85 @@ private:
   };
 
   template<typename Iterable>
-  class DataFrameRowIterator {
-    using DataFrameIterator = typename Iterable::DataFrameIterator;
-    using RowSeries         = typename Iterable::RowSeries;
+  class RowIterator {
+    using DataFrameIterator = typename Iterable::Iterator;
+    using Row               = typename Iterable::Row;
 
 public:
-    DataFrameRowIterator(DataFrameIterator df_begin, sizetype row_size)
+    RowIterator(DataFrameIterator df_begin, sizetype row_size)
         : m_df_begin(df_begin),
           m_row_size(row_size),
           m_current_row_idx(0) {
     }
 
-    DataFrameRowIterator(const DataFrameRowIterator& other)
+    RowIterator(const RowIterator& other)
         : m_df_begin(other.m_df_begin),
           m_row_size(other.m_row_size),
           m_current_row_idx(other.m_current_row_idx) {
     }
 
-    ~DataFrameRowIterator() {
+    ~RowIterator() {
     }
 
-    RowSeries current_row() {
-      return RowSeries(m_df_begin, m_current_row_idx, m_row_size);
+    Row current_row() {
+      return Row(m_df_begin, m_current_row_idx, m_row_size);
     }
 
     sizetype current_row_idx() {
       return m_current_row_idx;
     }
 
-    DataFrameRowIterator& operator++() {
+    RowIterator& operator++() {
       ++m_current_row_idx;
       return *this;
     }
 
-    DataFrameRowIterator operator++(int) {
-      DataFrameRowIterator tmp{*this};
+    RowIterator operator++(int) {
+      RowIterator tmp{*this};
       ++(*this);
       return tmp;
     }
 
-    DataFrameRowIterator& operator--() {
+    RowIterator& operator--() {
       --m_current_row_idx;
       return *this;
     }
 
-    DataFrameRowIterator operator--(int) {
-      DataFrameRowIterator tmp{*this};
+    RowIterator operator--(int) {
+      RowIterator tmp{*this};
       --(*this);
       return tmp;
     }
 
-    friend bool operator<(const DataFrameRowIterator& lhs, const DataFrameIterator& rhs) {
+    friend bool operator<(const RowIterator& lhs, const DataFrameIterator& rhs) {
       return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) < rhs;
     }
 
-    friend bool operator<(const DataFrameIterator& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator<(const DataFrameIterator& lhs, const RowIterator& rhs) {
       return lhs < (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
     }
 
-    friend bool operator>(const DataFrameRowIterator& lhs, const DataFrameIterator& rhs) {
+    friend bool operator>(const RowIterator& lhs, const DataFrameIterator& rhs) {
       return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) > rhs;
     }
 
-    friend bool operator>(const DataFrameIterator& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator>(const DataFrameIterator& lhs, const RowIterator& rhs) {
       return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
     }
 
-    friend bool operator<(const DataFrameRowIterator& lhs, const sizetype& rhs) {
+    friend bool operator<(const RowIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_row_idx < rhs;
     }
 
-    friend bool operator<(const sizetype& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator<(const sizetype& lhs, const RowIterator& rhs) {
       return lhs < rhs.m_current_row_idx;
     }
 
-    friend bool operator>(const DataFrameRowIterator& lhs, const sizetype& rhs) {
+    friend bool operator>(const RowIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_row_idx > rhs;
     }
 
-    friend bool operator>(const sizetype& lhs, const DataFrameRowIterator& rhs) {
+    friend bool operator>(const sizetype& lhs, const RowIterator& rhs) {
       return lhs > rhs.m_current_row_idx;
     }
 
@@ -227,49 +227,49 @@ private:
   };
 
   template<typename Iterable>
-  class DataFrameColIterator {
-    using DataFrameIter = typename Iterable::DataFrameIterator;
-    using ColumnSeries  = typename Iterable::ColumnSeries;
+  class ColumnIterator {
+    using DataFrameIter = typename Iterable::Iterator;
+    using Column        = typename Iterable::Column;
 
 public:
-    DataFrameColIterator(DataFrameIter df_begin, sizetype col_size, sizetype row_size)
+    ColumnIterator(DataFrameIter df_begin, sizetype col_size, sizetype row_size)
         : m_df_begin(df_begin),
           m_col_size(col_size),
           m_row_size(row_size),
           m_current_col_idx(0) {
     }
 
-    DataFrameColIterator(const DataFrameColIterator& other)
+    ColumnIterator(const ColumnIterator& other)
         : m_df_begin(other.m_df_begin),
           m_col_size(other.m_col_size),
           m_row_size(other.m_row_size),
           m_current_col_idx(other.m_current_col_idx) {
     }
 
-    ~DataFrameColIterator() {
+    ~ColumnIterator() {
     }
 
-    ColumnSeries current_col() {
-      return ColumnSeries(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+    Column current_col() {
+      return Column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
     }
 
     sizetype current_col_idx() {
       return m_current_col_idx;
     }
 
-    DataFrameColIterator operator+(const sizetype& off) {
-      DataFrameColIterator tmp{*this};
+    ColumnIterator operator+(const sizetype& off) {
+      ColumnIterator tmp{*this};
       tmp += off;
       return tmp;
     }
 
-    DataFrameColIterator& operator++() {
+    ColumnIterator& operator++() {
       ++m_current_col_idx;
       return *this;
     }
 
-    DataFrameColIterator operator++(int) {
-      DataFrameColIterator tmp{*this};
+    ColumnIterator operator++(int) {
+      ColumnIterator tmp{*this};
       ++(*this);
       return tmp;
     }
@@ -278,35 +278,35 @@ public:
       m_current_col_idx += off;
     }
 
-    friend bool operator<(const DataFrameColIterator& lhs, const DataFrameIter& rhs) {
+    friend bool operator<(const ColumnIterator& lhs, const DataFrameIter& rhs) {
       return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * (lhs.m_col_size - 1)))) < rhs.m_d;
     }
 
-    friend bool operator<(const DataFrameIter& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator<(const DataFrameIter& lhs, const ColumnIterator& rhs) {
       return lhs.m_d < (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
     }
 
-    friend bool operator>(const DataFrameColIterator& lhs, const DataFrameIter& rhs) {
+    friend bool operator>(const ColumnIterator& lhs, const DataFrameIter& rhs) {
       return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * lhs.m_col_size))) > rhs.m_d;
     }
 
-    friend bool operator>(const DataFrameIter& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator>(const DataFrameIter& lhs, const ColumnIterator& rhs) {
       return lhs.m_d > (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
     }
 
-    friend bool operator<(const DataFrameColIterator& lhs, const sizetype& rhs) {
+    friend bool operator<(const ColumnIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_col_idx < rhs;
     }
 
-    friend bool operator<(const sizetype& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator<(const sizetype& lhs, const ColumnIterator& rhs) {
       return lhs < rhs.m_current_col_idx;
     }
 
-    friend bool operator>(const DataFrameColIterator& lhs, const sizetype& rhs) {
+    friend bool operator>(const ColumnIterator& lhs, const sizetype& rhs) {
       return lhs.m_current_col_idx > rhs;
     }
 
-    friend bool operator>(const sizetype& lhs, const DataFrameColIterator& rhs) {
+    friend bool operator>(const sizetype& lhs, const ColumnIterator& rhs) {
       return lhs > rhs.m_current_col_idx;
     }
 
@@ -337,13 +337,13 @@ private:
   template<typename T>
   class DataFrame {
 public:
-    using ValueType            = Cell<T>;
-    using pValueType           = Cell<T>*;
-    using RowSeries            = Row<T>;
-    using ColumnSeries         = Column<T>;
-    using DataFrameIterator    = Iterator<DataFrame<T>>;
-    using DataFrameRowIterator = DataFrameRowIterator<DataFrame<T>>;
-    using DataFrameColIterator = DataFrameColIterator<DataFrame<T>>;
+    using ValueType      = Cell<T>;
+    using pValueType     = Cell<T>*;
+    using Row            = Row<T>;
+    using Column         = Column<T>;
+    using Iterator       = Iterator<DataFrame<T>>;
+    using RowIterator    = RowIterator<DataFrame<T>>;
+    using ColumnIterator = ColumnIterator<DataFrame<T>>;
 
 public:
     DataFrame(const StringList& col_names, const StringList& row_names) {
@@ -482,7 +482,7 @@ public:
       return cell;
     }
 
-    DataFrame<T> copy() {
+    DataFrame copy() {
       return DataFrame(*this);
     }
 
@@ -536,22 +536,6 @@ public:
       return m_d[idx];
     }
 
-    DataFrameIterator begin() {
-      return DataFrameIterator(m_d);
-    }
-
-    DataFrameIterator begin() const {
-      return DataFrameIterator(m_d);
-    }
-
-    DataFrameIterator end() {
-      return DataFrameIterator(m_d + m_current_size);
-    }
-
-    DataFrameIterator end() const {
-      return DataFrameIterator(m_d + m_current_size);
-    }
-
     constexpr sizetype size() const {
       return m_current_size;
     }
@@ -584,38 +568,54 @@ public:
       return {.col_count = m_col_count, .row_count = m_row_count};
     }
 
-    ColumnSeries column(sizetype col_idx) {
-      return ColumnSeries{begin() + col_idx, m_col_size, m_row_size};
+    Column column(sizetype col_idx) {
+      return Column{begin() + col_idx, m_col_size, m_row_size};
     }
 
-    ColumnSeries column(String col_name) {
-      return ColumnSeries{begin() + get_col_idx(col_name), m_col_size, m_row_size};
+    Column column(String col_name) {
+      return Column{begin() + get_col_idx(col_name), m_col_size, m_row_size};
     }
 
-    RowSeries row(sizetype row_idx) {
-      return RowSeries{begin(), row_idx, m_row_size};
+    Row row(sizetype row_idx) {
+      return Row{begin(), row_idx, m_row_size};
     }
 
-    RowSeries row(String row_name) {
-      return RowSeries{begin(), get_row_idx(row_name), m_row_size};
+    Row row(String row_name) {
+      return Row{begin(), get_row_idx(row_name), m_row_size};
     }
 
-    DataFrameRowIterator iter_rows() {
-      return DataFrameRowIterator(begin(), m_row_size);
+    Iterator begin() {
+      return Iterator(m_d);
     }
 
-    DataFrameColIterator iter_cols() {
-      return DataFrameColIterator(begin(), m_col_size, m_row_size);
+    Iterator begin() const {
+      return Iterator(m_d);
     }
 
-    template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+    Iterator end() {
+      return Iterator(m_d + m_current_size);
+    }
+
+    Iterator end() const {
+      return Iterator(m_d + m_current_size);
+    }
+
+    RowIterator iter_rows() {
+      return RowIterator(begin(), m_row_size);
+    }
+
+    ColumnIterator iter_cols() {
+      return ColumnIterator(begin(), m_col_size, m_row_size);
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     DataFrame asc_sort_rows(String col_name, bool inplace = true) {
-      sizetype     col_idx = get_col_idx(col_name);
-      ColumnSeries col     = column(col_name);
+      sizetype col_idx = get_col_idx(col_name);
+      Column   col     = column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
 
-      List<RowSeries> rows;
+      List<Row> rows;
       for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
         rows.push_back(row_iterator.current_row());
       }
@@ -669,14 +669,14 @@ public:
       return *this;
     }
 
-    template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     DataFrame dec_sort_rows(String col_name, bool inplace = true) {
-      sizetype     col_idx = get_col_idx(col_name);
-      ColumnSeries col     = column(col_name);
+      sizetype col_idx = get_col_idx(col_name);
+      Column   col     = column(col_name);
 
       pValueType* sorted_cells = new pValueType[col.size()];
 
-      List<RowSeries> rows;
+      List<Row> rows;
       for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
         rows.push_back(row_iterator.current_row());
       }

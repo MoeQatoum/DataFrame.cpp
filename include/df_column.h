@@ -29,7 +29,7 @@ namespace df {
   struct Column {
 
     using ValueType         = typename DataFrame<T>::pValueType;
-    using DataFrameIterator = typename DataFrame<T>::DataFrameIterator;
+    using DataFrameIterator = typename DataFrame<T>::Iterator;
     using ColIterator       = Iterator<Column>;
 
     Column(DataFrameIterator col_begin, sizetype col_size, sizetype row_size) {

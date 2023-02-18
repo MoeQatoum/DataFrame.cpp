@@ -72,7 +72,7 @@ TEST(df_iter_tests, dfRowIter) {
 
   sizetype idx   = 0;
   sizetype value = 0;
-  for (DataFrameRowIterator<DataFrame<long>> row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
+  for (RowIterator<DataFrame<long>> row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
     for (auto c : row_iterator.current_row()) {
       EXPECT_EQ(c, &df[idx]);
       EXPECT_EQ(c->value, df[idx].value);
@@ -90,7 +90,7 @@ TEST(df_iter_tests, dfColIter) {
     df[i] = (long)i;
   }
 
-  for (DataFrameColIterator<DataFrame<long>> col_iterator = df.iter_cols(); col_iterator < df.end(); col_iterator++) {
+  for (ColumnIterator<DataFrame<long>> col_iterator = df.iter_cols(); col_iterator < df.end(); col_iterator++) {
     for (auto c : col_iterator.current_col()) {
       EXPECT_EQ(c, &df[c->idx.global_idx]);
       EXPECT_EQ(c->value, df[c->idx.global_idx].value);
