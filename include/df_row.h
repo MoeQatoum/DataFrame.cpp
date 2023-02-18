@@ -80,24 +80,14 @@ namespace df {
       return data;
     }
 #ifdef QT_IMPLEMENTATION
-    friend QDebug operator<<(QDebug dbg, const RowSeries& row) {
-      dbg.noquote();
-      dbg << "RowSeries(size: " << row.m_size << ", "
-          << "Items: \n";
-      for (const ValueType& cell : row) {
-        dbg << *cell << "\n";
-      }
-      dbg << ")";
+    friend QDebug operator<<(QDebug dbg, const Row& row) {
+      dbg.noquote().nospace();
+      dbg << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(T).name() << ")";
       return dbg;
     }
 #else
     friend ostream& operator<<(ostream& os, const Row& row) {
-      os << "RowSeries(size: " << row.m_size << ", "
-         << "Items: \n";
-      for (const ValueType& cell : row) {
-        os << *cell << "\n";
-      }
-      os << ")";
+      os << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(T).name() << ")";
       return os;
     }
 #endif

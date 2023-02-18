@@ -75,24 +75,14 @@ namespace df {
       return data;
     }
 #ifdef QT_IMPLEMENTATION
-    friend QDebug operator<<(QDebug dbg, const ColumnSeries& col) {
-      dbg.noquote();
-      dbg << "ColumnSeries(size: " << col.m_size << ", "
-          << "Items: \n";
-      for (const ValueType& cell : col) {
-        dbg << *cell << "\n";
-      }
-      dbg << ")";
+    friend QDebug operator<<(QDebug dbg, const Column& col) {
+      dbg.noquote().nospace();
+      dbg << "Column(addr: " << &col << ", size: " << col.m_size << ", type: " << typeid(T).name() << ")";
       return dbg;
     }
 #else
     friend ostream& operator<<(ostream& os, const Column& col) {
-      os << "ColumnSeries(size: " << col.m_size << ", "
-         << "Items: \n";
-      for (const ValueType& cell : col) {
-        os << *cell << "\n";
-      }
-      os << ")";
+      os << "Column(addr: " << &col << ", size: " << col.m_size << ", type: " << typeid(T).name() << ")";
       return os;
     }
 #endif
