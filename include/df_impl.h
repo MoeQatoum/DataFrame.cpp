@@ -360,8 +360,6 @@ public:
 
       m_max_col_name_size = 0;
       m_max_row_name_size = 0;
-      m_floatPrecision    = 8;
-      m_spaceAdjustment   = 5;
 
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
@@ -414,8 +412,6 @@ public:
           m_col_count(other.m_col_count),
           m_row_size(other.m_row_size),
           m_row_count(other.m_row_count),
-          m_floatPrecision(other.m_floatPrecision),
-          m_spaceAdjustment(other.m_spaceAdjustment),
           m_max_col_name_size(other.m_max_col_name_size),
           m_max_row_name_size(other.m_max_row_name_size),
           logger(this, other.m_max_col_name_size, other.m_max_row_name_size),
@@ -445,8 +441,6 @@ public:
         m_col_count         = other.m_col_count;
         m_row_size          = other.m_row_size;
         m_row_count         = other.m_row_count;
-        m_floatPrecision    = other.m_floatPrecision;
-        m_spaceAdjustment   = other.m_spaceAdjustment;
         m_max_col_name_size = other.m_max_col_name_size;
         m_max_row_name_size = other.m_max_row_name_size;
         logger              = other.logger;
@@ -640,7 +634,17 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    DataFrame asc_sort_rows(String col_name, bool inplace = true) {
+    List<Row> ascending_sorted_rows(String col_name) {
+      return ascending_sort(*this, col_name);
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    List<Row> descending_sorted_rows(String col_name) {
+      return descending_sort(*this, col_name);
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    DataFrame inplace_ascending_sort(String col_name) {
       sizetype col_idx = get_col_idx(col_name);
       Column   col     = column(col_name);
 
@@ -701,7 +705,7 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    DataFrame dec_sort_rows(String col_name, bool inplace = true) {
+    DataFrame inplace_descending_rows(String col_name) {
       sizetype col_idx = get_col_idx(col_name);
       Column   col     = column(col_name);
 
@@ -759,8 +763,19 @@ public:
       return *this;
     }
 
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     void log(int range = 0) {
       logger.log(range);
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    void log_ascending_sorted_rows(String col_name, int range = 0) {
+      logger.log_sorted_rows(ascending_sorted_rows(col_name), range);
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    void log_descending_sorted_rows(String col_name, int range = 0) {
+      logger.log_sorted_rows(descending_sorted_rows(col_name), range);
     }
 
     Logger logger;
@@ -776,17 +791,8 @@ private:
     ValueType* m_d;
 
     // logging
-#ifdef QT_IMPLEMENTATION
-    int m_floatPrecision;
-    int m_spaceAdjustment;
-    int m_max_col_name_size;
-    int m_max_row_name_size;
-#else
-    sizetype m_floatPrecision;
-    sizetype m_spaceAdjustment;
     sizetype m_max_col_name_size;
     sizetype m_max_row_name_size;
-#endif
   };
 
 } // namespace df
