@@ -73,7 +73,9 @@ public:
 
       dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
       for (const auto& cell : df->row(0)) {
-        dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        if (!excluded_cols.contains(cell->idx.col_name)) {
+          dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        }
       }
       dbg << "\n";
 
@@ -116,7 +118,9 @@ public:
 
       dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
       for (const auto& cell : df->row(0)) {
-        dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        if (!excluded_cols.contains(cell->idx.col_name)) {
+          dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        }
       }
       dbg << "\n";
 
