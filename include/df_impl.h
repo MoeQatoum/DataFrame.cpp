@@ -5,6 +5,7 @@
 
 #include "df_cell.h"
 #include "df_column.h"
+#include "df_logger.h"
 #include "df_row.h"
 
 namespace df {
@@ -336,6 +337,8 @@ private:
 
   template<typename T>
   class DataFrame {
+    friend class DF_Logger<T>;
+
 public:
     using ValueType      = Cell<T>;
     using pValueType     = Cell<T>*;
@@ -344,9 +347,10 @@ public:
     using Iterator       = Iterator<DataFrame<T>>;
     using RowIterator    = RowIterator<DataFrame<T>>;
     using ColumnIterator = ColumnIterator<DataFrame<T>>;
+    using Logger         = DF_Logger<T>;
 
 public:
-    DataFrame(const StringList& col_names, const StringList& row_names) {
+    DataFrame(const StringList& col_names, const StringList& row_names) : logger(this, 0, 0) {
       m_col_count    = static_cast<sizetype>(col_names.size());
       m_row_count    = static_cast<sizetype>(row_names.size());
       m_col_size     = m_row_count;
@@ -397,6 +401,9 @@ public:
         m_d[i].idx.row_idx  = i / m_col_count;
         m_d[i].idx.row_name = row_names[i / m_col_count];
       }
+
+      logger.set_max_col_name_size(m_max_col_name_size);
+      logger.set_max_row_name_size(m_max_row_name_size);
     }
 
     DataFrame(const DataFrame& other)
@@ -411,6 +418,7 @@ public:
           m_spaceAdjustment(other.m_spaceAdjustment),
           m_max_col_name_size(other.m_max_col_name_size),
           m_max_row_name_size(other.m_max_row_name_size),
+          logger(this, other.m_max_col_name_size, other.m_max_row_name_size),
           m_d(new ValueType[m_current_size]) {
       for (sizetype idx = 0; idx < m_current_size; idx++) {
         m_d[idx] = other.m_d[idx];
@@ -425,7 +433,30 @@ public:
     //   return DataFrame(other);
     // }
 
-    DataFrame operator=(const DataFrame& other) = delete;
+    DataFrame operator=(const DataFrame& other) {
+      FORCED_ASSERT(m_current_size == other.m_current_size,
+                    "Copy assignment operator on DataFrame with other nonmatching size.");
+
+      if (this != &other) {
+        m_col_idx_map       = other.m_col_idx_map;
+        m_row_idx_map       = other.m_row_idx_map;
+        m_current_size      = other.m_current_size;
+        m_col_size          = other.m_col_size;
+        m_col_count         = other.m_col_count;
+        m_row_size          = other.m_row_size;
+        m_row_count         = other.m_row_count;
+        m_floatPrecision    = other.m_floatPrecision;
+        m_spaceAdjustment   = other.m_spaceAdjustment;
+        m_max_col_name_size = other.m_max_col_name_size;
+        m_max_row_name_size = other.m_max_row_name_size;
+        logger              = other.logger;
+
+        for (sizetype idx = 0; idx < m_current_size; idx++) {
+          m_d[idx] = other.m_d[idx];
+        }
+      }
+      return *this;
+    }
 
     ValueType& operator[](const sizetype& idx) {
       return *(m_d + idx);
@@ -492,9 +523,9 @@ public:
 
     std::optional<String> get_col_name(sizetype col_idx) {
 #ifdef QT_IMPLEMENTATION
-      for (const String& col_name : m_col_idx_map.keys()) {
-        if (m_col_idx_map[col_name] == col_idx) {
-          return col_name;
+      for (const sizetype& _col_idx : m_col_idx_map.values()) {
+        if (col_idx == _col_idx) {
+          return m_col_idx_map.key(col_idx);
         }
       }
 #else
@@ -778,85 +809,8 @@ public:
       return m_max_row_name_size;
     }
 
-    template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void print(int range = 0) {
-      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
-
-      QDebug dbg       = clog.noquote().nospace();
-      int    spacing   = 5;
-      int    idx_space = 4;
-
-      int row_name_space = m_max_row_name_size + spacing;
-      int col_spacing    = m_max_col_name_size + spacing;
-
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const String& col_name : m_col_idx_map.keys()) {
-        dbg << String("%1").arg(col_name, -(col_spacing));
-      }
-      dbg << "\n";
-
-      sizetype range_start;
-      sizetype range_end;
-      if (range == 0) {
-        range_start = 0;
-        range_end   = m_row_count;
-      } else if (range > 0) {
-        range_start = 0;
-        range_end   = static_cast<sizetype>(range);
-      } else {
-        range_start = m_row_count + range;
-        range_end   = m_row_count;
-      }
-
-      for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = row(idx);
-        dbg << String("%1").arg(current_row.idx(), -idx_space)
-            << String("%1").arg(current_row.name(), -(row_name_space));
-        for (const auto& c : current_row) {
-          dbg << String("%1").arg(c->value, -(col_spacing), 'f', m_floatPrecision);
-        }
-        dbg << "\n";
-      }
-    }
-
-    template<typename U = T, std::enable_if_t<std::is_integral_v<U>, bool> = true>
-    void print(int range = 0) {
-      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
-
-      QDebug dbg       = clog.noquote().nospace();
-      int    spacing   = 5;
-      int    idx_space = 4;
-
-      int row_name_space = m_max_row_name_size + spacing;
-      int col_spacing    = m_max_col_name_size + spacing;
-
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const auto& cell : row(0)) {
-        dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
-      }
-      dbg << "\n";
-
-      sizetype range_start;
-      sizetype range_end;
-      if (range == 0) {
-        range_start = 0;
-        range_end   = m_row_count;
-      } else if (range > 0) {
-        range_start = 0;
-        range_end   = static_cast<sizetype>(range);
-      } else {
-        range_start = m_row_count + range;
-        range_end   = m_row_count;
-      }
-
-      for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = row(idx);
-        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
-        for (const auto& c : current_row) {
-          dbg << String("%1").arg(c->value, -col_spacing);
-        }
-        dbg << "\n";
-      }
+      logger.log(range);
     }
 
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
@@ -962,46 +916,7 @@ public:
     }
 
     void print(long range = 0) {
-      DF_ASSERT(range <= m_row_count || range >= -m_row_count, "range is grater then row count");
-
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
-
-      sizetype row_name_space = m_max_row_name_size + spacing;
-      int      col_spacing    = m_max_col_name_size + spacing;
-
-      if (std::is_floating_point_v<T>) {
-        clog.precision(m_floatPrecision + 1);
-      }
-
-      clog << std::left << std::setw((row_name_space + idx_space)) << "idx";
-      for (const auto& [col_name, v] : m_col_idx_map) {
-        clog << std::left << std::setw(col_spacing) << col_name;
-      }
-      clog << "\n";
-
-      sizetype range_start;
-      sizetype range_end;
-      if (range == 0) {
-        range_start = 0;
-        range_end   = m_row_count;
-      } else if (range > 0) {
-        range_start = 0;
-        range_end   = static_cast<sizetype>(range);
-      } else {
-        range_start = m_row_count + range;
-        range_end   = m_row_count;
-      }
-
-      for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = row(idx);
-        clog << std::left << std::setw(idx_space) << current_row.idx() << std ::left << std::setw(row_name_space)
-             << current_row.name();
-        for (const auto& c : current_row) {
-          clog << std::left << std::setw(col_spacing) << c->value;
-        }
-        clog << "\n";
-      }
+      logger.log(range);
     }
 
     friend ostream& operator<<(ostream& os, DataFrame& df) {
@@ -1032,6 +947,8 @@ public:
       return os;
     }
 #endif
+
+    Logger logger;
 
 private:
     IndexHash  m_col_idx_map;
