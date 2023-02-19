@@ -20,7 +20,7 @@ namespace df {
 
     // Index(Index&& other) = delete;
 
-    // Index operator=(const Index& other) {
+    // Index& operator=(const Index& other) {
     //   Index temp_idx;
     //   temp_idx.row_idx    = other.row_idx;
     //   temp_idx.col_idx    = other.col_idx;
@@ -64,11 +64,11 @@ namespace df {
 
     // Cell(Cell&& other) = delete;
 
-    Cell<T> operator=(const Cell<T>& other) {
-      value = other.value;
-      idx   = other.idx;
-      // return temp_cell;
-      // return Cell(other);
+    Cell<T>& operator=(const Cell<T>& other) {
+      if (this != &other) {
+        value = other.value;
+        idx   = other.idx;
+      }
       return *this;
     }
 
@@ -116,6 +116,7 @@ namespace df {
     T     value;
     Index idx;
   };
+
 } // namespace df
 
 #endif // DATA_FRAME_CELL_H

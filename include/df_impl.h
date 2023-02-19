@@ -33,12 +33,11 @@ public:
     ~Iterator() {
     }
 
-    Iterator& operator=(Iterator&& other) {
-      return Iterator{other.m_d};
-    }
-
     Iterator& operator=(const Iterator& other) {
-      return Iterator{other.m_d};
+      if (this != &other) {
+        m_d = other.m_d;
+      }
+      return *this;
     }
 
     ValueType* operator&() const {
@@ -167,6 +166,15 @@ public:
       return m_current_row_idx;
     }
 
+    RowIterator& operator=(const RowIterator& other) {
+      if (this != &other) {
+        m_df_begin        = other.m_df_begin;
+        m_row_size        = other.m_row_size;
+        m_current_row_idx = other.m_current_row_idx;
+      }
+      return *this;
+    }
+
     RowIterator& operator++() {
       ++m_current_row_idx;
       return *this;
@@ -256,6 +264,16 @@ public:
 
     sizetype current_col_idx() {
       return m_current_col_idx;
+    }
+
+    ColumnIterator& operator=(const ColumnIterator& other) {
+      if (this != &other) {
+        m_df_begin        = other.m_df_begin;
+        m_col_size        = other.m_col_size;
+        m_row_size        = other.m_row_size;
+        m_current_col_idx = other.m_current_col_idx;
+      }
+      return *this;
     }
 
     ColumnIterator operator+(const sizetype& off) {
@@ -425,11 +443,7 @@ public:
       delete[] m_d;
     }
 
-    // DataFrame operator=(const DataFrame& other) {
-    //   return DataFrame(other);
-    // }
-
-    DataFrame operator=(const DataFrame& other) {
+    DataFrame& operator=(const DataFrame& other) {
       FORCED_ASSERT(m_current_size == other.m_current_size,
                     "Copy assignment operator on DataFrame with other nonmatching size.");
 
