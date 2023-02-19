@@ -100,6 +100,7 @@ int main() {
   DataFrame<int> unsorted_dec_df = unsorted_df.copy();
   DataFrame<int> sorted_dec_df   = unsorted_dec_df.dec_sort_rows("col-2");
   clog << sorted_dec_df;
+  // clog << unsorted_df;
 
   clog << "------------------LOGGING------------------\n";
 
@@ -116,6 +117,17 @@ int main() {
 
   clog << "-- log col with operator<<:\n";
   clog << unsorted_dec_df.column(1) << "\n";
+
+  sorted_aec_df = sorted_dec_df;
+  sorted_aec_df.logger
+    .with_cell_logging_color_condition([df](Cell<int>* c) {
+      if ((c->idx.col_name == "col-2") && (c->value > 10)) {
+        return DF_COLOR_G;
+      } else {
+        return DF_COLOR_W;
+      }
+    })
+    .log(10);
 
   // dec_inplace_sort_df.print(3, 3);
   // clog << dec_inplace_sort_df;

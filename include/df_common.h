@@ -22,6 +22,13 @@
   #include <vector>
 #endif
 
+#define DF_COLOR_R "\033[91m"
+#define DF_COLOR_G "\033[92m"
+#define DF_COLOR_C "\033[96m"
+#define DF_COLOR_Y "\033[93m"
+#define DF_COLOR_M "\033[35m"
+#define DF_COLOR_W "\033[00m"
+
 namespace df {
 
 #ifdef QT_IMPLEMENTATION

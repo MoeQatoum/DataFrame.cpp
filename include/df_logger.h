@@ -21,48 +21,58 @@ namespace df {
     friend class DataFrame<T>;
 
     using DataFrame            = DataFrame<T>;
-    using ColName              = String;
-    using CellLoggingColorCond = std::function<df::String(ColName, Cell<T>)>;
+    using CellLoggingColorCond = std::function<df::String(Cell<T>*)>;
 
     DF_Logger(DataFrame* df, sizetype max_col_name_size = 0, sizetype max_row_name_size = 0)
-        : m_df(df),
-          m_floatPrecision(8),
-          m_spacing(5),
-          m_max_col_name_size(max_col_name_size),
-          m_max_row_name_size(max_row_name_size),
-          m_excluded_cols({}) {
-      m_cell_color_condition = [](ColName, Cell<T>) { return String("\033[0;00m"); };
+        : df(df),
+          floatPrecision(8),
+          spacing(5),
+          max_col_name_size(max_col_name_size),
+          max_row_name_size(max_row_name_size),
+          excluded_cols({}) {
+      cell_color_condition = [](Cell<T>*) { return String(DF_COLOR_W); };
     }
 
     DF_Logger(const DF_Logger& other)
-        : m_df(other.m_df),
-          m_floatPrecision(other.m_floatPrecision),
-          m_spacing(other.m_spacing),
-          m_max_col_name_size(other.m_max_col_name_size),
-          m_max_row_name_size(other.m_max_row_name_size),
-          m_excluded_cols(other.m_excluded_cols),
-          m_cell_color_condition(other.m_cell_color_condition) {
+        : df(other.df),
+          floatPrecision(other.floatPrecision),
+          spacing(other.spacing),
+          max_col_name_size(other.max_col_name_size),
+          max_row_name_size(other.max_row_name_size),
+          excluded_cols(other.excluded_cols),
+          cell_color_condition(other.cell_color_condition) {
     }
 
     DF_Logger operator=(const DF_Logger& other) {
       if (this != &other) {}
       return *this;
     }
+    DataFrame* df;
+
+    sizetype   floatPrecision;
+    sizetype   spacing;
+    sizetype   max_col_name_size;
+    sizetype   max_row_name_size;
+    StringList excluded_cols;
+
+    CellLoggingColorCond cell_color_condition;
+
+public:
 #ifdef QT_IMPLEMENTATION
 
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
-      DF_ASSERT(range <= m_df->m_row_count || range >= -m_df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    spacing   = 5;
       int    idx_space = 4;
 
-      int row_name_space = m_max_row_name_size + spacing;
-      int col_spacing    = m_max_col_name_size + spacing;
+      int row_name_space = max_row_name_size + spacing;
+      int col_spacing    = max_col_name_size + spacing;
 
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const auto& cell : m_df->row(0)) {
+      dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
+      for (const auto& cell : df->row(0)) {
         dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
       }
       dbg << "\n";
@@ -71,21 +81,22 @@ namespace df {
       sizetype range_end;
       if (range == 0) {
         range_start = 0;
-        range_end   = m_df->m_row_count;
+        range_end   = df->m_row_count;
       } else if (range > 0) {
         range_start = 0;
         range_end   = static_cast<sizetype>(range);
       } else {
-        range_start = m_df->m_row_count + range;
-        range_end   = m_df->m_row_count;
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = m_df->row(idx);
+        const auto& current_row = df->row(idx);
         dbg << String("%1").arg(current_row.idx(), -idx_space)
             << String("%1").arg(current_row.name(), -(row_name_space));
         for (const auto& c : current_row) {
-          dbg << String("%1").arg(c->value, -(col_spacing), 'f', m_floatPrecision);
+          dbg << cell_color_condition(c) << String("%1").arg(c->value, -(col_spacing), 'f', floatPrecision)
+              << DF_COLOR_W;
         }
         dbg << "\n";
       }
@@ -93,17 +104,17 @@ namespace df {
 
     template<typename U = T, std::enable_if_t<std::is_integral_v<U>, bool> = true>
     void log(int range = 0) {
-      DF_ASSERT(range <= m_df->m_row_count || range >= -m_df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    spacing   = 5;
       int    idx_space = 4;
 
-      int row_name_space = m_max_row_name_size + spacing;
-      int col_spacing    = m_max_col_name_size + spacing;
+      int row_name_space = max_row_name_size + spacing;
+      int col_spacing    = max_col_name_size + spacing;
 
-      dbg << String("%1").arg("idx", -(m_max_row_name_size + spacing + idx_space));
-      for (const auto& cell : m_df->row(0)) {
+      dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
+      for (const auto& cell : df->row(0)) {
         dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
       }
       dbg << "\n";
@@ -112,27 +123,27 @@ namespace df {
       sizetype range_end;
       if (range == 0) {
         range_start = 0;
-        range_end   = m_df->m_row_count;
+        range_end   = df->m_row_count;
       } else if (range > 0) {
         range_start = 0;
         range_end   = static_cast<sizetype>(range);
       } else {
-        range_start = m_df->m_row_count + range;
-        range_end   = m_df->m_row_count;
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = m_df->row(idx);
+        const auto& current_row = df->row(idx);
         dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
-          dbg << String("%1").arg(c->value, -col_spacing);
+          dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
         }
         dbg << "\n";
       }
     }
 #else
     void log(long range = 0) {
-      DF_ASSERT(range <= m_df->m_row_count || range >= -m_df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       sizetype spacing   = 5;
       sizetype idx_space = 4;
@@ -145,7 +156,7 @@ namespace df {
       }
 
       clog << std::left << std::setw((row_name_space + idx_space)) << "idx";
-      for (const auto& [col_name, v] : m_df->m_col_idx_map) {
+      for (const auto& [col_name, v] : df->m_col_idx_map) {
         clog << std::left << std::setw(col_spacing) << col_name;
       }
       clog << "\n";
@@ -154,17 +165,17 @@ namespace df {
       sizetype range_end;
       if (range == 0) {
         range_start = 0;
-        range_end   = m_df->m_row_count;
+        range_end   = df->m_row_count;
       } else if (range > 0) {
         range_start = 0;
         range_end   = static_cast<sizetype>(range);
       } else {
-        range_start = m_df->m_row_count + range;
-        range_end   = m_df->m_row_count;
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
-        const auto& current_row = m_df->row(idx);
+        const auto& current_row = df->row(idx);
         clog << std::left << std::setw(idx_space) << current_row.idx() << std ::left << std::setw(row_name_space)
              << current_row.name();
         for (const auto& c : current_row) {
@@ -178,21 +189,21 @@ namespace df {
       sizetype spacing   = 5;
       sizetype idx_space = 4;
 
-      sizetype row_name_space = logger.m_df->m_max_row_name_size + spacing;
-      sizetype col_spacing    = logger.m_df->m_max_col_name_size + spacing;
+      sizetype row_name_space = logger.df->m_max_row_name_size + spacing;
+      sizetype col_spacing    = logger.df->m_max_col_name_size + spacing;
 
       if (std::is_floating_point_v<T>) {
-        clog.precision(logger.m_df->m_floatPrecision + 1);
+        clog.precision(logger.df->m_floatPrecision + 1);
       }
 
       os << std::left << std::setw(row_name_space + idx_space) << "idx";
-      for (const auto& [col_name, v] : logger.m_df->m_col_idx_map) {
+      for (const auto& [col_name, v] : logger.df->m_col_idx_map) {
         os << std::left << std::setw(col_spacing) << col_name;
       }
       os << "\n";
 
-      for (sizetype i = 0; i < logger.m_df->m_row_count; i++) {
-        const auto& row = logger.m_df->row(i);
+      for (sizetype i = 0; i < logger.df->m_row_count; i++) {
+        const auto& row = logger.df->row(i);
         os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
         for (const auto& c : row) {
           clog << std::left << std::setw(col_spacing) << c->value;
@@ -204,61 +215,40 @@ namespace df {
 #endif
 
     DF_Logger& exclude_columns(StringList column_names) {
-      m_excluded_cols = column_names;
+      excluded_cols = column_names;
     }
 
     DF_Logger& exclude_column(String col_name) {
-      m_excluded_cols.push_back(col_name);
+      excluded_cols.push_back(col_name);
     }
 
     DF_Logger& where(String col_name) {
     }
 
     DF_Logger& where(std::function<String(String, Cell<T>)> coloring_condition) {
-      m_cell_color_condition = coloring_condition;
+      cell_color_condition = coloring_condition;
     }
 
-    void setFloatPrecision(sizetype precision) {
-      m_floatPrecision = precision;
+    void set_precision(sizetype precision) {
+      floatPrecision = precision;
     }
 
-    sizetype floatPrecision() {
-      return m_floatPrecision;
-    }
-
-    void setSpaceAdjustment(sizetype spaceAdjustment) {
-      m_spacing = spaceAdjustment;
-    }
-
-    sizetype spaceAdjustment() {
-      return m_spacing;
+    void set_space_adjustment(sizetype spaceAdjustment) {
+      spacing = spaceAdjustment;
     }
 
     void set_max_col_name_size(sizetype size) {
-      m_max_col_name_size = size;
-    }
-
-    sizetype max_col_name_size() {
-      return m_max_col_name_size;
+      max_col_name_size = size;
     }
 
     void set_max_row_name_size(sizetype size) {
-      m_max_row_name_size = size;
+      max_row_name_size = size;
     }
 
-    sizetype max_row_name_size() {
-      return m_max_row_name_size;
+    DF_Logger with_cell_logging_color_condition(CellLoggingColorCond condition) {
+      cell_color_condition = condition;
+      return *this;
     }
-
-    DataFrame* m_df;
-
-    sizetype   m_floatPrecision;
-    sizetype   m_spacing;
-    sizetype   m_max_col_name_size;
-    sizetype   m_max_row_name_size;
-    StringList m_excluded_cols;
-
-    CellLoggingColorCond m_cell_color_condition;
   };
 
 } // namespace df
