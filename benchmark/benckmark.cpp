@@ -15,12 +15,14 @@ using namespace df;
 #define COUNT__ITER_ROW_BENCH  1000
 #define COUNT__ITER_COL_BENCH  1000
 #define COUNT__ITER_SORT_BENCH 1000
+#define COUNT__ITER_COPY_BENCH 30
 
-#define DF_BENCH
-#define ROW_BENCH
-#define COL_BENCH
+// #define DF_BENCH
+// #define ROW_BENCH
+// #define COL_BENCH
 // #define SORT_BENCH
-#define ROW_SORT_BENCH
+// #define ROW_SORT_BENCH
+#define COPY_BENCH
 
 template<typename TimeUnit, unsigned long N>
 void print_bench_result(std::array<long, N> data, const char* bench_name) {
@@ -261,7 +263,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().col_count - 1);
     nsec_timer.tick();
-    auto col = df.col(rand_idx);
+    auto col = df.column(rand_idx);
     for (auto& c : col) {
       auto v = c->value;
     }
@@ -274,7 +276,7 @@ int main() {
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().col_count - 1);
     usec_timer.tick();
-    auto col = df.col(rand_idx);
+    auto col = df.column(rand_idx);
     for (auto& c : col) {
       c->value = 123123.123;
     }
@@ -326,6 +328,25 @@ int main() {
   }
   print_bench_result<std::chrono::milliseconds>(row_sort_bench_data,
                                                 "utils::asc_sort_rows(df&, col_name), sort df rows by col");
+#endif
+
+#ifdef COPY_BENCH
+  #ifdef QT_IMPLEMENTATION
+  clog << "\n  sort, test iterations: " << COUNT__ITER_COPY_BENCH;
+  #else
+  clog << "\n  df copy, test iterations: " << COUNT__ITER_COPY_BENCH << "\n";
+  #endif
+  std::array<long, COUNT__ITER_COPY_BENCH> row_copy_bench_data;
+
+  for (sizetype i = 0; i < COUNT__ITER_COPY_BENCH; i++) {
+
+    msec_timer.tick();
+    DataFrame<dataT> new_df{df};
+    msec_timer.tock();
+    row_copy_bench_data[i] = msec_timer.duration().count();
+  }
+  print_bench_result<std::chrono::milliseconds>(row_copy_bench_data,
+                                                "DataFrame<T>::DataFrame(const DataFrame<T>& other): copy constructor");
 #endif
   return 0;
 }
