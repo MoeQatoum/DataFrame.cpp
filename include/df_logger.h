@@ -21,7 +21,7 @@ namespace df {
     friend class DataFrame<T>;
 
     using DataFrame            = DataFrame<T>;
-    using CellLoggingColorCond = std::function<df::String(Cell<T>*)>;
+    using CellLoggingColorCond = std::function<String(Cell<T>*)>;
 
     DF_Logger(DataFrame* df, sizetype max_col_name_size = 0, sizetype max_row_name_size = 0)
         : df(df),
@@ -148,25 +148,25 @@ public:
         dbg << "\n";
       }
     }
-#else
-    void log(long range = 0) {
+
+    template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
+    void log_sorted_rows(const List<Row<T>>& sorted_rows, int range = 0) {
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
-      sizetype spacing   = 5;
-      sizetype idx_space = 4;
+      QDebug dbg       = clog.noquote().nospace();
+      int    spacing   = 5;
+      int    idx_space = 4;
 
-      sizetype row_name_space = m_max_row_name_size + spacing;
-      int      col_spacing    = m_max_col_name_size + spacing;
+      int row_name_space = max_row_name_size + spacing;
+      int col_spacing    = max_col_name_size + spacing;
 
-      if (std::is_floating_point_v<T>) {
-        clog.precision(m_floatPrecision + 1);
+      dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
+      for (const auto& cell : df->row(0)) {
+        if (!excluded_cols.contains(cell->idx.col_name)) {
+          dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        }
       }
-
-      clog << std::left << std::setw((row_name_space + idx_space)) << "idx";
-      for (const auto& [col_name, v] : df->m_col_idx_map) {
-        clog << std::left << std::setw(col_spacing) << col_name;
-      }
-      clog << "\n";
+      dbg << "\n";
 
       sizetype range_start;
       sizetype range_end;
@@ -182,42 +182,170 @@ public:
       }
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
+        const Row<T>& current_row = sorted_rows[idx];
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
+        for (const auto& c : current_row) {
+          if (!excluded_cols.contains(c->idx.col_name)) {
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', floatPrecision)
+                << DF_COLOR_W;
+          }
+        }
+        dbg << "\n";
+      }
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_integral_v<U>, bool> = true>
+    void log_sorted_rows(const List<Row<T>>& sorted_rows, int range = 0) {
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+
+      QDebug dbg       = clog.noquote().nospace();
+      int    spacing   = 5;
+      int    idx_space = 4;
+
+      int row_name_space = max_row_name_size + spacing;
+      int col_spacing    = max_col_name_size + spacing;
+
+      dbg << String("%1").arg("idx", -(max_row_name_size + spacing + idx_space));
+      for (const auto& cell : df->row(0)) {
+        if (!excluded_cols.contains(cell->idx.col_name)) {
+          dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
+        }
+      }
+      dbg << "\n";
+
+      sizetype range_start;
+      sizetype range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = df->m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = static_cast<sizetype>(range);
+      } else {
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
+      }
+
+      for (sizetype idx = range_start; idx < range_end; idx++) {
+        const Row<T>& current_row = sorted_rows[idx];
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
+        for (const auto& c : current_row) {
+          if (!excluded_cols.contains(c->idx.col_name)) {
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
+          }
+        }
+        dbg << "\n";
+      }
+    }
+#else
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    void log(int range = 0) {
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+
+      sizetype spacing   = 5;
+      sizetype idx_space = 4;
+
+      sizetype row_name_space = max_row_name_size + spacing;
+      int      col_spacing    = max_col_name_size + spacing;
+
+      auto contains = [](const StringList& excluded_cols_list, const String& cur_col_name) {
+        return std::find_if(excluded_cols_list.begin(),
+                            excluded_cols_list.end(),
+                            [cur_col_name](String col_name) { return cur_col_name == col_name; })
+               != excluded_cols_list.end();
+      };
+
+      if (std::is_floating_point_v<T>) {
+        clog.precision(floatPrecision + 1);
+      }
+
+      clog << std::left << std::setw(row_name_space + idx_space) << "idx";
+      for (const auto& [col_name, v] : df->m_col_idx_map) {
+        if (!contains(excluded_cols, col_name)) {
+          clog << std::left << std::setw(col_spacing) << col_name;
+        }
+      }
+      clog << "\n";
+
+      int range_start;
+      int range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = df->m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = range;
+      } else {
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
+      }
+
+      for (int idx = range_start; idx < range_end; idx++) {
         const auto& current_row = df->row(idx);
         clog << std::left << std::setw(idx_space) << current_row.idx() << std ::left << std::setw(row_name_space)
              << current_row.name();
-        for (const auto& c : current_row) {
-          clog << std::left << std::setw(col_spacing) << c->value;
+        for (const auto& cell : current_row) {
+          if (!contains(excluded_cols, cell->idx.col_name)) {
+            clog << cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
+          }
         }
         clog << "\n";
       }
     }
 
-    friend ostream& operator<<(ostream& os, DF_Logger& logger) {
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    void log_sorted_rows(const List<Row<T>>& sorted_rows, int range = 0) {
+      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+
       sizetype spacing   = 5;
       sizetype idx_space = 4;
 
-      sizetype row_name_space = logger.df->m_max_row_name_size + spacing;
-      sizetype col_spacing    = logger.df->m_max_col_name_size + spacing;
+      sizetype row_name_space = max_row_name_size + spacing;
+      int      col_spacing    = max_col_name_size + spacing;
+
+      auto contains = [](const StringList& excluded_cols_list, const String& cur_col_name) {
+        return std::find_if(excluded_cols_list.begin(),
+                            excluded_cols_list.end(),
+                            [cur_col_name](String col_name) { return cur_col_name == col_name; })
+               != excluded_cols_list.end();
+      };
 
       if (std::is_floating_point_v<T>) {
-        clog.precision(logger.df->m_floatPrecision + 1);
+        clog.precision(floatPrecision + 1);
       }
 
-      os << std::left << std::setw(row_name_space + idx_space) << "idx";
-      for (const auto& [col_name, v] : logger.df->m_col_idx_map) {
-        os << std::left << std::setw(col_spacing) << col_name;
-      }
-      os << "\n";
-
-      for (sizetype i = 0; i < logger.df->m_row_count; i++) {
-        const auto& row = logger.df->row(i);
-        os << std::left << std::setw(idx_space) << row.idx() << std ::left << std::setw(row_name_space) << row.name();
-        for (const auto& c : row) {
-          clog << std::left << std::setw(col_spacing) << c->value;
+      clog << std::left << std::setw(row_name_space + idx_space) << "idx";
+      for (const auto& [col_name, v] : df->m_col_idx_map) {
+        if (!contains(excluded_cols, col_name)) {
+          clog << std::left << std::setw(col_spacing) << col_name;
         }
-        os << "\n";
       }
-      return os;
+      clog << "\n";
+
+      int range_start;
+      int range_end;
+      if (range == 0) {
+        range_start = 0;
+        range_end   = df->m_row_count;
+      } else if (range > 0) {
+        range_start = 0;
+        range_end   = range;
+      } else {
+        range_start = df->m_row_count + range;
+        range_end   = df->m_row_count;
+      }
+
+      for (int idx = range_start; idx < range_end; idx++) {
+        const Row<T>& current_row = sorted_rows[idx];
+        clog << std::left << std::setw(idx_space) << current_row.idx() << std ::left << std::setw(row_name_space)
+             << current_row.name();
+        for (const auto& cell : current_row) {
+          if (!contains(excluded_cols, cell->idx.col_name)) {
+            clog << cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
+          }
+        }
+        clog << "\n";
+      }
     }
 #endif
 

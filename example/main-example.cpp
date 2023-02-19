@@ -30,7 +30,7 @@ int main() {
   for (sizetype i = 0; i < df.size(); ++i) {
     df[i] = static_cast<int>(i);
   }
-  clog << df;
+  df.log();
 
   for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
     for (auto& c : col_iter.current_col()) {
@@ -43,7 +43,7 @@ int main() {
     }
     clog << "\n";
   }
-  clog << df;
+  df.log();
 
   for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
     for (auto& c : row_iter.current_row()) {
@@ -57,7 +57,7 @@ int main() {
     clog << "\n";
   }
 
-  clog << df;
+  df.log();
 
   clog << "------------------COPY_DF------------------\n";
   for (sizetype i = 0; i < df.size(); i++) {
@@ -65,52 +65,49 @@ int main() {
   }
 
   clog << "--old df:\n";
-  clog << df;
+  df.log();
   DataFrame<int> new_df = df.copy();
   clog << "\n--new df:\n";
-  clog << new_df;
+  new_df.log();
 
   clog << "------------------SORTING------------------\n";
 
   DataFrame<int> unsorted_df = df.copy();
 
   clog << "-- unsorted df:\n";
-  clog << unsorted_df;
+  unsorted_df.log();
 
   clog << "\n-- aec sort:\n";
-  List<Row<int>> aec_sorted_rows = asc_sort_rows(unsorted_df, "col-2");
+  List<Row<int>> aec_sorted_rows = ascending_sort(unsorted_df, "col-2");
   clog << "asc rows log algo: \n";
-  log_sorted_rows(aec_sorted_rows, unsorted_df);
+  unsorted_df.logger.log_sorted_rows(aec_sorted_rows);
   clog << "asc rows log algo head 5: \n";
-  log_sorted_rows(aec_sorted_rows, unsorted_df, 5);
+  unsorted_df.logger.log_sorted_rows(aec_sorted_rows, 5);
   clog << "asc rows log algo tail 3: \n";
-  log_sorted_rows(aec_sorted_rows, unsorted_df, -3);
+  unsorted_df.logger.log_sorted_rows(aec_sorted_rows, -3);
 
   clog << "\n-- dec sort:\n";
-  List<Row<int>> dec_sorted_rows = dec_sort_rows(unsorted_df, "col-2");
+  List<Row<int>> dec_sorted_rows = descending_sort(unsorted_df, "col-2");
   clog << "dec rows log algo: \n";
-  log_sorted_rows(dec_sorted_rows, unsorted_df);
+  unsorted_df.logger.log_sorted_rows(dec_sorted_rows);
 
   clog << "\n-- inplace aec sort:\n";
   DataFrame<int> unsorted_aec_df = unsorted_df.copy();
-  DataFrame<int> sorted_aec_df   = unsorted_aec_df.asc_sort_rows("col-2");
-  clog << sorted_aec_df;
+  DataFrame<int> sorted_aec_df   = unsorted_aec_df.inplace_ascending_sort("col-2");
+  sorted_aec_df.log();
 
   clog << "\n-- inplace dec sort:\n";
   DataFrame<int> unsorted_dec_df = unsorted_df.copy();
-  DataFrame<int> sorted_dec_df   = unsorted_dec_df.dec_sort_rows("col-2");
-  clog << sorted_dec_df;
-  // clog << unsorted_df;
+  DataFrame<int> sorted_dec_df   = unsorted_dec_df.inplace_descending_rows("col-2");
+  sorted_dec_df.log();
 
   clog << "------------------LOGGING------------------\n";
 
   clog << "-- head:\n";
-  unsorted_dec_df.print(3);
-
-  fill_df(unsorted_dec_df, 0);
+  unsorted_dec_df.log(3);
 
   clog << "-- tail:\n";
-  unsorted_dec_df.print(-4);
+  unsorted_dec_df.log(-4);
 
   clog << "-- log row with operator<<:\n";
   clog << unsorted_dec_df.row(1) << "\n";
@@ -129,8 +126,12 @@ int main() {
     })
     .log(10);
 
-  // dec_inplace_sort_df.print(3, 3);
-  // clog << dec_inplace_sort_df;
+  clog << "------------------UTILS------------------\n";
+  clog << "-- before fill_df():\n";
+  unsorted_dec_df.log();
+  clog << "-- after fill_df():\n";
+  fill_df(unsorted_dec_df, 0);
+  unsorted_dec_df.log();
 
   return 0;
 }
