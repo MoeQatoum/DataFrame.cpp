@@ -216,10 +216,12 @@ public:
 
     DF_Logger& exclude_columns(StringList column_names) {
       excluded_cols = column_names;
+      return *this;
     }
 
     DF_Logger& exclude_column(String col_name) {
       excluded_cols.push_back(col_name);
+      return *this;
     }
 
     DF_Logger& where(String col_name) {
