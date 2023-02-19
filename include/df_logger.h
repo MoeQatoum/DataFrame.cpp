@@ -92,11 +92,12 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const auto& current_row = df->row(idx);
-        dbg << String("%1").arg(current_row.idx(), -idx_space)
-            << String("%1").arg(current_row.name(), -(row_name_space));
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
-          dbg << cell_color_condition(c) << String("%1").arg(c->value, -(col_spacing), 'f', floatPrecision)
-              << DF_COLOR_W;
+          if (!excluded_cols.contains(c->idx.col_name)) {
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', floatPrecision)
+                << DF_COLOR_W;
+          }
         }
         dbg << "\n";
       }
@@ -136,7 +137,9 @@ public:
         const auto& current_row = df->row(idx);
         dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
-          dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
+          if (!excluded_cols.contains(c->idx.col_name)) {
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
+          }
         }
         dbg << "\n";
       }
@@ -214,12 +217,12 @@ public:
     }
 #endif
 
-    DF_Logger& exclude_columns(StringList column_names) {
+    DF_Logger& with_exclude_columns(StringList column_names) {
       excluded_cols = column_names;
       return *this;
     }
 
-    DF_Logger& exclude_column(String col_name) {
+    DF_Logger& with_exclude_column(String col_name) {
       excluded_cols.push_back(col_name);
       return *this;
     }
