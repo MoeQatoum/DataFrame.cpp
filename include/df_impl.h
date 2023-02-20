@@ -7,6 +7,7 @@
 #include "df_column.h"
 #include "df_logger.h"
 #include "df_row.h"
+#include "df_series.h"
 
 namespace df {
 
@@ -24,7 +25,7 @@ namespace df {
     friend class ColumnIterator;
 
 public:
-    Iterator(ValueType* data_p) : m_d(data_p) {
+    Iterator(ValueType* p_data) : m_d(p_data) {
     }
 
     Iterator(const Iterator& other) : m_d(other.m_d) {
@@ -367,7 +368,6 @@ public:
     using ColumnIterator = ColumnIterator<DataFrame<T>>;
     using Logger         = DF_Logger<T>;
 
-public:
     DataFrame(const StringList& col_names, const StringList& row_names) : logger(this, 0, 0) {
       m_col_count    = static_cast<sizetype>(col_names.size());
       m_row_count    = static_cast<sizetype>(row_names.size());
