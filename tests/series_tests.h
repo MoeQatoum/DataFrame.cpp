@@ -4,21 +4,14 @@
 #include <dataframe.h>
 #undef clog
 
+#include "test_utils.h"
+
 #include <gtest/gtest.h>
 
 #define TEST_COL_COUNT 10
 #define TEST_ROW_COUNT 10
 
 using namespace df;
-
-template<typename T, sizetype N>
-Series<T> make_series(T data[]) {
-  Series<T> temp{N};
-  for (sizetype i = 0; i < N; i++) {
-    temp[i] = data[i];
-  }
-  return temp;
-}
 
 TEST(series_operators_tests, is_equal) {
   constexpr int N = 10;
