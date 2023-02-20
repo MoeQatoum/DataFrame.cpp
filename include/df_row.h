@@ -1,6 +1,6 @@
 
-#ifndef DATA_FRAME_ROW_SERIES_H
-#define DATA_FRAME_ROW_SERIES_H
+#ifndef DATA_FRAME_ROW_H
+#define DATA_FRAME_ROW_H
 
 #include "df_common.h"
 
