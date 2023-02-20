@@ -33,12 +33,12 @@ namespace df {
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using RowIterator       = Iterator<Row>;
 
-    Row(DataFrameIterator row_begin, sizetype row_idx, sizetype row_size) {
+    Row(DataFrameIterator df_begin, sizetype row_idx, sizetype row_size) {
       m_size = row_size;
       m_d    = new ValueType[m_size];
 
       for (sizetype idx = 0; idx < row_size; idx++) {
-        m_d[idx] = &(row_begin + ((row_idx * row_size) + idx));
+        m_d[idx] = &(df_begin + ((row_idx * row_size) + idx));
       }
     }
 
