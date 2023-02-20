@@ -467,11 +467,11 @@ public:
     }
 
     ValueType& operator[](const sizetype& idx) {
-      return *(m_d + idx);
+      return m_d[idx];
     }
 
     const ValueType& operator[](const sizetype& idx) const {
-      return *(m_d + idx);
+      return m_d[idx];
     }
 
     ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) {
