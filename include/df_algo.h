@@ -52,9 +52,11 @@ namespace df {
 
     sorted_cells[0] = col[0];
 
+    bool     lower_found;
+    sizetype insert_idx;
     for (sizetype idx = 0; idx < col.size(); idx++) {
-      bool     lower_found = false;
-      sizetype insert_idx  = 0;
+      lower_found = false;
+      insert_idx  = 0;
       for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
         if (col[idx]->value < sorted_cells[sorted_idx]->value) {
           lower_found = true;
@@ -66,7 +68,7 @@ namespace df {
         for (sizetype i = idx - 1; i >= insert_idx; i--) {
           sorted_cells[i + 1] = sorted_cells[i];
 
-          // avoidsizetype (aka df_ui32) underflow
+          // avoid sizetype underflow
           if (i == 0) {
             break;
           }
@@ -102,9 +104,11 @@ namespace df {
 
     sorted_cells[0] = col[0];
 
+    bool     higher_found;
+    sizetype insert_idx;
     for (sizetype idx = 0; idx < col.size(); idx++) {
-      bool     higher_found = false;
-      sizetype insert_idx   = 0;
+      higher_found = false;
+      insert_idx   = 0;
       for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
         if (col[idx]->value > sorted_cells[sorted_idx]->value) {
           higher_found = true;
@@ -116,7 +120,7 @@ namespace df {
         for (sizetype i = idx - 1; i >= insert_idx; i--) {
           sorted_cells[i + 1] = sorted_cells[i];
 
-          // avoidsizetype (aka df_ui32) underflow
+          // avoid sizetype underflow
           if (i == 0) {
             break;
           }
