@@ -4,13 +4,10 @@
 #include <dataframe.h>
 #undef clog
 
-#define TEST_COL_COUNT 10
-#define TEST_ROW_COUNT 10
-
 template<typename T, df::sizetype COL_COUNT, df::sizetype ROW_COUNT>
 df::DataFrame<T> create_dataframe() {
   df::StringList col_names{};
-  for (df::sizetype i = 1; i <= TEST_COL_COUNT; i++) {
+  for (df::sizetype i = 1; i <= COL_COUNT; i++) {
 #ifdef QT_IMPLEMENTATION
     col_names.push_back(df::String("col-%1").arg(i));
 #else
@@ -19,7 +16,7 @@ df::DataFrame<T> create_dataframe() {
   }
 
   df::StringList row_names{};
-  for (df::sizetype i = 1; i <= TEST_ROW_COUNT; i++) {
+  for (df::sizetype i = 1; i <= ROW_COUNT; i++) {
 #ifdef QT_IMPLEMENTATION
     row_names.push_back(String("row-%1").arg(i));
 #else
