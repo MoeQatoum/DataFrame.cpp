@@ -39,14 +39,14 @@ namespace df {
 
 #ifdef QT_IMPLEMENTATION
     friend QDebug operator<<(QDebug dbg, const Index& df_idx) {
-      dbg.noquote();
-      dbg << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
-          << df_idx.row_name << ", " << df_idx.row_idx << ">)";
+      dbg.noquote().nospace();
+      dbg << "Index(<glob" << df_idx.global_idx << ">, column<" << df_idx.col_name << ", " << df_idx.col_idx
+          << ">, row<" << df_idx.row_name << ", " << df_idx.row_idx << ">)";
       return dbg;
     }
 #else
     friend ostream& operator<<(ostream& os, const Index& df_idx) {
-      os << "Index(<" << df_idx.global_idx << ">, <" << df_idx.col_name << ", " << df_idx.col_idx << ">, <"
+      os << "Index(glob<" << df_idx.global_idx << ">, column<" << df_idx.col_name << ", " << df_idx.col_idx << ">, row<"
          << df_idx.row_name << ", " << df_idx.row_idx << ">)";
       return os;
     }
@@ -55,6 +55,7 @@ namespace df {
 
   template<typename T>
   struct Cell {
+    using ValueType = T;
 
     Cell() {
     }
@@ -108,7 +109,7 @@ namespace df {
     }
 #else
     friend ostream& operator<<(ostream& os, const Cell<T>& cell) {
-      os << "Cell(value: " << cell.value << ", " << cell.idx << ")";
+      os << "Cell(value: " << cell.value << ", idx: " << cell.idx << ")";
       return os;
     }
 #endif
