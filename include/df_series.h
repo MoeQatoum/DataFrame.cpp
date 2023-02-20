@@ -13,11 +13,17 @@ public:
     using ValueType      = T;
     using SeriesIterator = Iterator<Series>;
 
-    explicit Series(sizetype data_size) : m_size(data_size), m_d(new T[data_size]) {
+    explicit Series(const sizetype& size) : m_size(size), m_d(new T[size]) {
     }
 
-    Series(sizetype data_size, T fill) : m_size(data_size), m_d(new T[data_size]) {
-      for (sizetype i = 0; i < data_size; i++) {
+    Series(const std::initializer_list<T>& ini_list) : m_size(ini_list.size()), m_d(new T[ini_list.size()]) {
+      for (sizetype i = 0; i < m_size; i++) {
+        m_d[i] = ini_list[i];
+      }
+    }
+
+    Series(const sizetype& size, const T& fill) : m_size(size), m_d(new T[size]) {
+      for (sizetype i = 0; i < size; i++) {
         m_d[i] = fill;
       }
     }
