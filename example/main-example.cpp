@@ -133,5 +133,18 @@ int main() {
   fill_df(unsorted_dec_df, 0);
   unsorted_dec_df.log();
 
+  clog << "------------------SERIES------------------\n";
+  Series<int> series_1{20};
+  fill_series(series_1, 1);
+  Series<int> series_2{20};
+  fill_series(series_2, 2);
+
+  Series<bool> bar = (series_2 == 2);
+  series_2 += 10;
+
+  for (sizetype i = 0; i < bar.size; i++) {
+    clog << series_2[i] << " ";
+  }
+  clog << "\n";
   return 0;
 }

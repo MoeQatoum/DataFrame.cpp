@@ -47,7 +47,7 @@ for ((i = 0; i < $#; i++)); do
     ;;
   --test)
     BUILD_TESTS=true
-    TARGET=dataframe-tests
+    TARGET=tests
     ;;
   --qt-impl)
     USE_QT_IMPLEMENTATION=true
@@ -163,7 +163,7 @@ if [[ $? -eq 0 ]]; then
 
   #run tests
   if [[ $BUILD_TESTS = true ]]; then
-    GTEST_COLOR=1 ./build/tests/dataframe-tests
+    GTEST_COLOR=1 ./build/tests/tests --output-on-failure
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run tests failed.${W}\n"
       exit 1

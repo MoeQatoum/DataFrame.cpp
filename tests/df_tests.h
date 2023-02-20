@@ -1,3 +1,6 @@
+#ifndef DATA_FRAME_TESTS_H
+#define DATA_FRAME_TESTS_H
+
 #include <dataframe.h>
 #undef clog
 
@@ -162,3 +165,5 @@ TEST(df_sort, dfRowsAscendingSort) {
     }
   }
 }
+
+#endif // DATA_FRAME_TESTS_H
