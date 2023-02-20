@@ -10,6 +10,9 @@ namespace df {
   class Iterator;
 
   template<typename T>
+  class Series;
+
+  template<typename T>
   class DataFrame;
 
   template<typename T>
@@ -52,8 +55,14 @@ namespace df {
       delete[] m_d;
     }
 
-    ValueType operator[](const sizetype& idx) {
-      return *(m_d + idx);
+    ValueType& operator[](const sizetype& idx) {
+      return m_d[idx];
+      // return *(m_d + idx);
+    }
+
+    const ValueType& operator[](const sizetype& idx) const {
+      return m_d[idx];
+      // return *(m_d + idx);
     }
 
     ValueType operator[](const String& col_name) {
@@ -72,10 +81,10 @@ namespace df {
 #endif
     }
 
-    RowData<T> copy_data() {
-      RowData<T> data{m_size};
+    Series<T> copy_data() {
+      Series<T> data{m_size};
       for (sizetype i = 0; i < m_size; i++) {
-        data.data[i] = (*(m_d + i))->value;
+        data[i] = (*(m_d + i))->value;
       }
       return data;
     }
