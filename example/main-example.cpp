@@ -142,7 +142,7 @@ int main() {
   Series<bool> bar = (series_2 == 2);
   series_2 += 10;
 
-  for (sizetype i = 0; i < bar.size; i++) {
+  for (sizetype i = 0; i < bar.size(); i++) {
     clog << series_2[i] << " ";
   }
   clog << "\n";
