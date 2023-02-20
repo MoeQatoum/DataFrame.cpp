@@ -16,10 +16,8 @@ public:
     explicit Series(const sizetype& size) : m_size(size), m_d(new T[size]) {
     }
 
-    Series(const std::initializer_list<T>& ini_list) : m_size(ini_list.size()), m_d(new T[ini_list.size()]) {
-      for (sizetype i = 0; i < m_size; i++) {
-        m_d[i] = ini_list[i];
-      }
+    Series(const std::initializer_list<T>& il) : m_size(il.size()), m_d(new T[il.size()]) {
+      std::copy(il.begin(), il.end(), m_d);
     }
 
     Series(const sizetype& size, const T& fill) : m_size(size), m_d(new T[size]) {
@@ -61,7 +59,7 @@ public:
     // comparaison operators
     Series<bool> operator==(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] == other[i]);
       }
@@ -69,7 +67,7 @@ public:
     }
 
     friend Series<bool> operator==(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] == rhs);
       }
@@ -82,7 +80,7 @@ public:
 
     Series<bool> operator!=(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] != other[i]);
       }
@@ -90,7 +88,7 @@ public:
     }
 
     friend Series<bool> operator!=(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] != rhs);
       }
@@ -103,7 +101,7 @@ public:
 
     Series<bool> operator>=(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] >= other[i]);
       }
@@ -111,7 +109,7 @@ public:
     }
 
     friend Series<bool> operator>=(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] >= rhs);
       }
@@ -119,7 +117,7 @@ public:
     }
 
     friend Series<bool> operator>=(const T& lhs, const Series& rhs) {
-      Series<bool> temp{rhs.m_size};
+      Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs >= rhs[i]);
       }
@@ -128,7 +126,7 @@ public:
 
     Series<bool> operator<=(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] <= other[i]);
       }
@@ -136,7 +134,7 @@ public:
     }
 
     friend Series<bool> operator<=(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] <= rhs);
       }
@@ -144,7 +142,7 @@ public:
     }
 
     friend Series<bool> operator<=(const T& lhs, const Series& rhs) {
-      Series<bool> temp{rhs.m_size};
+      Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs <= rhs[i]);
       }
@@ -153,7 +151,7 @@ public:
 
     Series<bool> operator<(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] < other[i]);
       }
@@ -161,7 +159,7 @@ public:
     }
 
     friend Series<bool> operator<(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] < rhs);
       }
@@ -169,7 +167,7 @@ public:
     }
 
     friend Series<bool> operator<(const T& lhs, const Series& rhs) {
-      Series<bool> temp{rhs.m_size};
+      Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs < rhs[i]);
       }
@@ -178,7 +176,7 @@ public:
 
     Series<bool> operator>(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
-      Series<bool> temp{m_size};
+      Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] > other[i]);
       }
@@ -186,7 +184,7 @@ public:
     }
 
     friend Series<bool> operator>(const Series& lhs, const T& rhs) {
-      Series<bool> temp{lhs.m_size};
+      Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] > rhs);
       }
@@ -194,7 +192,7 @@ public:
     }
 
     friend Series<bool> operator>(const T& lhs, const Series& rhs) {
-      Series<bool> temp{rhs.m_size};
+      Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs > rhs[i]);
       }
@@ -203,7 +201,7 @@ public:
 
     // arithmetic operators
     Series operator+(const Series& rhs) {
-      Series res{m_size};
+      Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         res[i] = m_d[i] + rhs[i];
       }
@@ -211,7 +209,7 @@ public:
     }
 
     friend Series operator+(const Series& lhs, const T& rhs) {
-      Series res{lhs.m_size};
+      Series res(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         res[i] = lhs[i] + rhs;
       }
@@ -243,7 +241,7 @@ public:
     }
 
     Series operator-(const Series& rhs) {
-      Series res{m_size};
+      Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         res[i] = m_d[i] - rhs[i];
       }
@@ -251,7 +249,7 @@ public:
     }
 
     friend Series operator-(const Series& lhs, const T& rhs) {
-      Series res{lhs.m_size};
+      Series res(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         res[i] = lhs[i] - rhs;
       }
@@ -259,7 +257,7 @@ public:
     }
 
     friend Series operator-(const T& lhs, const Series& rhs) {
-      Series res{rhs.m_size};
+      Series res(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         res[i] = lhs - rhs[i];
       }

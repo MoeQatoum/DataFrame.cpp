@@ -16,12 +16,9 @@ using namespace df;
 TEST(series_operators_tests, is_equal) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 == series_1);
   df::Series<bool> result_2 = (series_1 == series_2);
@@ -44,12 +41,9 @@ TEST(series_operators_tests, is_equal) {
 TEST(series_operators_tests, is_not_equal_operator) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 != series_1);
   df::Series<bool> result_2 = (series_1 != series_2);
@@ -72,12 +66,9 @@ TEST(series_operators_tests, is_not_equal_operator) {
 TEST(series_operators_tests, grater_or_equal_operator) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 >= series_1);
   df::Series<bool> result_2 = (series_1 >= series_2);
@@ -102,12 +93,9 @@ TEST(series_operators_tests, grater_or_equal_operator) {
 TEST(series_operators_tests, less_than_or_equal_operator) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 <= series_1);
   df::Series<bool> result_2 = (series_1 <= series_2);
@@ -135,9 +123,9 @@ TEST(series_operators_tests, less_than_operator) {
   int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 < series_1);
   df::Series<bool> result_2 = (series_1 < series_2);
@@ -163,12 +151,9 @@ TEST(series_operators_tests, less_than_operator) {
 TEST(series_operators_tests, grater_than_operator) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  int array_2[N] = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
-  df::Series<int> series_2 = make_series<int, 10>(array_1);
-  df::Series<int> series_3 = make_series<int, 10>(array_2);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_2 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
+  df::Series<int> series_3 = make_series<int>({9, 8, 7, 6, 5, 4, 3, 2, 1, 0});
 
   df::Series<bool> result_1 = (series_1 > series_1);
   df::Series<bool> result_2 = (series_1 > series_2);
@@ -194,9 +179,7 @@ TEST(series_operators_tests, grater_than_operator) {
 TEST(series_operators_tests, add_operators) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   df::Series<int> result_1 = series_1++;
   df::Series<int> result_2 = ++series_1;
@@ -221,9 +204,7 @@ TEST(series_operators_tests, add_operators) {
 TEST(series_operators_tests, subtraction_operators) {
   constexpr int N = 10;
 
-  int array_1[N] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-
-  df::Series<int> series_1 = make_series<int, 10>(array_1);
+  df::Series<int> series_1 = make_series<int>({0, 1, 2, 3, 4, 5, 6, 7, 8, 9});
 
   df::Series<int> result_1 = series_1--;
   df::Series<int> result_2 = --series_1;
