@@ -80,7 +80,7 @@ namespace df {
     }
 
     Series<T> copy_data() {
-      Series<T> data{m_size};
+      Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         data[i] = (*(m_d + i))->value;
       }
