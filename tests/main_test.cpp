@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "column_tests.h"
 #include "df_tests.h"
 #include "series_tests.h"
 

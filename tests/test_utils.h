@@ -29,13 +29,9 @@ df::DataFrame<T> create_dataframe() {
   return df;
 }
 
-template<typename T, df::sizetype N>
-df::Series<T> make_series(T data[]) {
-  df::Series<T> temp{N};
-  for (df::sizetype i = 0; i < N; i++) {
-    temp[i] = data[i];
-  }
-  return temp;
+template<typename T>
+df::Series<T> make_series(std::initializer_list<T> data) {
+  return df::Series<T>{data};
 }
 
 #endif // TEST_UTILS_H
