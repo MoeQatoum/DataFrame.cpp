@@ -38,8 +38,8 @@ int main() {
     }
     // i.column()[0]->value = 123;
     auto d = col_iter.current_col().copy_data();
-    for (int i = 0; i < d.size; i++) {
-      clog << d.data[i] << ", ";
+    for (int i = 0; i < d.size(); i++) {
+      clog << d[i] << ", ";
     }
     clog << "\n";
   }
@@ -51,8 +51,8 @@ int main() {
     }
     // i.row()[0]->value = 123;
     auto d = row_iter.current_row().copy_data();
-    for (int i = 0; i < d.size; i++) {
-      clog << d.data[i] << ", ";
+    for (int i = 0; i < d.size(); i++) {
+      clog << d[i] << ", ";
     }
     clog << "\n";
   }
@@ -69,6 +69,13 @@ int main() {
   DataFrame<int> new_df = df.copy();
   clog << "\n--new df:\n";
   new_df.log();
+
+  clog << "\n";
+  Series<int> comp = df.column(1) + df.column(2);
+  for (sizetype i = 0; i < comp.size(); i++) {
+    clog << comp[i] << " ";
+  }
+  clog << "\n";
 
   clog << "------------------SORTING------------------\n";
 
@@ -134,9 +141,9 @@ int main() {
   unsorted_dec_df.log();
 
   clog << "------------------SERIES------------------\n";
-  Series<int> series_1{20};
+  Series<int> series_1(20);
   fill_series(series_1, 1);
-  Series<int> series_2{20};
+  Series<int> series_2(20);
   fill_series(series_2, 2);
 
   Series<bool> bar = (series_2 == 2);
