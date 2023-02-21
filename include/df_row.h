@@ -16,20 +16,6 @@ namespace df {
   class DataFrame;
 
   template<typename T>
-  struct RowData {
-
-    RowData(sizetype size) : size(size), data(new T[size]) {
-    }
-
-    T*       data;
-    sizetype size;
-
-    ~RowData() {
-      delete[] data;
-    }
-  };
-
-  template<typename T>
   struct Row {
 
     using ValueType         = typename DataFrame<T>::pValueType;

@@ -18,16 +18,18 @@ namespace df {
           row_name(other.row_name) {
     }
 
-    // Index(Index&& other) = delete;
+    // Index(const Index&& other) = delete;
 
     // Index& operator=(const Index& other) {
-    //   Index temp_idx;
-    //   temp_idx.row_idx    = other.row_idx;
-    //   temp_idx.col_idx    = other.col_idx;
-    //   temp_idx.global_idx = other.global_idx;
-    //   temp_idx.col_name   = other.col_name;
-    //   temp_idx.row_name   = other.row_name;
-    //   return temp_idx;
+    //   if (this != &other) {
+    //     Index temp_idx;
+    //     temp_idx.row_idx    = other.row_idx;
+    //     temp_idx.col_idx    = other.col_idx;
+    //     temp_idx.global_idx = other.global_idx;
+    //     temp_idx.col_name   = other.col_name;
+    //     temp_idx.row_name   = other.row_name;
+    //   }
+    //   return *this;
     // }
 
     sizetype row_idx;
@@ -63,7 +65,7 @@ namespace df {
     Cell(const Cell& other) : value(other.value), idx(other.idx) {
     }
 
-    // Cell(Cell&& other) = delete;
+    // Cell(const Cell&& other) = delete;
 
     Cell<T>& operator=(const Cell<T>& other) {
       if (this != &other) {
