@@ -20,12 +20,6 @@ public:
       std::copy(il.begin(), il.end(), m_d);
     }
 
-    Series(const sizetype& size, const T& fill) : m_size(size), m_d(new T[size]) {
-      for (sizetype i = 0; i < size; i++) {
-        m_d[i] = fill;
-      }
-    }
-
     ~Series() {
       delete[] m_d;
     }
