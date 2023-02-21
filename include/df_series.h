@@ -52,7 +52,7 @@ public:
 
     // comparaison operators
     Series<bool> operator==(const Series& other) const {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] == other[i]);
@@ -73,7 +73,7 @@ public:
     }
 
     Series<bool> operator!=(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] != other[i]);
@@ -94,7 +94,7 @@ public:
     }
 
     Series<bool> operator>=(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] >= other[i]);
@@ -119,7 +119,7 @@ public:
     }
 
     Series<bool> operator<=(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] <= other[i]);
@@ -144,7 +144,7 @@ public:
     }
 
     Series<bool> operator<(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] < other[i]);
@@ -169,7 +169,7 @@ public:
     }
 
     Series<bool> operator>(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         temp[i] = (m_d[i] > other[i]);
@@ -195,6 +195,7 @@ public:
 
     // arithmetic operators
     Series operator+(const Series& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         res[i] = m_d[i] + rhs[i];
@@ -234,7 +235,29 @@ public:
       return *this;
     }
 
+    Series operator*(const Series& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
+      Series res(m_size);
+      for (sizetype i = 0; i < m_size; i++) {
+        res[i] = m_d[i] * rhs[i];
+      }
+      return res;
+    }
+
+    friend Series operator*(const Series& lhs, const T& rhs) {
+      Series res(lhs.m_size);
+      for (sizetype i = 0; i < lhs.m_size; i++) {
+        res[i] = lhs[i] * rhs;
+      }
+      return res;
+    }
+
+    friend Series operator*(const T& lhs, const Series& rhs) {
+      return rhs * lhs;
+    }
+
     Series operator-(const Series& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         res[i] = m_d[i] - rhs[i];
@@ -278,8 +301,33 @@ public:
       return *this;
     }
 
+    Series operator/(const Series& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
+      Series res(m_size);
+      for (sizetype i = 0; i < m_size; i++) {
+        res[i] = m_d[i] / rhs[i];
+      }
+      return res;
+    }
+
+    friend Series operator/(const Series& lhs, const T& rhs) {
+      Series res(lhs.m_size);
+      for (sizetype i = 0; i < lhs.m_size; i++) {
+        res[i] = lhs[i] / rhs;
+      }
+      return res;
+    }
+
+    friend Series operator/(const T& lhs, const Series& rhs) {
+      Series res(rhs.m_size);
+      for (sizetype i = 0; i < rhs.m_size; i++) {
+        res[i] = lhs / rhs[i];
+      }
+      return res;
+    }
+
     bool is_equal_with(const Series& other) {
-      FORCED_ASSERT(m_size == other.m_size, "comparaison operations on nonmatching size objects");
+      FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i] != other[i]) {
           return false;
