@@ -17,11 +17,11 @@ using namespace df;
 #define COUNT__ITER_SORT_BENCH 1000
 #define COUNT__ITER_COPY_BENCH 30
 
-// #define DF_BENCH
-// #define ROW_BENCH
-// #define COL_BENCH
-// #define SORT_BENCH
-// #define ROW_SORT_BENCH
+#define DF_BENCH
+#define ROW_BENCH
+#define COL_BENCH
+#define SORT_BENCH
+#define ROW_SORT_BENCH
 #define COPY_BENCH
 
 template<typename TimeUnit, unsigned long N>
@@ -301,7 +301,7 @@ int main() {
     }
     String col_name = bench_col_names[static_cast<sizetype>(rand()) % (bench_col_names.size() - 1)];
     msec_timer.tick();
-    df.asc_sort_rows(col_name);
+    df.inplace_ascending_sort(col_name);
     msec_timer.tock();
     sort_bench_data[i] = msec_timer.duration().count();
   }
@@ -322,7 +322,7 @@ int main() {
     }
     String col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
     msec_timer.tick();
-    asc_sort_rows(df, col_name);
+    ascending_sort(df, col_name);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }
