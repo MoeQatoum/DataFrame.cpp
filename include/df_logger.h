@@ -22,15 +22,17 @@ namespace df {
 
     using DataFrame            = DataFrame<T>;
     using CellLoggingColorCond = std::function<String(Cell<T>*)>;
+    using CellLoggingPrecCond  = std::function<int(Cell<T>*)>;
 
-    DF_Logger(DataFrame* df, sizetype max_col_name_size = 0, sizetype max_row_name_size = 0)
+    DF_Logger(DataFrame* df)
         : df(df),
           floatPrecision(8),
           spacing(5),
           max_col_name_size(max_col_name_size),
           max_row_name_size(max_row_name_size),
           excluded_cols({}) {
-      cell_color_condition = [](Cell<T>*) { return String(DF_COLOR_W); };
+      cell_color_condition     = [](Cell<T>*) { return String(DF_COLOR_W); };
+      cell_precision_condition = [this](Cell<T>*) { return floatPrecision; };
     }
 
     DF_Logger(const DF_Logger& other)
@@ -49,13 +51,14 @@ namespace df {
     }
     DataFrame* df;
 
-    sizetype   floatPrecision;
+    int        floatPrecision;
     sizetype   spacing;
     sizetype   max_col_name_size;
     sizetype   max_row_name_size;
     StringList excluded_cols;
 
     CellLoggingColorCond cell_color_condition;
+    CellLoggingPrecCond  cell_precision_condition;
 
 public:
 #ifdef QT_IMPLEMENTATION
@@ -186,8 +189,8 @@ public:
         dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
           if (!excluded_cols.contains(c->idx.col_name)) {
-            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', floatPrecision)
-                << DF_COLOR_W;
+            dbg << cell_color_condition(c)
+                << String("%1").arg(c->value, -col_spacing, 'f', cellCellLoggingPrecCond(c), '0') << DF_COLOR_W;
           }
         }
         dbg << "\n";
@@ -382,8 +385,13 @@ public:
       max_row_name_size = size;
     }
 
-    DF_Logger with_cell_logging_color_condition(CellLoggingColorCond condition) {
+    DF_Logger with_cell_color_condition(CellLoggingColorCond condition) {
       cell_color_condition = condition;
+      return *this;
+    }
+
+    DF_Logger with_cell_precision_condition(CellLoggingPrecCond condition) {
+      cell_precision_condition = condition;
       return *this;
     }
   };

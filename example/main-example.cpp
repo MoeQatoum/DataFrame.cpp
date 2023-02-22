@@ -136,7 +136,7 @@ int main() {
 
   sorted_aec_df = sorted_dec_df;
   sorted_aec_df.logger
-    .with_cell_logging_color_condition([df](Cell<int>* c) {
+    .with_cell_color_condition([df](Cell<int>* c) {
       if ((c->idx.col_name == "col-2") && (c->value > 10)) {
         return DF_COLOR_G;
       } else {
