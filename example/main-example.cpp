@@ -59,6 +59,18 @@ int main() {
 
   df.log();
 
+  for (sizetype i = 0; i < df.size(); ++i) {
+    df[i] = static_cast<int>(i);
+  }
+
+  clog << "-- copy assignment operator row:\n";
+  df.row(0) = df.row(1);
+  df.log();
+
+  clog << "-- copy assignment operator column:\n";
+  df.column(0) = df.column(1);
+  df.log();
+
   clog << "------------------COPY_DF------------------\n";
   for (sizetype i = 0; i < df.size(); i++) {
     df[i] = rand() % static_cast<int>(df.size());

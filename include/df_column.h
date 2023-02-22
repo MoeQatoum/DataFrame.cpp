@@ -60,6 +60,24 @@ namespace df {
 #endif
     }
 
+    Column& operator=(const Column& rhs) {
+      if (this != &rhs) {
+        FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+        for (sizetype i = 0; i < m_size; i++) {
+          m_d[i]->value = rhs[i]->value;
+        }
+      }
+      return *this;
+    }
+
+    Column& operator=(const Series<T>& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+      for (sizetype i = 0; i < m_size; i++) {
+        m_d[i]->value = rhs[i];
+      }
+      return *this;
+    }
+
     // comparaison operators
     Series<bool> operator==(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");

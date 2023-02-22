@@ -65,6 +65,23 @@ namespace df {
 #endif
     }
 
+    Row& operator=(const Row& rhs) {
+      if (this != &rhs) {
+        FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+        for (sizetype i = 0; i < m_size; i++) {
+          m_d[i]->value = rhs[i]->value;
+        }
+      }
+      return *this;
+    }
+
+    Row& operator=(const Series<T>& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+      for (sizetype i = 0; i < m_size; i++) {
+        m_d[i]->value = rhs[i];
+      }
+    }
+
     Series<T> copy_data() {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
