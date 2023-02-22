@@ -28,8 +28,8 @@ namespace df {
         : df(df),
           floatPrecision(8),
           spacing(5),
-          max_col_name_size(max_col_name_size),
-          max_row_name_size(max_row_name_size),
+          max_col_name_size(0),
+          max_row_name_size(0),
           excluded_cols({}) {
       cell_color_condition     = [](Cell<T>*) { return String(DF_COLOR_W); };
       cell_precision_condition = [this](Cell<T>*) { return floatPrecision; };
