@@ -360,6 +360,14 @@ public:
       return m_size;
     }
 
+    T* data() {
+      return m_d;
+    }
+
+    const T* data() const {
+      return m_d;
+    }
+
 private:
     T*       m_d;
     sizetype m_size;

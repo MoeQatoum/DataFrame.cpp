@@ -50,9 +50,9 @@ namespace df {
     }
 
     ValueType operator[](const String& col_name) {
-      for (sizetype idx = 0; idx < m_size; idx++) {
-        if ((*(m_d + idx))->idx.col_name == col_name) {
-          return *(m_d + idx);
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == col_name) {
+          return m_d[i];
         }
       }
 
@@ -85,10 +85,19 @@ namespace df {
     Series<T> copy_data() {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
-        data[i] = (*(m_d + i))->value;
+        data[i] = m_d[i]->value;
       }
       return data;
     }
+
+    Series<T> copy_data() const {
+      Series<T> data(m_size);
+      for (sizetype i = 0; i < m_size; i++) {
+        data[i] = m_d[i]->value;
+      }
+      return data;
+    }
+
 #ifdef QT_IMPLEMENTATION
     friend QDebug operator<<(QDebug dbg, const Row& row) {
       dbg.noquote().nospace();

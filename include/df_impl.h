@@ -474,6 +474,14 @@ public:
       return m_d[idx];
     }
 
+    Column operator[](const String& col_name) {
+      return column(col_name);
+    }
+
+    Column operator[](const String& col_name) const {
+      return column(col_name);
+    }
+
     ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) {
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");

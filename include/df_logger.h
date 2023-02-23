@@ -32,7 +32,7 @@ namespace df {
           max_row_name_size(0),
           excluded_cols({}) {
       cell_color_condition     = [](Cell<T>*) { return String(DF_COLOR_W); };
-      cell_precision_condition = [this](Cell<T>*) { return floatPrecision; };
+      cell_precision_condition = [](Cell<T>*) { return 8; };
     }
 
     DF_Logger(const DF_Logger& other)
@@ -52,7 +52,7 @@ namespace df {
     DataFrame* df;
 
     int        floatPrecision;
-    sizetype   spacing;
+    int        spacing;
     sizetype   max_col_name_size;
     sizetype   max_row_name_size;
     StringList excluded_cols;
@@ -68,7 +68,6 @@ public:
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
-      int    spacing   = 5;
       int    idx_space = 4;
 
       int row_name_space = max_row_name_size + spacing;
@@ -100,7 +99,7 @@ public:
         dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
           if (!excluded_cols.contains(c->idx.col_name)) {
-            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', floatPrecision)
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', cell_precision_condition(c))
                 << DF_COLOR_W;
           }
         }
@@ -157,7 +156,6 @@ public:
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
-      int    spacing   = 5;
       int    idx_space = 4;
 
       int row_name_space = max_row_name_size + spacing;
@@ -189,8 +187,8 @@ public:
         dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
         for (const auto& c : current_row) {
           if (!excluded_cols.contains(c->idx.col_name)) {
-            dbg << cell_color_condition(c)
-                << String("%1").arg(c->value, -col_spacing, 'f', cellCellLoggingPrecCond(c), '0') << DF_COLOR_W;
+            dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', cell_precision_condition(c))
+                << DF_COLOR_W;
           }
         }
         dbg << "\n";

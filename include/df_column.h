@@ -36,18 +36,16 @@ namespace df {
 
     ValueType& operator[](const sizetype& idx) {
       return m_d[idx];
-      // return *(m_d + idx);
     }
 
     const ValueType& operator[](const sizetype& idx) const {
       return m_d[idx];
-      // return *(m_d + idx);
     }
 
     ValueType operator[](const String& row_name) {
-      for (sizetype idx = 0; idx < m_size; idx++) {
-        if ((*(m_d + idx))->idx.row_name == row_name) {
-          return *(m_d + idx);
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.row_name == row_name) {
+          return m_d[i];
         }
       }
 
@@ -449,7 +447,15 @@ namespace df {
     Series<T> copy_data() {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
-        data[i] = (*(m_d + i))->value;
+        data[i] = m_d[i]->value;
+      }
+      return data;
+    }
+
+    Series<T> copy_data() const {
+      Series<T> data(m_size);
+      for (sizetype i = 0; i < m_size; i++) {
+        data[i] = m_d[i]->value;
       }
       return data;
     }
