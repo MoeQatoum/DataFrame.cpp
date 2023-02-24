@@ -21,8 +21,9 @@ namespace df {
     friend class DataFrame<T>;
 
     using DataFrame            = DataFrame<T>;
-    using CellLoggingColorCond = std::function<String(Cell<T>*)>;
-    using CellLoggingPrecCond  = std::function<int(Cell<T>*)>;
+    using CellLoggingColorCond = std::function<String(const Cell<T>*)>;
+    using RowNameColorCond     = std::function<String(const Row<T>*)>;
+    using CellLoggingPrecCond  = std::function<int(const Cell<T>*)>;
 
     DF_Logger(DataFrame* df)
         : df(df),
@@ -31,8 +32,9 @@ namespace df {
           max_col_name_size(0),
           max_row_name_size(0),
           excluded_cols({}) {
-      cell_color_condition     = [](Cell<T>*) { return String(DF_COLOR_W); };
-      cell_precision_condition = [](Cell<T>*) { return 8; };
+      cell_color_condition     = [](const Cell<T>*) { return String(DF_COLOR_W); };
+      row_name_color_condition = [](const Row<T>*) { return String(DF_COLOR_W); };
+      cell_precision_condition = [](const Cell<T>*) { return 8; };
     }
 
     DF_Logger(const DF_Logger& other)
@@ -42,13 +44,16 @@ namespace df {
           max_col_name_size(other.max_col_name_size),
           max_row_name_size(other.max_row_name_size),
           excluded_cols(other.excluded_cols),
-          cell_color_condition(other.cell_color_condition) {
+          cell_color_condition(other.cell_color_condition),
+          cell_precision_condition(other.cell_precision_condition),
+          row_name_color_condition(other.row_name_color_condition) {
     }
 
     DF_Logger operator=(const DF_Logger& other) {
       if (this != &other) {}
       return *this;
     }
+
     DataFrame* df;
 
     int        floatPrecision;
@@ -58,6 +63,7 @@ namespace df {
     StringList excluded_cols;
 
     CellLoggingColorCond cell_color_condition;
+    RowNameColorCond     row_name_color_condition;
     CellLoggingPrecCond  cell_precision_condition;
 
 public:
@@ -184,7 +190,8 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const Row<T>& current_row = sorted_rows[idx];
-        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << row_name_color_condition(&current_row)
+            << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
           if (!excluded_cols.contains(c->idx.col_name)) {
             dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing, 'f', cell_precision_condition(c))
@@ -229,7 +236,8 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const Row<T>& current_row = sorted_rows[idx];
-        dbg << String("%1").arg(current_row.idx(), -idx_space) << String("%1").arg(current_row.name(), -row_name_space);
+        dbg << String("%1").arg(current_row.idx(), -idx_space) << row_name_color_condition(&current_row)
+            << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
           if (!excluded_cols.contains(c->idx.col_name)) {
             dbg << cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
@@ -385,6 +393,11 @@ public:
 
     DF_Logger with_cell_color_condition(CellLoggingColorCond condition) {
       cell_color_condition = condition;
+      return *this;
+    }
+
+    DF_Logger with_row_color_condition(RowNameColorCond condition) {
+      row_name_color_condition = condition;
       return *this;
     }
 
