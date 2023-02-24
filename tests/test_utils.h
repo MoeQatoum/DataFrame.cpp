@@ -18,7 +18,7 @@ df::DataFrame<T> create_dataframe() {
   df::StringList row_names{};
   for (df::sizetype i = 1; i <= ROW_COUNT; i++) {
 #ifdef QT_IMPLEMENTATION
-    row_names.push_back(String("row-%1").arg(i));
+    row_names.push_back(df::String("row-%1").arg(i));
 #else
     row_names.push_back(df::String{"row-" + std::to_string(i)});
 #endif
