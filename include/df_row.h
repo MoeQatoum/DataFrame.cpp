@@ -98,6 +98,38 @@ namespace df {
       return data;
     }
 
+    ValueType at_column(const String& col_name) {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == col_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_IMPLEMENTATION
+      qWarning() << "col name not found.";
+      qTerminate();
+#else
+      std::cerr << "col name not found.";
+      abort();
+#endif
+    }
+
+    ValueType at_column(const String& col_name) const {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == col_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_IMPLEMENTATION
+      qWarning() << "col name not found.";
+      qTerminate();
+#else
+      std::cerr << "col name not found.";
+      abort();
+#endif
+    }
+
 #ifdef QT_IMPLEMENTATION
     friend QDebug operator<<(QDebug dbg, const Row& row) {
       dbg.noquote().nospace();
