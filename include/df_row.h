@@ -25,6 +25,9 @@ namespace df {
   class RowGroup_Logger;
 
   template<typename T>
+  class LoggingContext;
+
+  template<typename T>
   struct Row {
 
     using ValueType         = typename DataFrame<T>::pValueType;
@@ -216,7 +219,7 @@ private:
     using value_t = typename Row<T>::ValueType;
 
 public:
-    RowGroup(const DataFrame<T>& df) : logger(this) {
+    RowGroup(const DataFrame<T>& df) : logger(this), logging_context(df.logger.context) {
       for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
 #ifdef QT_IMPLEMENTATION
         m_rows.push_back(row_iter.current_row());
@@ -225,20 +228,11 @@ public:
 #endif
       }
 
-      m_max_col_name_size = df.max_col_name_size();
-      m_max_row_name_size = df.max_row_name_size();
-
-      logger.set_max_col_name_size(m_max_col_name_size);
-      logger.set_max_row_name_size(m_max_row_name_size);
+      logger.with_context(logging_context);
     }
 
-    RowGroup(const RowGroup& other)
-        : m_rows(other.m_rows),
-          logger(this),
-          m_max_col_name_size(other.m_max_col_name_size),
-          m_max_row_name_size(other.m_max_row_name_size) {
-      logger.set_max_col_name_size(m_max_col_name_size);
-      logger.set_max_row_name_size(m_max_row_name_size);
+    RowGroup(const RowGroup& other) : m_rows(other.m_rows), logger(this), logging_context(other.logging_context) {
+      logger.with_context(logging_context);
     }
 
     Row<T> operator[](const sizetype& idx) {
@@ -356,9 +350,7 @@ public:
 private:
     List<Row<T>> m_rows;
 
-    // logger
-    sizetype m_max_col_name_size;
-    sizetype m_max_row_name_size;
+    LoggingContext<T> logging_context;
   };
 
 } // namespace df

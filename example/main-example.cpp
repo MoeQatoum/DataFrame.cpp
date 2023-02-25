@@ -134,7 +134,7 @@ int main() {
   clog << unsorted_dec_df.column(1) << "\n";
 
   unsorted_asc_df = sorted_dec_df;
-  unsorted_asc_df.logger.with_cell_color_condition([df](const Cell<int>* c) {
+  unsorted_asc_df.logger.context.with_cell_color_condition([df](const Cell<int>* c) {
     if ((c->idx.col_name == "col-2") && (c->value > 10)) {
       return DF_COLOR_G;
     } else {

@@ -20,47 +20,11 @@ namespace df {
   class RowGroup;
 
   template<typename T>
-  class Logger {
-
-protected:
+  struct LoggingContext {
     using CellLoggingColorCond = std::function<String(const Cell<T>*)>;
     using RowNameColorCond     = std::function<String(const Row<T>*)>;
     using CellLoggingPrecCond  = std::function<int(const Cell<T>*)>;
 
-    Logger() : floatPrecision(8), spacing(5), max_col_name_size(0), max_row_name_size(0), excluded_cols({}) {
-      cell_color_condition     = [](const Cell<T>*) { return String(DF_COLOR_W); };
-      row_name_color_condition = [](const Row<T>*) { return String(DF_COLOR_W); };
-      cell_precision_condition = [](const Cell<T>*) { return 8; };
-    }
-
-    Logger(const Logger& other)
-        : floatPrecision(other.floatPrecision),
-          spacing(other.spacing),
-          max_col_name_size(other.max_col_name_size),
-          max_row_name_size(other.max_row_name_size),
-          excluded_cols(other.excluded_cols),
-          cell_color_condition(other.cell_color_condition),
-          cell_precision_condition(other.cell_precision_condition),
-          row_name_color_condition(other.row_name_color_condition) {
-    }
-
-    Logger operator=(const Logger& other) {
-      if (this != &other) {}
-      return *this;
-    }
-
-protected:
-    int        floatPrecision;
-    int        spacing;
-    sizetype   max_col_name_size;
-    sizetype   max_row_name_size;
-    StringList excluded_cols;
-
-    CellLoggingColorCond cell_color_condition;
-    RowNameColorCond     row_name_color_condition;
-    CellLoggingPrecCond  cell_precision_condition;
-
-public:
     void with_exclude_columns(StringList column_names) {
       excluded_cols = column_names;
     }
@@ -96,6 +60,39 @@ public:
     void with_cell_precision_condition(CellLoggingPrecCond condition) {
       cell_precision_condition = condition;
     }
+
+    CellLoggingColorCond cell_color_condition     = [](const Cell<T>*) { return String(DF_COLOR_W); };
+    RowNameColorCond     row_name_color_condition = [](const Row<T>*) { return String(DF_COLOR_W); };
+    CellLoggingPrecCond  cell_precision_condition = [](const Cell<T>*) { return 8; };
+    int                  floatPrecision           = 8;
+    int                  spacing                  = 5;
+    sizetype             max_col_name_size        = 0;
+    sizetype             max_row_name_size        = 0;
+    StringList           excluded_cols            = {};
+  };
+
+  template<typename T>
+  class Logger {
+
+protected:
+    Logger() {
+    }
+
+    Logger(const Logger& other) : context(other.context) {
+    }
+
+    Logger operator=(const Logger& other) {
+      if (this != &other) {}
+      return *this;
+    }
+
+public:
+    LoggingContext<T> context;
+
+    Logger& with_context(LoggingContext<T> context) {
+      this->context = context;
+      return *this;
+    }
   };
 
   template<typename T>
@@ -119,12 +116,12 @@ public:
       QDebug dbg       = clog.noquote().nospace();
       int    idx_space = 4;
 
-      int row_name_space = this->max_row_name_size + this->spacing;
-      int col_spacing    = this->max_col_name_size + this->spacing;
+      int row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
-      dbg << String("%1").arg("idx", -(this->max_row_name_size + this->spacing + idx_space));
+      dbg << String("%1").arg("idx", -(this->context.max_row_name_size + this->context.spacing + idx_space));
       for (const auto& cell : df->row(0)) {
-        if (!this->excluded_cols.contains(cell->idx.col_name)) {
+        if (!this->context.excluded_cols.contains(cell->idx.col_name)) {
           dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
         }
       }
@@ -145,12 +142,13 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const auto& current_row = df->row(idx);
-        dbg << String("%1").arg(current_row.index(), -idx_space) << this->row_name_color_condition(&current_row)
+        dbg << String("%1").arg(current_row.index(), -idx_space) << this->context.row_name_color_condition(&current_row)
             << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
-          if (!this->excluded_cols.contains(c->idx.col_name)) {
-            dbg << this->cell_color_condition(c)
-                << String("%1").arg(c->value, -col_spacing, 'f', this->cell_precision_condition(c)) << DF_COLOR_W;
+          if (!this->context.excluded_cols.contains(c->idx.col_name)) {
+            dbg << this->context.cell_color_condition(c)
+                << String("%1").arg(c->value, -col_spacing, 'f', this->context.cell_precision_condition(c))
+                << DF_COLOR_W;
           }
         }
         dbg << "\n";
@@ -162,15 +160,14 @@ public:
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
-      int    spacing   = 5;
       int    idx_space = 4;
 
-      int row_name_space = this->max_row_name_size + this->spacing;
-      int col_spacing    = this->max_col_name_size + this->spacing;
+      int row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
-      dbg << String("%1").arg("idx", -(this->max_row_name_size + spacing + idx_space));
+      dbg << String("%1").arg("idx", -(this->context.max_row_name_size + this->context.spacing + idx_space));
       for (const auto& cell : df->row(0)) {
-        if (!this->excluded_cols.contains(cell->idx.col_name)) {
+        if (!this->context.excluded_cols.contains(cell->idx.col_name)) {
           dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
         }
       }
@@ -191,11 +188,11 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const auto& current_row = df->row(idx);
-        dbg << String("%1").arg(current_row.index(), -idx_space) << this->row_name_color_condition(&current_row)
+        dbg << String("%1").arg(current_row.index(), -idx_space) << this->context.row_name_color_condition(&current_row)
             << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
-          if (!this->excluded_cols.contains(c->idx.col_name)) {
-            dbg << this->cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
+          if (!this->context.excluded_cols.contains(c->idx.col_name)) {
+            dbg << this->context.cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
           }
         }
         dbg << "\n";
@@ -206,11 +203,10 @@ public:
     void log(int range = 0) {
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
-      sizetype spacing   = 5;
       sizetype idx_space = 4;
 
-      sizetype row_name_space = this->max_row_name_size + spacing;
-      int      col_spacing    = this->max_col_name_size + spacing;
+      sizetype row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int      col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
       auto contains = [](const StringList& excluded_cols_list, const String& cur_col_name) {
         return std::find_if(excluded_cols_list.begin(),
@@ -220,12 +216,12 @@ public:
       };
 
       if (std::is_floating_point_v<T>) {
-        clog.precision(this->floatPrecision + 1);
+        clog.precision(this->context.floatPrecision + 1);
       }
 
       clog << std::left << std::setw(row_name_space + idx_space) << "idx";
       for (const auto& [col_name, v] : this->df->m_col_idx_map) {
-        if (!contains(this->excluded_cols, col_name)) {
+        if (!contains(this->context.excluded_cols, col_name)) {
           clog << std::left << std::setw(col_spacing) << col_name;
         }
       }
@@ -246,11 +242,12 @@ public:
 
       for (int idx = range_start; idx < range_end; idx++) {
         const auto& current_row = this->df->row(idx);
-        clog << std::left << std::setw(idx_space) << current_row.index() << std ::left << std::setw(row_name_space)
-             << current_row.name();
+        clog << std::left << std::setw(idx_space) << current_row.index()
+             << this->context.row_name_color_condition(&current_row) << std ::left << std::setw(row_name_space)
+             << current_row.name() << DF_COLOR_W;
         for (const auto& cell : current_row) {
-          if (!contains(this->excluded_cols, cell->idx.col_name)) {
-            clog << this->cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value
+          if (!contains(this->context.excluded_cols, cell->idx.col_name)) {
+            clog << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value
                  << DF_COLOR_W;
           }
         }
@@ -276,17 +273,17 @@ public:
 #ifdef QT_IMPLEMENTATION
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
-      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+      // DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    idx_space = 4;
 
-      int row_name_space = this->max_row_name_size + this->spacing;
-      int col_spacing    = this->max_col_name_size + this->spacing;
+      int row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
-      dbg << String("%1").arg("idx", -(this->max_row_name_size + this->spacing + idx_space));
-      for (const auto& cell : rg->row(0)) {
-        if (!this->excluded_cols.contains(cell->idx.col_name)) {
+      dbg << String("%1").arg("idx", -(this->context.max_row_name_size + this->context.spacing + idx_space));
+      for (const auto& cell : rg->at(0)) {
+        if (!this->context.excluded_cols.contains(cell->idx.col_name)) {
           dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
         }
       }
@@ -296,7 +293,7 @@ public:
       sizetype range_end;
       if (range == 0) {
         range_start = 0;
-        range_end   = rg->m_row_count;
+        range_end   = rg->size();
       } else if (range > 0) {
         range_start = 0;
         range_end   = static_cast<sizetype>(range);
@@ -307,12 +304,13 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const Row<T>& current_row = rg->at(idx);
-        dbg << String("%1").arg(current_row.index(), -idx_space) << this->row_name_color_condition(&current_row)
+        dbg << String("%1").arg(current_row.index(), -idx_space) << this->context.row_name_color_condition(&current_row)
             << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
-          if (!this->excluded_cols.contains(c->idx.col_name)) {
-            dbg << this->cell_color_condition(c)
-                << String("%1").arg(c->value, -col_spacing, 'f', this->cell_precision_condition(c)) << DF_COLOR_W;
+          if (!this->context.excluded_cols.contains(c->idx.col_name)) {
+            dbg << this->context.cell_color_condition(c)
+                << String("%1").arg(c->value, -col_spacing, 'f', this->context.cell_precision_condition(c))
+                << DF_COLOR_W;
           }
         }
         dbg << "\n";
@@ -326,12 +324,12 @@ public:
       QDebug dbg       = clog.noquote().nospace();
       int    idx_space = 4;
 
-      int row_name_space = this->max_row_name_size + this->spacing;
-      int col_spacing    = this->max_col_name_size + this->spacing;
+      int row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
-      dbg << String("%1").arg("idx", -(this->max_row_name_size + this->spacing + idx_space));
+      dbg << String("%1").arg("idx", -(this->context.max_row_name_size + this->context.spacing + idx_space));
       for (const auto& cell : rg->at(0)) {
-        if (!this->excluded_cols.contains(cell->idx.col_name)) {
+        if (!this->context.excluded_cols.contains(cell->idx.col_name)) {
           dbg << String("%1").arg(cell->idx.col_name, -col_spacing);
         }
       }
@@ -352,11 +350,11 @@ public:
 
       for (sizetype idx = range_start; idx < range_end; idx++) {
         const Row<T>& current_row = rg->at(idx);
-        dbg << String("%1").arg(current_row.index(), -idx_space) << this->row_name_color_condition(&current_row)
+        dbg << String("%1").arg(current_row.index(), -idx_space) << this->context.row_name_color_condition(&current_row)
             << String("%1").arg(current_row.name(), -row_name_space) << DF_COLOR_W;
         for (const auto& c : current_row) {
-          if (!this->excluded_cols.contains(c->idx.col_name)) {
-            dbg << this->cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
+          if (!this->context.excluded_cols.contains(c->idx.col_name)) {
+            dbg << this->context.cell_color_condition(c) << String("%1").arg(c->value, -col_spacing) << DF_COLOR_W;
           }
         }
         dbg << "\n";
@@ -368,8 +366,8 @@ public:
       // DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
 
       sizetype idx_space      = 4;
-      sizetype row_name_space = this->max_row_name_size + this->spacing;
-      int      col_spacing    = this->max_col_name_size + this->spacing;
+      sizetype row_name_space = this->context.max_row_name_size + this->context.spacing;
+      int      col_spacing    = this->context.max_col_name_size + this->context.spacing;
 
       auto contains = [](const StringList& excluded_cols_list, const String& cur_col_name) {
         return std::find_if(excluded_cols_list.begin(),
@@ -379,12 +377,12 @@ public:
       };
 
       if (std::is_floating_point_v<T>) {
-        clog.precision(this->floatPrecision + 1);
+        clog.precision(this->context.floatPrecision + 1);
       }
 
       clog << std::left << std::setw(row_name_space + idx_space) << "idx";
       for (const auto& c : rg->at(0)) {
-        if (!contains(this->excluded_cols, c->idx.col_name)) {
+        if (!contains(this->context.excluded_cols, c->idx.col_name)) {
           clog << std::left << std::setw(col_spacing) << c->idx.col_name;
         }
       }
@@ -405,11 +403,12 @@ public:
 
       for (int idx = range_start; idx < range_end; idx++) {
         const Row<T>& current_row = rg->at(idx);
-        clog << std::left << std::setw(idx_space) << current_row.index() << this->row_name_color_condition(&current_row)
-             << std ::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
+        clog << std::left << std::setw(idx_space) << current_row.index()
+             << this->context.row_name_color_condition(&current_row) << std ::left << std::setw(row_name_space)
+             << current_row.name() << DF_COLOR_W;
         for (const auto& cell : current_row) {
-          if (!contains(this->excluded_cols, cell->idx.col_name)) {
-            clog << this->cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value
+          if (!contains(this->context.excluded_cols, cell->idx.col_name)) {
+            clog << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value
                  << DF_COLOR_W;
           }
         }

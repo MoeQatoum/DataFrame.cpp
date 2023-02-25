@@ -369,7 +369,7 @@ public:
     using ColumnIterator = ColumnIterator<DataFrame<T>>;
     using Logger         = DF_Logger<T>;
 
-    DataFrame(const StringList& col_names, const StringList& row_names) : logger(this) {
+    DataFrame(const StringList& col_names, const StringList& row_names) : logger(this), logging_context({}) {
       m_col_count    = static_cast<sizetype>(col_names.size());
       m_row_count    = static_cast<sizetype>(row_names.size());
       m_col_size     = m_row_count;
@@ -377,17 +377,14 @@ public:
       m_current_size = m_col_count * m_row_count;
       m_d            = new ValueType[m_current_size];
 
-      m_max_col_name_size = 0;
-      m_max_row_name_size = 0;
-
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_col_idx_map.insert(col_names[i], i);
 #else
         m_col_idx_map.insert({col_names[i], i});
 #endif
-        if (col_names[i].size() > m_max_col_name_size) {
-          m_max_col_name_size = col_names[i].size();
+        if (col_names[i].size() > logging_context.max_col_name_size) {
+          logging_context.max_col_name_size = col_names[i].size();
         }
       }
 
@@ -397,8 +394,8 @@ public:
 #else
         m_row_idx_map.insert({row_names[i], i});
 #endif
-        if (row_names[i].size() > m_max_row_name_size) {
-          m_max_row_name_size = row_names[i].size();
+        if (row_names[i].size() > logging_context.max_row_name_size) {
+          logging_context.max_row_name_size = row_names[i].size();
         }
       }
 
@@ -419,11 +416,10 @@ public:
         m_d[i].idx.row_name = row_names[i / m_col_count];
       }
 
-      logger.set_max_col_name_size(m_max_col_name_size);
-      logger.set_max_row_name_size(m_max_row_name_size);
+      logger.with_context(logging_context);
     }
 
-    DataFrame(const RowGroup& rows) : logger(this) {
+    DataFrame(const RowGroup& rows) : logger(this), logging_context({}) {
       m_col_count    = rows[0].size();
       m_row_count    = rows.size();
       m_col_size     = m_row_count;
@@ -439,17 +435,14 @@ public:
         }
       }
 
-      m_max_col_name_size = 0;
-      m_max_row_name_size = 0;
-
       for (sizetype i = 0; i < m_col_count; i++) {
 #ifdef QT_IMPLEMENTATION
         m_col_idx_map.insert(m_d[i].idx.col_name, i);
 #else
         m_col_idx_map.insert({m_d[i].idx.col_name, i});
 #endif
-        if (m_d[i].idx.col_name.size() > m_max_col_name_size) {
-          m_max_col_name_size = m_d[i].idx.col_name.size();
+        if (m_d[i].idx.col_name.size() > logging_context.max_col_name_size) {
+          logging_context.max_col_name_size = m_d[i].idx.col_name.size();
         }
       }
 
@@ -459,13 +452,12 @@ public:
 #else
         m_row_idx_map.insert({m_d[i].idx.row_name, i});
 #endif
-        if (m_d[i].idx.row_name.size() > m_max_row_name_size) {
-          m_max_row_name_size = m_d[i].idx.row_name.size();
+        if (m_d[i].idx.row_name.size() > logging_context.max_row_name_size) {
+          logging_context.max_row_name_size = m_d[i].idx.row_name.size();
         }
       }
 
-      logger.set_max_col_name_size(m_max_col_name_size);
-      logger.set_max_row_name_size(m_max_row_name_size);
+      logger.with_context(logging_context);
     }
 
     DataFrame(const DataFrame& other)
@@ -476,15 +468,13 @@ public:
           m_col_count(other.m_col_count),
           m_row_size(other.m_row_size),
           m_row_count(other.m_row_count),
-          m_max_col_name_size(other.m_max_col_name_size),
-          m_max_row_name_size(other.m_max_row_name_size),
+          logging_context(other.logging_context),
           logger(this),
           m_d(new ValueType[m_current_size]) {
       for (sizetype idx = 0; idx < m_current_size; idx++) {
         m_d[idx] = other.m_d[idx];
       }
-      logger.set_max_col_name_size(m_max_col_name_size);
-      logger.set_max_row_name_size(m_max_row_name_size);
+      logger.with_context(logging_context);
     }
 
     ~DataFrame() {
@@ -496,16 +486,15 @@ public:
                     "Copy assignment operator on DataFrame with other nonmatching size.");
 
       if (this != &other) {
-        m_col_idx_map       = other.m_col_idx_map;
-        m_row_idx_map       = other.m_row_idx_map;
-        m_current_size      = other.m_current_size;
-        m_col_size          = other.m_col_size;
-        m_col_count         = other.m_col_count;
-        m_row_size          = other.m_row_size;
-        m_row_count         = other.m_row_count;
-        m_max_col_name_size = other.m_max_col_name_size;
-        m_max_row_name_size = other.m_max_row_name_size;
-        logger              = other.logger;
+        m_col_idx_map   = other.m_col_idx_map;
+        m_row_idx_map   = other.m_row_idx_map;
+        m_current_size  = other.m_current_size;
+        m_col_size      = other.m_col_size;
+        m_col_count     = other.m_col_count;
+        m_row_size      = other.m_row_size;
+        m_row_count     = other.m_row_count;
+        logging_context = other.logging_context;
+        logger          = other.logger;
 
         for (sizetype idx = 0; idx < m_current_size; idx++) {
           m_d[idx] = other.m_d[idx];
@@ -732,22 +721,6 @@ public:
 
     Logger logger;
 
-    // sizetype max_col_name_size() {
-    //   return m_max_col_name_size;
-    // }
-
-    sizetype max_col_name_size() const {
-      return m_max_col_name_size;
-    }
-
-    // sizetype max_row_name_size() {
-    //   return m_max_row_name_size;
-    // }
-
-    sizetype max_row_name_size() const {
-      return m_max_row_name_size;
-    }
-
 private:
     IndexHash  m_col_idx_map;
     IndexHash  m_row_idx_map;
@@ -758,9 +731,7 @@ private:
     sizetype   m_row_count;
     ValueType* m_d;
 
-    // logging
-    sizetype m_max_col_name_size;
-    sizetype m_max_row_name_size;
+    LoggingContext<T> logging_context;
   };
 
 } // namespace df
