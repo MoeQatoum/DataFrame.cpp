@@ -489,20 +489,20 @@ namespace df {
       return m_stride;
     }
 
-    constexpr sizetype idx() {
-      return (*begin())->idx.col_idx;
+    constexpr sizetype index() {
+      return m_d[0]->idx.col_idx;
     }
 
-    constexpr const sizetype& idx() const {
-      return (*begin())->idx.col_idx;
+    constexpr const sizetype& index() const {
+      return m_d[0]->idx.col_idx;
     }
 
     String name() {
-      return (*begin())->idx.col_name;
+      return m_d[0]->idx.col_name;
     }
 
     const String& name() const {
-      return (*begin())->idx.col_name;
+      return m_d[0]->idx.col_name;
     }
 
     ColIterator begin() {
