@@ -13,7 +13,7 @@ public:
     using ValueType      = T;
     using SeriesIterator = Iterator<Series>;
 
-    explicit Series(const sizetype& size) : m_size(size), m_d(new T[size]) {
+    explicit Series(const sizetype& size) : m_d(new T[size]), m_size(size) {
     }
 
     Series(const std::initializer_list<T>& il) : m_size(il.size()), m_d(new T[il.size()]) {
