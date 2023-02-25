@@ -369,6 +369,17 @@ public:
     using ColumnIterator = ColumnIterator<DataFrame<T>>;
     using Logger         = DF_Logger<T>;
 
+    DataFrame()
+        : logger(this),
+          logging_context({}),
+          m_current_size(0),
+          m_col_size(0),
+          m_col_count(0),
+          m_row_size(0),
+          m_row_count(0),
+          m_d(nullptr) {
+    }
+
     DataFrame(const StringList& col_names, const StringList& row_names) : logger(this), logging_context({}) {
       m_col_count    = static_cast<sizetype>(col_names.size());
       m_row_count    = static_cast<sizetype>(row_names.size());

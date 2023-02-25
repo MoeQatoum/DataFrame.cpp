@@ -18,6 +18,9 @@ namespace df {
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using ColIterator       = Iterator<Column>;
 
+    Column() : m_size(0), m_stride(0), m_d(nullptr) {
+    }
+
     Column(DataFrameIterator col_begin, sizetype col_size, sizetype stride) {
       m_size   = col_size;
       m_stride = stride;
