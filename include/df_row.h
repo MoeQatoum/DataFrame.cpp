@@ -91,7 +91,7 @@ namespace df {
         }
 
         for (sizetype i = 0; i < m_size; i++) {
-          m_d[i] = rhs[i];
+          m_d[i]->value = rhs[i]->value;
         }
       }
       return *this;
