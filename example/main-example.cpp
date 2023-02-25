@@ -96,28 +96,27 @@ int main() {
   clog << "-- unsorted df:\n";
   unsorted_df.log();
 
-  clog << "\n-- aec sort:\n";
-  List<Row<int>> aec_sorted_rows = ascending_sort(unsorted_df, "col-2");
-  clog << "asc rows log algo: \n";
-  unsorted_df.logger.log_sorted_rows(aec_sorted_rows);
+  clog << "\n-- asc sort:\n";
+  auto asc_sorted_rows = unsorted_df.ascending_sorted_rows("col-2");
+  asc_sorted_rows.log();
+
   clog << "asc rows log algo head 5: \n";
-  unsorted_df.logger.log_sorted_rows(aec_sorted_rows, 5);
+  asc_sorted_rows.log(5);
   clog << "asc rows log algo tail 3: \n";
-  unsorted_df.logger.log_sorted_rows(aec_sorted_rows, -3);
+  asc_sorted_rows.log(-3);
 
   clog << "\n-- dec sort:\n";
-  List<Row<int>> dec_sorted_rows = descending_sort(unsorted_df, "col-2");
-  clog << "dec rows log algo: \n";
-  unsorted_df.logger.log_sorted_rows(dec_sorted_rows);
+  auto dec_sorted_rows = unsorted_df.rows().descending_sorted(unsorted_df["col-2"]);
+  dec_sorted_rows.log();
 
   clog << "\n-- inplace aec sort:\n";
-  DataFrame<int> unsorted_aec_df = unsorted_df.copy();
-  DataFrame<int> sorted_aec_df   = unsorted_aec_df.inplace_ascending_sort("col-2");
-  sorted_aec_df.log();
+  DataFrame<int> unsorted_asc_df = unsorted_df.copy();
+  DataFrame<int> sorted_asc_df(unsorted_asc_df.rows().ascending_sorted(unsorted_asc_df["col-2"]));
+  sorted_asc_df.log();
 
   clog << "\n-- inplace dec sort:\n";
   DataFrame<int> unsorted_dec_df = unsorted_df.copy();
-  DataFrame<int> sorted_dec_df   = unsorted_dec_df.inplace_descending_rows("col-2");
+  DataFrame<int> sorted_dec_df(unsorted_asc_df.rows().descending_sorted(unsorted_asc_df["col-2"]));
   sorted_dec_df.log();
 
   clog << "------------------LOGGING------------------\n";
@@ -134,16 +133,15 @@ int main() {
   clog << "-- log col with operator<<:\n";
   clog << unsorted_dec_df.column(1) << "\n";
 
-  sorted_aec_df = sorted_dec_df;
-  sorted_aec_df.logger
-    .with_cell_color_condition([df](const Cell<int>* c) {
-      if ((c->idx.col_name == "col-2") && (c->value > 10)) {
-        return DF_COLOR_G;
-      } else {
-        return DF_COLOR_W;
-      }
-    })
-    .log(10);
+  unsorted_asc_df = sorted_dec_df;
+  unsorted_asc_df.logger.with_cell_color_condition([df](const Cell<int>* c) {
+    if ((c->idx.col_name == "col-2") && (c->value > 10)) {
+      return DF_COLOR_G;
+    } else {
+      return DF_COLOR_W;
+    }
+  });
+  unsorted_asc_df.log(10);
 
   clog << "------------------UTILS------------------\n";
   clog << "-- before fill_df():\n";

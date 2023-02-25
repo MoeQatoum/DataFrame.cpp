@@ -14,15 +14,15 @@ using namespace df;
 #define COUNT__ITER_DF_BENCH   1000
 #define COUNT__ITER_ROW_BENCH  1000
 #define COUNT__ITER_COL_BENCH  1000
-#define COUNT__ITER_SORT_BENCH 1000
+#define COUNT__ITER_SORT_BENCH 5
 #define COUNT__ITER_COPY_BENCH 30
 
 #define DF_BENCH
 #define ROW_BENCH
 #define COL_BENCH
-#define SORT_BENCH
+// #define SORT_BENCH
 #define ROW_SORT_BENCH
-#define COPY_BENCH
+// #define COPY_BENCH
 
 template<typename TimeUnit, unsigned long N>
 void print_bench_result(std::array<long, N> data, const char* bench_name) {
@@ -320,9 +320,11 @@ int main() {
     for (sizetype i = 0; i < df.size(); ++i) {
       df[i] = static_cast<dataT>(static_cast<sizetype>(rand()) % df.size());
     }
-    String col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
+    // String col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
+    auto col_name = df[bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)]];
+    auto rows     = df.rows();
     msec_timer.tick();
-    ascending_sort(df, col_name);
+    rows.ascending_sorted(col_name);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }

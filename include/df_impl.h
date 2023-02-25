@@ -362,6 +362,7 @@ public:
     using ValueType      = Cell<T>;
     using pValueType     = Cell<T>*;
     using Row            = Row<T>;
+    using RowGroup       = RowGroup<T>;
     using Column         = Column<T>;
     using Iterator       = Iterator<DataFrame<T>>;
     using RowIterator    = RowIterator<DataFrame<T>>;
@@ -422,6 +423,51 @@ public:
       logger.set_max_row_name_size(m_max_row_name_size);
     }
 
+    DataFrame(const RowGroup& rows) : logger(this) {
+      m_col_count    = rows[0].size();
+      m_row_count    = rows.size();
+      m_col_size     = m_row_count;
+      m_row_size     = m_col_count;
+      m_current_size = m_col_count * m_row_count;
+      m_d            = new ValueType[m_current_size];
+
+      sizetype idx = 0;
+      for (sizetype row_idx = 0; row_idx < m_row_count; row_idx++) {
+        for (sizetype i = 0; i < m_col_count; i++) {
+          m_d[idx] = *rows[row_idx][i];
+          idx++;
+        }
+      }
+
+      m_max_col_name_size = 0;
+      m_max_row_name_size = 0;
+
+      for (sizetype i = 0; i < m_col_count; i++) {
+#ifdef QT_IMPLEMENTATION
+        m_col_idx_map.insert(m_d[i].idx.col_name, i);
+#else
+        m_col_idx_map.insert({m_d[i].idx.col_name, i});
+#endif
+        if (m_d[i].idx.col_name.size() > m_max_col_name_size) {
+          m_max_col_name_size = m_d[i].idx.col_name.size();
+        }
+      }
+
+      for (sizetype i = 0; i < m_current_size; i += m_row_size) {
+#ifdef QT_IMPLEMENTATION
+        m_row_idx_map.insert(m_d[i].idx.row_name, i);
+#else
+        m_row_idx_map.insert({m_d[i].idx.row_name, i});
+#endif
+        if (m_d[i].idx.row_name.size() > m_max_row_name_size) {
+          m_max_row_name_size = m_d[i].idx.row_name.size();
+        }
+      }
+
+      logger.set_max_col_name_size(m_max_col_name_size);
+      logger.set_max_row_name_size(m_max_row_name_size);
+    }
+
     DataFrame(const DataFrame& other)
         : m_col_idx_map(other.m_col_idx_map),
           m_row_idx_map(other.m_row_idx_map),
@@ -432,11 +478,13 @@ public:
           m_row_count(other.m_row_count),
           m_max_col_name_size(other.m_max_col_name_size),
           m_max_row_name_size(other.m_max_row_name_size),
-          logger(other.logger),
+          logger(this),
           m_d(new ValueType[m_current_size]) {
       for (sizetype idx = 0; idx < m_current_size; idx++) {
         m_d[idx] = other.m_d[idx];
       }
+      logger.set_max_col_name_size(m_max_col_name_size);
+      logger.set_max_row_name_size(m_max_row_name_size);
     }
 
     ~DataFrame() {
@@ -631,6 +679,10 @@ public:
       return Row{begin(), get_row_idx(row_name), m_row_size};
     }
 
+    RowGroup rows() {
+      return RowGroup(*this);
+    }
+
     Iterator begin() {
       return Iterator(m_d);
     }
@@ -647,142 +699,30 @@ public:
       return Iterator(m_d + m_current_size);
     }
 
-    RowIterator iter_rows() {
-      return RowIterator(begin(), m_row_size);
-    }
-
     ColumnIterator iter_cols() {
       return ColumnIterator(begin(), m_col_size, m_row_size);
     }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    List<Row> ascending_sorted_rows(String col_name) {
-      return ascending_sort(*this, col_name);
+    ColumnIterator iter_cols() const {
+      return ColumnIterator(begin(), m_col_size, m_row_size);
+    }
+
+    RowIterator iter_rows() {
+      return RowIterator(begin(), m_row_size);
+    }
+
+    RowIterator iter_rows() const {
+      return RowIterator(begin(), m_row_size);
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    List<Row> descending_sorted_rows(String col_name) {
-      return descending_sort(*this, col_name);
+    RowGroup ascending_sorted_rows(String column_name) {
+      return RowGroup(*this).ascending_sorted(column(column_name));
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    DataFrame inplace_ascending_sort(String col_name) {
-      sizetype col_idx = get_col_idx(col_name);
-      Column   col     = column(col_name);
-
-      pValueType* sorted_cells = new pValueType[col.size()];
-
-      List<Row> rows;
-      for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
-        rows.push_back(row_iterator.current_row());
-      }
-
-      sorted_cells[0] = col[0];
-
-      for (sizetype idx = 0; idx < col.size(); idx++) {
-        bool     lower_found = false;
-        sizetype insert_idx  = 0;
-        for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-          if (col[idx]->value < sorted_cells[sorted_idx]->value) {
-            lower_found = true;
-            insert_idx  = sorted_idx;
-            break;
-          }
-        }
-        if (lower_found) {
-          for (sizetype i = idx - 1; i >= insert_idx; i--) {
-            sorted_cells[i + 1] = sorted_cells[i];
-
-            // avoidsizetype (aka df_ui32) underflow
-            if (i == 0) {
-              break;
-            }
-          }
-          sorted_cells[insert_idx] = col[idx];
-        } else {
-          sorted_cells[idx] = col[idx];
-        }
-      }
-
-      // sort
-      sizetype   idx       = 0;
-      ValueType* temp_vals = new ValueType[m_current_size];
-
-      for (sizetype i = 0; i < col.size(); i++) {
-        for (auto c : row(sorted_cells[i]->idx.row_idx)) {
-          temp_vals[idx] = *c;
-          idx++;
-        }
-        m_row_idx_map[sorted_cells[i]->idx.row_name] = i;
-      }
-
-      delete[] sorted_cells;
-
-      for (sizetype i = 0; i < m_current_size; i++) {
-        m_d[i] = temp_vals[i];
-      }
-      delete[] temp_vals;
-
-      return *this;
-    }
-
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    DataFrame inplace_descending_rows(String col_name) {
-      sizetype col_idx = get_col_idx(col_name);
-      Column   col     = column(col_name);
-
-      pValueType* sorted_cells = new pValueType[col.size()];
-
-      List<Row> rows;
-      for (auto row_iterator = iter_rows(); row_iterator < end(); row_iterator++) {
-        rows.push_back(row_iterator.current_row());
-      }
-
-      sorted_cells[0] = col[0];
-
-      for (sizetype idx = 0; idx < col.size(); idx++) {
-        bool     higher_found = false;
-        sizetype insert_idx   = 0;
-        for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-          if (col[idx]->value > sorted_cells[sorted_idx]->value) {
-            higher_found = true;
-            insert_idx   = sorted_idx;
-            break;
-          }
-        }
-        if (higher_found) {
-          for (sizetype i = idx - 1; i >= insert_idx; i--) {
-            sorted_cells[i + 1] = sorted_cells[i];
-
-            if (i == 0) {
-              break;
-            }
-          }
-          sorted_cells[insert_idx] = col[idx];
-        } else {
-          sorted_cells[idx] = col[idx];
-        }
-      }
-
-      sizetype   idx       = 0;
-      ValueType* temp_vals = new ValueType[m_current_size];
-
-      for (sizetype i = 0; i < col.size(); i++) {
-        for (auto c : row(sorted_cells[i]->idx.row_idx)) {
-          temp_vals[idx] = *c;
-          idx++;
-        }
-        m_row_idx_map[sorted_cells[i]->idx.row_name] = i;
-      }
-
-      delete[] sorted_cells;
-
-      for (sizetype i = 0; i < m_current_size; i++) {
-        m_d[i] = temp_vals[i];
-      }
-      delete[] temp_vals;
-
-      return *this;
+    RowGroup descending_sorted_rows(String column_name) {
+      return RowGroup(*this).descending_sorted(column(column_name));
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
@@ -790,17 +730,23 @@ public:
       logger.log(range);
     }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    void log_ascending_sorted_rows(String col_name, int range = 0) {
-      logger.log_sorted_rows(ascending_sorted_rows(col_name), range);
-    }
-
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    void log_descending_sorted_rows(String col_name, int range = 0) {
-      logger.log_sorted_rows(descending_sorted_rows(col_name), range);
-    }
-
     Logger logger;
+
+    // sizetype max_col_name_size() {
+    //   return m_max_col_name_size;
+    // }
+
+    sizetype max_col_name_size() const {
+      return m_max_col_name_size;
+    }
+
+    // sizetype max_row_name_size() {
+    //   return m_max_row_name_size;
+    // }
+
+    sizetype max_row_name_size() const {
+      return m_max_row_name_size;
+    }
 
 private:
     IndexHash  m_col_idx_map;
