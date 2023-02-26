@@ -52,21 +52,20 @@ namespace df {
 
 #ifndef NDEBUG
   #ifdef QT_IMPLEMENTATION
-    #define DF_ASSERT(condition, message)                        \
-      do {                                                       \
-        if (!(condition)) {                                      \
-          qFatal(QString("%1%2%3%4%5%6%7%8")                     \
-                   .arg("Assertion `" #condition "` failed in ") \
-                   .arg(__FILE__)                                \
-                   .arg(" line ")                                \
-                   .arg(__LINE__)                                \
-                   .arg(" function ")                            \
-                   .arg(__PRETTY_FUNCTION__)                     \
-                   .arg(": ")                                    \
-                   .arg(message)                                 \
-                   .toStdString()                                \
-                   .c_str());                                    \
-        }                                                        \
+    #define DF_ASSERT(condition, message)                         \
+      do {                                                        \
+        if (!(condition)) {                                       \
+          qFatal(QString("Assertion `" #condition "` failed in ") \
+                   .append(__FILE__)                              \
+                   .append(" line ")                              \
+                   .append(QString::number(__LINE__))             \
+                   .append(" function ")                          \
+                   .append(__PRETTY_FUNCTION__)                   \
+                   .append(": ")                                  \
+                   .append(message)                               \
+                   .toStdString()                                 \
+                   .c_str());                                     \
+        }                                                         \
       } while (false)
   #else
     #define DF_ASSERT(condition, message)                                                                          \
@@ -85,21 +84,20 @@ namespace df {
 #endif
 
 #ifdef QT_IMPLEMENTATION
-  #define FORCED_ASSERT(condition, message)                    \
-    do {                                                       \
-      if (!(condition)) {                                      \
-        qFatal(QString("%1%2%3%4%5%6%7%8")                     \
-                 .arg("Assertion `" #condition "` failed in ") \
-                 .arg(__FILE__)                                \
-                 .arg(" line ")                                \
-                 .arg(__LINE__)                                \
-                 .arg(" function ")                            \
-                 .arg(__PRETTY_FUNCTION__)                     \
-                 .arg(": ")                                    \
-                 .arg(message)                                 \
-                 .toStdString()                                \
-                 .c_str());                                    \
-      }                                                        \
+  #define FORCED_ASSERT(condition, message)                     \
+    do {                                                        \
+      if (!(condition)) {                                       \
+        qFatal(QString("Assertion `" #condition "` failed in ") \
+                 .append(__FILE__)                              \
+                 .append(" line ")                              \
+                 .append(QString::number(__LINE__))             \
+                 .append(" function ")                          \
+                 .append(__PRETTY_FUNCTION__)                   \
+                 .append(": ")                                  \
+                 .append(message)                               \
+                 .toStdString()                                 \
+                 .c_str());                                     \
+      }                                                         \
     } while (false)
 #else
   #define FORCED_ASSERT(condition, message)                                                                      \
