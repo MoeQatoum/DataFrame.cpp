@@ -167,27 +167,27 @@ namespace df {
     }
 #endif
 
-    constexpr sizetype size() {
+    sizetype size() {
       return m_size;
     }
 
-    constexpr sizetype size() const {
+    sizetype size() const {
       return m_size;
     }
 
-    constexpr const sizetype& index() {
+    const sizetype index() {
       return m_d[0]->idx.row_idx;
     }
 
-    constexpr const sizetype& index() const {
+    const sizetype index() const {
       return m_d[0]->idx.row_idx;
     }
 
-    String& name() {
+    String name() {
       return m_d[0]->idx.row_name;
     }
 
-    const String& name() const {
+    const String name() const {
       return m_d[0]->idx.row_name;
     }
 
@@ -221,7 +221,7 @@ private:
     using value_t = typename Row<T>::ValueType;
 
 public:
-    RowGroup(const DataFrame<T>& df) : logger(this), logging_context(df.logger.context) {
+    RowGroup(const DataFrame<T>& df) : logger(this), logging_context(df.logger.context), m_row_size(df.row_size()) {
       for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
 #ifdef QT_IMPLEMENTATION
         m_rows.push_back(row_iter.current_row());
@@ -233,22 +233,26 @@ public:
       logger.with_context(logging_context);
     }
 
-    RowGroup(const RowGroup& other) : m_rows(other.m_rows), logger(this), logging_context(other.logging_context) {
+    RowGroup(const RowGroup& other)
+        : logger(this),
+          logging_context(other.logging_context),
+          m_row_size(other.m_row_size),
+          m_rows(other.m_rows) {
       logger.with_context(logging_context);
     }
 
     RowGroup operator=(const RowGroup& other) = delete;
 
-    Row<T> operator[](const sizetype& idx) {
+    Row<T>& operator[](const sizetype& idx) {
       return m_rows[idx];
     }
 
-    Row<T> operator[](const sizetype& idx) const {
+    const Row<T>& operator[](const sizetype& idx) const {
       return m_rows[idx];
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup sort(const Column<T>& column, bool ascending = false) {
+    RowGroup& sort(const Column<T>& column, bool ascending = false) {
       Series<value_t> sorted_cells(size());
       bool            lower_found;
       sizetype        insert_idx;
@@ -301,11 +305,19 @@ public:
       return m_rows.size();
     }
 
-    Row<T> at(sizetype index) {
+    sizetype row_size() {
+      return m_row_size;
+    }
+
+    sizetype row_size() const {
+      return m_row_size;
+    }
+
+    Row<T>& at(sizetype index) {
       return m_rows[index];
     }
 
-    Row<T> at(sizetype index) const {
+    const Row<T>& at(sizetype index) const {
       return m_rows[index];
     }
 
@@ -324,8 +336,8 @@ public:
     RowGroup_Logger<T> logger;
 
 private:
-    List<Row<T>> m_rows;
-
+    sizetype          m_row_size;
+    List<Row<T>>      m_rows;
     LoggingContext<T> logging_context;
   };
 

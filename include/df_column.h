@@ -487,27 +487,27 @@ namespace df {
     }
 #endif
 
-    constexpr sizetype size() {
+    sizetype size() {
       return m_size;
     }
 
-    constexpr sizetype size() const {
+    sizetype size() const {
       return m_size;
     }
 
-    constexpr sizetype stride() {
+    sizetype stride() {
       return m_stride;
     }
 
-    constexpr sizetype stride() const {
+    sizetype stride() const {
       return m_stride;
     }
 
-    constexpr sizetype index() {
+    sizetype index() {
       return m_d[0]->idx.col_idx;
     }
 
-    constexpr const sizetype& index() const {
+    const sizetype index() const {
       return m_d[0]->idx.col_idx;
     }
 
@@ -515,7 +515,7 @@ namespace df {
       return m_d[0]->idx.col_name;
     }
 
-    const String& name() const {
+    const String name() const {
       return m_d[0]->idx.col_name;
     }
 

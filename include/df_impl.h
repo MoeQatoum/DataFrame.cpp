@@ -644,31 +644,35 @@ public:
       return m_d[idx];
     }
 
-    constexpr sizetype size() const {
+    sizetype size() const {
       return m_current_size;
     }
 
-    constexpr sizetype col_size() const {
+    sizetype col_size() const {
       return m_col_size;
     }
 
-    constexpr sizetype col_count() {
+    sizetype col_count() {
       return m_col_count;
     }
 
-    constexpr sizetype col_count() const {
+    sizetype col_count() const {
       return m_col_count;
     }
 
-    constexpr sizetype row_size() const {
+    sizetype row_size() {
       return m_row_size;
     }
 
-    constexpr sizetype row_count() {
+    sizetype row_size() const {
+      return m_row_size;
+    }
+
+    sizetype row_count() {
       return m_row_count;
     }
 
-    constexpr sizetype row_count() const {
+    sizetype row_count() const {
       return m_row_count;
     }
 
