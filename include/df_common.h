@@ -52,20 +52,21 @@ namespace df {
 
 #ifndef NDEBUG
   #ifdef QT_IMPLEMENTATION
-    #define DF_ASSERT(condition, message)                         \
-      do {                                                        \
-        if (!(condition)) {                                       \
-          qFatal(QString("Assertion `" #condition "` failed in ") \
-                   .append(__FILE__)                              \
-                   .append(" line ")                              \
-                   .append(QString::number(__LINE__))             \
-                   .append(" function ")                          \
-                   .append(__PRETTY_FUNCTION__)                   \
-                   .append(": ")                                  \
-                   .append(message)                               \
-                   .toStdString()                                 \
-                   .c_str());                                     \
-        }                                                         \
+    #define DF_ASSERT(condition, message)             \
+      do {                                            \
+        if (!(condition)) {                           \
+          qFatal(QString("Assertion `%1` failed in ") \
+                   .arg(#condition)                   \
+                   .append(__FILE__)                  \
+                   .append(" line ")                  \
+                   .append(QString::number(__LINE__)) \
+                   .append(" function ")              \
+                   .append(__PRETTY_FUNCTION__)       \
+                   .append(": ")                      \
+                   .append(message)                   \
+                   .toStdString()                     \
+                   .c_str());                         \
+        }                                             \
       } while (false)
   #else
     #define DF_ASSERT(condition, message)                                                                          \
@@ -84,20 +85,21 @@ namespace df {
 #endif
 
 #ifdef QT_IMPLEMENTATION
-  #define FORCED_ASSERT(condition, message)                     \
-    do {                                                        \
-      if (!(condition)) {                                       \
-        qFatal(QString("Assertion `" #condition "` failed in ") \
-                 .append(__FILE__)                              \
-                 .append(" line ")                              \
-                 .append(QString::number(__LINE__))             \
-                 .append(" function ")                          \
-                 .append(__PRETTY_FUNCTION__)                   \
-                 .append(": ")                                  \
-                 .append(message)                               \
-                 .toStdString()                                 \
-                 .c_str());                                     \
-      }                                                         \
+  #define FORCED_ASSERT(condition, message)         \
+    do {                                            \
+      if (!(condition)) {                           \
+        qFatal(QString("Assertion `%1` failed in ") \
+                 .arg(#condition)                   \
+                 .append(__FILE__)                  \
+                 .append(" line ")                  \
+                 .append(QString::number(__LINE__)) \
+                 .append(" function ")              \
+                 .append(__PRETTY_FUNCTION__)       \
+                 .append(": ")                      \
+                 .append(message)                   \
+                 .toStdString()                     \
+                 .c_str());                         \
+      }                                             \
     } while (false)
 #else
   #define FORCED_ASSERT(condition, message)                                                                      \
