@@ -324,7 +324,7 @@ int main() {
     auto col_name = df[bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)]];
     auto rows     = df.rows();
     msec_timer.tick();
-    rows.ascending_sorted(col_name);
+    rows.sort(col_name, true);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }

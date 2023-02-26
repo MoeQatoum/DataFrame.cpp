@@ -127,7 +127,7 @@ TEST(df_sort, dfRowsAscendingSort) {
   sizetype col_idx  = 2;
   String   col_name = df.get_col_name(col_idx).value();
 
-  RowGroup<int> sorted_rows = df.ascending_sorted_rows(col_name);
+  RowGroup<int> sorted_rows = df.sort(col_name);
 
   EXPECT_EQ(sorted_rows.size(), df.row_count());
 

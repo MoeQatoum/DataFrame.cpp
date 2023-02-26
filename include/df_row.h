@@ -248,52 +248,24 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup& descending_sorted(Column<T> column) {
+    RowGroup sort(const Column<T>& column, bool ascending = false) {
       Series<value_t> sorted_cells(size());
       bool            lower_found;
       sizetype        insert_idx;
-      for (sizetype idx = 0; idx < m_rows.size(); idx++) {
-        lower_found = false;
-        insert_idx  = 0;
-        for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-          if (column[idx]->value > sorted_cells[sorted_idx]->value) {
-            lower_found = true;
-            insert_idx  = sorted_idx;
-            break;
-          }
-        }
-        if (lower_found) {
-          for (sizetype i = idx - 1; i >= insert_idx; i--) {
-            sorted_cells[i + 1] = sorted_cells[i];
-            // avoid sizetype underflow
-            if (i == 0) {
-              break;
-            }
-          }
-          sorted_cells[insert_idx] = column[idx];
-        } else {
-          sorted_cells[idx] = column[idx];
-        }
-      }
-      List<Row<T>> unsorted_rows;
-      unsorted_rows.resize(m_rows.size());
-      for (sizetype i = 0; i < m_rows.size(); i++) {
-        unsorted_rows[i] = m_rows[sorted_cells[i]->idx.row_idx];
-      }
-      m_rows.swap(unsorted_rows);
-      return *this;
-    }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup ascending_sorted(const Column<T>& column) {
-      Series<value_t> sorted_cells(size());
-      bool            lower_found;
-      sizetype        insert_idx;
+      std::function<bool(const T&, const T&)> sort_condition;
+
+      if (ascending) {
+        sort_condition = [](const T& current_value, const T& sorted_value) { return current_value < sorted_value; };
+      } else {
+        sort_condition = [](const T& current_value, const T& sorted_value) { return current_value > sorted_value; };
+      }
+
       for (sizetype idx = 0; idx < m_rows.size(); idx++) {
         lower_found = false;
         insert_idx  = 0;
         for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-          if (column[idx]->value < sorted_cells[sorted_idx]->value) {
+          if (sort_condition(column[idx]->value, sorted_cells[sorted_idx]->value)) {
             lower_found = true;
             insert_idx  = sorted_idx;
             break;

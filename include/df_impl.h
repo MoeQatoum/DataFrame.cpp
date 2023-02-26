@@ -734,13 +734,8 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup ascending_sorted_rows(String column_name) {
-      return RowGroup(*this).ascending_sorted(column(column_name));
-    }
-
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup descending_sorted_rows(String column_name) {
-      return RowGroup(*this).descending_sorted(column(column_name));
+    RowGroup sort(String column_name, bool ascending = false) {
+      return RowGroup(*this).sort(column(column_name), ascending);
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
