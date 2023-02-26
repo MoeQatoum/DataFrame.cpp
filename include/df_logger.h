@@ -273,7 +273,7 @@ public:
 #ifdef QT_IMPLEMENTATION
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
-      // DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    idx_space = 4;
@@ -319,7 +319,7 @@ public:
 
     template<typename U = T, std::enable_if_t<std::is_integral_v<U>, bool> = true>
     void log(int range = 0) {
-      DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
       QDebug dbg       = clog.noquote().nospace();
       int    idx_space = 4;
@@ -363,7 +363,7 @@ public:
 #else
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     void log(int range = 0) {
-      // DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+      DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
       sizetype idx_space      = 4;
       sizetype row_name_space = this->context.max_row_name_size + this->context.spacing;
