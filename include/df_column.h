@@ -72,9 +72,20 @@ namespace df {
     }
 
     Column& operator=(const Series<T>& rhs) {
-      FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
-      for (sizetype i = 0; i < m_size; i++) {
-        m_d[i]->value = rhs[i];
+      if (this != &rhs) {
+        if (is_null()) {
+          FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
+          m_size = rhs.m_size;
+          m_d    = new ValueType[m_size];
+          for (sizetype i = 0; i < m_size; i++) {
+            m_d[i] = rhs[i];
+          }
+        } else {
+          FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+          for (sizetype i = 0; i < m_size; i++) {
+            m_d[i]->value = rhs[i]->value;
+          }
+        }
       }
       return *this;
     }
@@ -522,6 +533,10 @@ namespace df {
 
     ColIterator end() const {
       return ColIterator(m_d + m_size);
+    }
+
+    bool is_null() {
+      return (m_d == nullptr) && (m_size == 0) && (m_stride == 0);
     }
 
 private:
