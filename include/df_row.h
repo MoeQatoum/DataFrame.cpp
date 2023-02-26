@@ -237,6 +237,8 @@ public:
       logger.with_context(logging_context);
     }
 
+    RowGroup operator=(const RowGroup& other) = delete;
+
     Row<T> operator[](const sizetype& idx) {
       return m_rows[idx];
     }

@@ -493,22 +493,35 @@ public:
     }
 
     DataFrame& operator=(const DataFrame& other) {
-      FORCED_ASSERT(m_current_size == other.m_current_size,
-                    "Copy assignment operator on DataFrame with other nonmatching size.");
-
       if (this != &other) {
-        m_col_idx_map   = other.m_col_idx_map;
-        m_row_idx_map   = other.m_row_idx_map;
-        m_current_size  = other.m_current_size;
-        m_col_size      = other.m_col_size;
-        m_col_count     = other.m_col_count;
-        m_row_size      = other.m_row_size;
-        m_row_count     = other.m_row_count;
-        logging_context = other.logging_context;
-        logger          = other.logger;
-
-        for (sizetype idx = 0; idx < m_current_size; idx++) {
-          m_d[idx] = other.m_d[idx];
+        if (is_null()) {
+          FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
+          m_col_idx_map   = other.m_col_idx_map;
+          m_row_idx_map   = other.m_row_idx_map;
+          m_current_size  = other.m_current_size;
+          m_col_size      = other.m_col_size;
+          m_col_count     = other.m_col_count;
+          m_row_size      = other.m_row_size;
+          m_row_count     = other.m_row_count;
+          logging_context = other.logging_context;
+          m_d             = new ValueType[other.m_current_size];
+          for (sizetype idx = 0; idx < m_current_size; idx++) {
+            m_d[idx] = other.m_d[idx];
+          }
+        } else {
+          FORCED_ASSERT(m_current_size == other.m_current_size,
+                        "Copy assignment operator on DataFrame with other nonmatching size.");
+          m_col_idx_map   = other.m_col_idx_map;
+          m_row_idx_map   = other.m_row_idx_map;
+          m_current_size  = other.m_current_size;
+          m_col_size      = other.m_col_size;
+          m_col_count     = other.m_col_count;
+          m_row_size      = other.m_row_size;
+          m_row_count     = other.m_row_count;
+          logging_context = other.logging_context;
+          for (sizetype idx = 0; idx < m_current_size; idx++) {
+            m_d[idx] = other.m_d[idx];
+          }
         }
       }
       return *this;
@@ -713,6 +726,11 @@ public:
 
     RowIterator iter_rows() const {
       return RowIterator(begin(), m_row_size);
+    }
+
+    bool is_null() {
+      return (m_d == nullptr) && (m_col_count == 0) && (m_col_size == 0) && (m_row_size == 0) && (m_row_size == 0)
+             && (m_current_size == 0);
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
