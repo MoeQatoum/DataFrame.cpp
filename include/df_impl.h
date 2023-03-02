@@ -692,7 +692,15 @@ public:
       return Row{begin(), row_idx, m_row_size};
     }
 
+    Row row(sizetype row_idx) const {
+      return Row{begin(), row_idx, m_row_size};
+    }
+
     Row row(String row_name) {
+      return Row{begin(), get_row_idx(row_name), m_row_size};
+    }
+
+    Row row(String row_name) const {
       return Row{begin(), get_row_idx(row_name), m_row_size};
     }
 
