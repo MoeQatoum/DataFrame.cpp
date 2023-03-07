@@ -96,6 +96,9 @@ int main() {
   clog << "-- unsorted df:\n";
   unsorted_df.log();
 
+  clog << "-- max min df:\n";
+  clog << unsorted_df["col-2"].max() << " " << unsorted_df["col-2"].min() << "\n";
+
   clog << "\n-- asc sort:\n";
   auto asc_sorted_rows = unsorted_df.sort("col-2", true);
   asc_sorted_rows.log();

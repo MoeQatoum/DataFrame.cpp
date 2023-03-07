@@ -326,6 +326,28 @@ public:
       return res;
     }
 
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    T max() {
+      T temp = m_d[0]->value;
+      for (sizetype i = 1; i < m_size; ++i) {
+        if (m_d[i]->value > temp) {
+          temp = m_d[i]->value;
+        }
+      }
+      return temp;
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    T min() {
+      T temp = m_d[0]->value;
+      for (sizetype i = 1; i < m_size; ++i) {
+        if (m_d[i]->value < temp) {
+          temp = m_d[i]->value;
+        }
+      }
+      return temp;
+    }
+
     bool is_equal_with(const Series& other) {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       for (sizetype i = 0; i < m_size; i++) {

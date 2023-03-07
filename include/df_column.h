@@ -458,6 +458,28 @@ namespace df {
       return res;
     }
 
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    T max() {
+      T temp = m_d[0]->value;
+      for (sizetype i = 1; i < m_size; ++i) {
+        if (m_d[i]->value > temp) {
+          temp = m_d[i]->value;
+        }
+      }
+      return temp;
+    }
+
+    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
+    T min() {
+      T temp = m_d[0]->value;
+      for (sizetype i = 1; i < m_size; ++i) {
+        if (m_d[i]->value < temp) {
+          temp = m_d[i]->value;
+        }
+      }
+      return temp;
+    }
+
     Series<T> copy_data() {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -535,7 +557,7 @@ namespace df {
       return ColIterator(m_d + m_size);
     }
 
-    bool is_null() {
+    constexpr bool is_null() {
       return (m_d == nullptr) && (m_size == 0) && (m_stride == 0);
     }
 
