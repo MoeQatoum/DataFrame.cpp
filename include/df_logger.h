@@ -429,6 +429,7 @@ public:
 
       clog << std::left << std::setw(row_name_space + idx_space) << "idx";
       for (const auto& c : rg->at(0)) {
+        clog << "from log1\n";
         if (!contains(this->context.excluded_cols, c->idx.col_name)) {
           if (c->idx.col_name == last_col_name) {
             clog << c->idx.col_name;

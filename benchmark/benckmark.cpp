@@ -14,13 +14,13 @@ using namespace df;
 #define COUNT__ITER_DF_BENCH   1000
 #define COUNT__ITER_ROW_BENCH  1000
 #define COUNT__ITER_COL_BENCH  1000
-#define COUNT__ITER_SORT_BENCH 5
+#define COUNT__ITER_SORT_BENCH 1000
 #define COUNT__ITER_COPY_BENCH 30
 
 #define DF_BENCH
 #define ROW_BENCH
 #define COL_BENCH
-// #define SORT_BENCH
+// #define SORT_BENCH // REMOVED
 #define ROW_SORT_BENCH
 // #define COPY_BENCH
 
@@ -85,7 +85,7 @@ int main() {
   #ifdef QT_IMPLEMENTATION
   clog << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH;
   #else
-  clog << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH << "\n";
+  clog << "  direct access, iterations: " << COUNT__ITER_DF_BENCH << "\n";
   #endif
 
   std::array<long, COUNT__ITER_DF_BENCH> DataFrameIterator_bench_data;
@@ -172,7 +172,7 @@ int main() {
   #ifdef QT_IMPLEMENTATION
   clog << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH;
   #else
-  clog << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH << "\n";
+  clog << "\n  row access, iterations: " << COUNT__ITER_ROW_BENCH << "\n";
   #endif
 
   std::array<long, COUNT__ITER_ROW_BENCH> RowIterator_bench_data;
@@ -231,7 +231,7 @@ int main() {
   #ifdef QT_IMPLEMENTATION
   clog << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH;
   #else
-  clog << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH << "\n";
+  clog << "\n  col access, iterations: " << COUNT__ITER_COL_BENCH << "\n";
   #endif
   std::array<long, COUNT__ITER_COL_BENCH> ColumnIterator_bench_data;
 
@@ -312,24 +312,24 @@ int main() {
   #ifdef QT_IMPLEMENTATION
   clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH;
   #else
-  clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
+  clog << "\n  sort, iterations: " << COUNT__ITER_SORT_BENCH << "\n";
   #endif
   std::array<long, COUNT__ITER_SORT_BENCH> row_sort_bench_data;
 
+  for (sizetype i = 0; i < df.size(); ++i) {
+    df[i] = static_cast<dataT>(static_cast<sizetype>(rand()) % df.size());
+  }
   for (sizetype i = 0; i < COUNT__ITER_SORT_BENCH; i++) {
-    for (sizetype i = 0; i < df.size(); ++i) {
-      df[i] = static_cast<dataT>(static_cast<sizetype>(rand()) % df.size());
-    }
     // String col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
-    auto col_name = df[bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)]];
+    auto col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
     auto rows     = df.rows();
     msec_timer.tick();
     rows.sort(col_name, true);
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }
-  print_bench_result<std::chrono::milliseconds>(row_sort_bench_data,
-                                                "utils::asc_sort_rows(df&, col_name), sort df rows by col");
+  print_bench_result<std::chrono::microseconds>(row_sort_bench_data,
+                                                "sort(col_name, true), sort df by col, sort df rows by col value");
 #endif
 
 #ifdef COPY_BENCH
@@ -341,7 +341,6 @@ int main() {
   std::array<long, COUNT__ITER_COPY_BENCH> row_copy_bench_data;
 
   for (sizetype i = 0; i < COUNT__ITER_COPY_BENCH; i++) {
-
     msec_timer.tick();
     DataFrame<dataT> new_df{df};
     msec_timer.tock();

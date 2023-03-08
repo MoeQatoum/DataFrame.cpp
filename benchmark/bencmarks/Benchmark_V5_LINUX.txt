@@ -20,7 +20,7 @@ Shape(c: 5000, r: 5000) size: 200 MB, data Type: d
     col rand access, write to single col cells , avg time per it: 72µs
 
   sort, test iterations: 1000
-    sort_rows(col_name), sort df by col , avg time per it: 2625ms
+    sort_rows(col_name), sort df by col (in-place sort) , avg time per it: 2625ms
 
   sort, test iterations: 1000
     utils::asc_sort_rows(df&, col_name), sort df rows by col , avg time per it: 236ms

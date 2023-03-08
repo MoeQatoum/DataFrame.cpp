@@ -131,7 +131,7 @@ TEST(df_sort, dfRowsAscendingSort) {
 
   EXPECT_EQ(sorted_rows.size(), df.row_count());
 
-  long sorted_values[sorted_rows.size()];
+  int sorted_values[sorted_rows.size()];
 
   for (sizetype idx = 0; idx < sorted_rows.size(); idx++) {
     sorted_values[idx] = sorted_rows[idx][col_idx]->value;

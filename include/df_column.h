@@ -37,6 +37,15 @@ namespace df {
       delete[] m_d;
     }
 
+    // replace values directly - not recommended
+    // Column& operator()(const Column& other) {
+    //   FORCED_ASSERT(m_size == other.m_size, "assignment operation on nonmatching size objects");
+    //   for (sizetype i = 0; i < m_size; i++) {
+    //     m_d[i]->value = other.m_d[i]->value;
+    //   }
+    //   return *this;
+    // }
+
     ValueType& operator[](const sizetype& idx) {
       return m_d[idx];
     }
@@ -63,29 +72,33 @@ namespace df {
 
     Column& operator=(const Column& rhs) {
       if (this != &rhs) {
-        FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+        if (is_null()) {
+          FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
+          m_size = rhs.m_size;
+          m_d    = new ValueType[m_size];
+        } else {
+          FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+        }
         for (sizetype i = 0; i < m_size; i++) {
-          m_d[i]->value = rhs[i]->value;
+          m_d[i] = rhs[i];
         }
       }
       return *this;
     }
 
+    Column& operator=(Column&& rhs) {
+      FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+      m_size  = rhs.m_size;
+      m_d     = rhs.m_d;
+      rhs.m_d = nullptr;
+      return *this;
+    }
+
     Column& operator=(const Series<T>& rhs) {
-      if (this != &rhs) {
-        if (is_null()) {
-          FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
-          m_size = rhs.m_size;
-          m_d    = new ValueType[m_size];
-          for (sizetype i = 0; i < m_size; i++) {
-            m_d[i] = rhs[i];
-          }
-        } else {
-          FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
-          for (sizetype i = 0; i < m_size; i++) {
-            m_d[i]->value = rhs[i]->value;
-          }
-        }
+      FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
+      FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
+      for (sizetype i = 0; i < m_size; i++) {
+        m_d[i]->value = rhs[i];
       }
       return *this;
     }

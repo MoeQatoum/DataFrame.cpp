@@ -63,14 +63,6 @@ int main() {
     df[i] = static_cast<int>(i);
   }
 
-  clog << "-- copy assignment operator row:\n";
-  df.row(0) = df.row(1);
-  df.log();
-
-  clog << "-- copy assignment operator column:\n";
-  df.column(0) = df.column(1);
-  df.log();
-
   clog << "------------------COPY_DF------------------\n";
   for (sizetype i = 0; i < df.size(); i++) {
     df[i] = rand() % static_cast<int>(df.size());
@@ -100,7 +92,9 @@ int main() {
   clog << unsorted_df["col-2"].max() << " " << unsorted_df["col-2"].min() << "\n";
 
   clog << "\n-- asc sort:\n";
+  clog << "---------------\n";
   auto asc_sorted_rows = unsorted_df.sort("col-2", true);
+  clog << "---------------\n";
   asc_sorted_rows.log();
 
   clog << "asc rows log algo head 5: \n";
@@ -109,7 +103,7 @@ int main() {
   asc_sorted_rows.log(-3);
 
   clog << "\n-- dec sort:\n";
-  auto dec_sorted_rows = unsorted_df.rows().sort(unsorted_df["col-2"]);
+  auto dec_sorted_rows = unsorted_df.rows().sort("col-2");
   dec_sorted_rows.log();
 
   // clog << "\n-- inplace aec sort:\n";

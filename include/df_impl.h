@@ -431,7 +431,7 @@ public:
     }
 
     DataFrame(const RowGroup& rows) : logger(this), logging_context({}) {
-      m_col_count    = rows[0].size();
+      m_col_count    = rows.row_size();
       m_row_count    = rows.size();
       m_col_size     = m_row_count;
       m_row_size     = m_col_count;
@@ -441,7 +441,7 @@ public:
       sizetype idx = 0;
       for (sizetype row_idx = 0; row_idx < m_row_count; row_idx++) {
         for (sizetype i = 0; i < m_col_count; i++) {
-          m_d[idx] = *rows[row_idx][i];
+          m_d[idx] = rows[row_idx][i];
           idx++;
         }
       }
@@ -705,7 +705,7 @@ public:
     }
 
     RowGroup rows() {
-      return RowGroup(*this);
+      return RowGroup(this);
     }
 
     Iterator begin() {
@@ -747,7 +747,7 @@ public:
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     RowGroup sort(String column_name, bool ascending = false) {
-      return RowGroup(*this).sort(column(column_name), ascending);
+      return RowGroup(this).sort(column_name, ascending);
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>

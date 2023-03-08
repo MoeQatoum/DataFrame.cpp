@@ -40,7 +40,6 @@ namespace df {
     Row(DataFrameIterator df_begin, sizetype row_idx, sizetype row_size) {
       m_size = row_size;
       m_d    = new ValueType[m_size];
-
       for (sizetype idx = 0; idx < row_size; idx++) {
         m_d[idx] = &(df_begin + ((row_idx * row_size) + idx));
       }
@@ -52,9 +51,22 @@ namespace df {
       }
     }
 
+    Row(Row&& other) : m_size(other.m_size), m_d(other.m_d) {
+      other.m_d = nullptr;
+    }
+
     ~Row() {
       delete[] m_d;
     }
+
+    // replace values directly - not recommended
+    // Row& operator()(const Row& other) {
+    //   FORCED_ASSERT(m_size == other.m_size, "assignment operation on nonmatching size objects");
+    //   for (sizetype i = 0; i < m_size; i++) {
+    //     m_d[i]->value = other.m_d[i]->value;
+    //   }
+    //   return *this;
+    // }
 
     ValueType& operator[](const sizetype& idx) {
       return m_d[idx];
@@ -86,24 +98,32 @@ namespace df {
           FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
           m_size = rhs.m_size;
           m_d    = new ValueType[m_size];
-          for (sizetype i = 0; i < m_size; i++) {
-            m_d[i] = rhs[i];
-          }
         } else {
           FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
-          for (sizetype i = 0; i < m_size; i++) {
-            m_d[i]->value = rhs[i]->value;
-          }
+        }
+        for (sizetype i = 0; i < m_size; i++) {
+          m_d[i] = rhs.m_d[i];
         }
       }
       return *this;
     }
 
+    Row& operator=(Row&& rhs) {
+      if (this != &rhs) {
+        m_size  = rhs.m_size;
+        m_d     = rhs.m_d;
+        rhs.m_d = nullptr;
+      }
+      return *this;
+    }
+
     Row& operator=(const Series<T>& rhs) {
-      FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+      FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
+      FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
       for (sizetype i = 0; i < m_size; i++) {
         m_d[i]->value = rhs[i];
       }
+      return *this;
     }
 
     Series<T> copy_data() {
@@ -142,6 +162,38 @@ namespace df {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.col_name == col_name) {
           return m_d[i];
+        }
+      }
+
+#ifdef QT_IMPLEMENTATION
+      qWarning() << "col name not found.";
+      qTerminate();
+#else
+      std::cerr << "col name not found.";
+      abort();
+#endif
+    }
+
+    sizetype column_index(const String& column_name) {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == column_name) {
+          return i;
+        }
+      }
+
+#ifdef QT_IMPLEMENTATION
+      qWarning() << "col name not found.";
+      qTerminate();
+#else
+      std::cerr << "col name not found.";
+      abort();
+#endif
+    }
+
+    sizetype column_index(const String& column_name) const {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == column_name) {
+          return i;
         }
       }
 
@@ -218,91 +270,115 @@ private:
 
   template<typename T>
   class RowGroup {
-    using value_t = typename Row<T>::ValueType;
-
 public:
-    RowGroup(const DataFrame<T>& df) : logger(this), logging_context(df.logger.context), m_row_size(df.row_size()) {
-      for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
-#ifdef QT_IMPLEMENTATION
-        m_rows.push_back(row_iter.current_row());
-#else
-        m_rows.push_back(row_iter.current_row());
-#endif
-      }
+    using ValueType        = Row<T>;
+    using RowGroupIterator = Iterator<RowGroup>;
 
+    RowGroup(const DataFrame<T>* df) : logger(this), logging_context(df->logger.context) {
+      m_size     = df->row_count();
+      m_d        = new Row<T>[m_size];
+      m_row_size = df->row_size();
+      for (auto row_iter = df->iter_rows(); row_iter < df->end(); row_iter++) {
+        m_d[row_iter.current_row_idx()] = row_iter.current_row();
+      }
       logger.with_context(logging_context);
     }
 
     RowGroup(const RowGroup& other)
         : logger(this),
           logging_context(other.logging_context),
-          m_row_size(other.m_row_size),
-          m_rows(other.m_rows) {
+          m_size(other.m_size),
+          m_d(new Row<T>[m_size]),
+          m_row_size(other.m_row_size) {
+      for (sizetype i = 0; i < m_size; i++) {
+        m_d[i] = other.m_d[i];
+      }
       logger.with_context(logging_context);
     }
 
+    RowGroup(RowGroup&& other)
+        : logger(this),
+          logging_context(other.logging_context),
+          m_size(other.m_size),
+          m_d(other.m_d),
+          m_row_size(other.m_row_size) {
+      logger.with_context(logging_context);
+      other.m_d = nullptr;
+    }
+
+    ~RowGroup() {
+      delete[] m_d;
+    }
+
     RowGroup operator=(const RowGroup& other) = delete;
+    RowGroup operator=(RowGroup&& other) {
+      if (this != &other) {
+        logging_context = other.logging_context;
+        m_size          = other.m_size;
+        m_d             = other.m_d;
+        m_row_size      = other.m_row_size;
+        other.m_d       = nullptr;
+      }
+      return *this;
+    }
 
     Row<T>& operator[](const sizetype& idx) {
-      return m_rows[idx];
+      return m_d[idx];
     }
 
     const Row<T>& operator[](const sizetype& idx) const {
-      return m_rows[idx];
+      return m_d[idx];
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup& sort(const Column<T>& column, bool ascending = false) {
-      Series<value_t> sorted_cells(size());
-      bool            lower_found;
-      sizetype        insert_idx;
+    RowGroup& sort(const String& column_name, bool ascending = false) {
+      sizetype col_idx = m_d[0].column_index(column_name);
+      sizetype insert_idx;
+      bool     found;
 
-      std::function<bool(const T&, const T&)> sort_condition;
-
+      std::function<bool(const Cell<T>*, const Cell<T>*)> sort_condition;
       if (ascending) {
-        sort_condition = [](const T& current_value, const T& sorted_value) { return current_value < sorted_value; };
+        sort_condition = [](const Cell<T>* current_value, const Cell<T>* sorted_value) {
+          return current_value->value < sorted_value->value;
+        };
       } else {
-        sort_condition = [](const T& current_value, const T& sorted_value) { return current_value > sorted_value; };
+        sort_condition = [](const Cell<T>* current_value, const Cell<T>* sorted_value) {
+          return current_value->value > sorted_value->value;
+        };
       }
 
-      for (sizetype idx = 0; idx < m_rows.size(); idx++) {
-        lower_found = false;
-        insert_idx  = 0;
+      for (sizetype idx = 0; idx < m_size; idx++) {
+        found      = false;
+        insert_idx = 0;
         for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-          if (sort_condition(column[idx]->value, sorted_cells[sorted_idx]->value)) {
-            lower_found = true;
-            insert_idx  = sorted_idx;
+          if (sort_condition(m_d[idx][col_idx], m_d[sorted_idx][col_idx])) {
+            found      = true;
+            insert_idx = sorted_idx;
             break;
           }
         }
-        if (lower_found) {
+        if (found) {
+          Row<T> swap_item = std::move(m_d[idx]);
           for (sizetype i = idx - 1; i >= insert_idx; i--) {
-            sorted_cells[i + 1] = sorted_cells[i];
+            m_d[i + 1] = std::move(m_d[i]);
             // avoid sizetype underflow
             if (i == 0) {
               break;
             }
           }
-          sorted_cells[insert_idx] = column[idx];
-        } else {
-          sorted_cells[idx] = column[idx];
+          m_d[insert_idx] = std::move(swap_item);
         }
       }
-      List<Row<T>> unsorted_rows;
-      unsorted_rows.resize(m_rows.size());
-      for (sizetype i = 0; i < m_rows.size(); i++) {
-        unsorted_rows[i] = m_rows[sorted_cells[i]->idx.row_idx];
-      }
-      m_rows.swap(unsorted_rows);
+
       return *this;
     }
 
     sizetype size() {
-      return m_rows.size();
+      return m_size;
     }
 
     sizetype size() const {
-      return m_rows.size();
+      return m_size;
     }
 
     sizetype row_size() {
@@ -314,19 +390,19 @@ public:
     }
 
     Row<T>& at(sizetype index) {
-      return m_rows[index];
+      return m_d[index];
     }
 
     const Row<T>& at(sizetype index) const {
-      return m_rows[index];
+      return m_d[index];
     }
 
-    typename List<Row<T>>::iterator begin() {
-      return m_rows.begin();
+    RowGroupIterator begin() {
+      return RowGroupIterator(m_d);
     }
 
-    typename List<Row<T>>::iterator end() {
-      return m_rows.end();
+    RowGroupIterator end() {
+      return RowGroupIterator(m_d + m_size);
     }
 
     void log(int range = 0) {
@@ -336,9 +412,10 @@ public:
     RowGroup_Logger<T> logger;
 
 private:
-    sizetype          m_row_size;
-    List<Row<T>>      m_rows;
     LoggingContext<T> logging_context;
+    sizetype          m_size;
+    Row<T>*           m_d;
+    sizetype          m_row_size;
   };
 
 } // namespace df
