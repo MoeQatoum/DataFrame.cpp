@@ -328,7 +328,7 @@ int main() {
     msec_timer.tock();
     row_sort_bench_data[i] = msec_timer.duration().count();
   }
-  print_bench_result<std::chrono::microseconds>(row_sort_bench_data,
+  print_bench_result<std::chrono::milliseconds>(row_sort_bench_data,
                                                 "sort(col_name, true), sort df by col, sort df rows by col value");
 #endif
 
