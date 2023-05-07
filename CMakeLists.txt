@@ -42,7 +42,8 @@ target_include_directories(${DATA_FRAME} INTERFACE
 
 if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
     target_compile_options(${DATA_FRAME} INTERFACE
-        -O3 #-Wconversion -Wno-c++98-compat #-static-libstdc++
+        -O3 -Wall -Wextra -Wreorder-ctor
+        # -O3 #-Wconversion -Wno-c++98-compat #-static-libstdc++
         #profile CPU with as small performance impact as possible: use -pg
     )
 elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)

@@ -20,7 +20,8 @@ namespace df {
   class RowGroup;
 
   template<typename T>
-  struct LoggingContext {
+  class LoggingContext {
+public:
     using CellLoggingColorCond = std::function<String(const Cell<T>*)>;
     using RowNameColorCond     = std::function<String(const Row<T>*)>;
     using CellLoggingPrecCond  = std::function<int(const Cell<T>*)>;

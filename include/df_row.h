@@ -28,8 +28,8 @@ namespace df {
   class LoggingContext;
 
   template<typename T>
-  struct Row {
-
+  class Row {
+public:
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using RowIterator       = Iterator<Row>;
@@ -227,11 +227,11 @@ namespace df {
       return m_size;
     }
 
-    const sizetype index() {
+    sizetype index() {
       return m_d[0]->idx.row_idx;
     }
 
-    const sizetype index() const {
+    sizetype index() const {
       return m_d[0]->idx.row_idx;
     }
 

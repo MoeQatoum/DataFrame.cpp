@@ -8,7 +8,7 @@ namespace df {
   class Iterator;
 
   template<typename T>
-  struct Series {
+  class Series {
 public:
     using ValueType      = T;
     using SeriesIterator = Iterator<Series>;

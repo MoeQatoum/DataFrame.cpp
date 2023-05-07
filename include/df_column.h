@@ -12,8 +12,8 @@ namespace df {
   class DataFrame;
 
   template<typename T>
-  struct Column {
-
+  class Column {
+public:
     using ValueType         = typename DataFrame<T>::pValueType;
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using ColIterator       = Iterator<Column>;
@@ -542,7 +542,7 @@ namespace df {
       return m_d[0]->idx.col_idx;
     }
 
-    const sizetype index() const {
+    sizetype index() const {
       return m_d[0]->idx.col_idx;
     }
 

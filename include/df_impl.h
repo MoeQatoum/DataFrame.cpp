@@ -472,16 +472,16 @@ public:
     }
 
     DataFrame(const DataFrame& other)
-        : m_col_idx_map(other.m_col_idx_map),
+        : logger(this),
+          m_col_idx_map(other.m_col_idx_map),
           m_row_idx_map(other.m_row_idx_map),
           m_current_size(other.m_current_size),
           m_col_size(other.m_col_size),
           m_col_count(other.m_col_count),
           m_row_size(other.m_row_size),
           m_row_count(other.m_row_count),
-          logging_context(other.logging_context),
-          logger(this),
-          m_d(new ValueType[m_current_size]) {
+          m_d(new ValueType[m_current_size]),
+          logging_context(other.logging_context) {
       for (sizetype idx = 0; idx < m_current_size; idx++) {
         m_d[idx] = other.m_d[idx];
       }

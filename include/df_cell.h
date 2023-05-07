@@ -20,17 +20,16 @@ namespace df {
 
     // Index(const Index&& other) = delete;
 
-    // Index& operator=(const Index& other) {
-    //   if (this != &other) {
-    //     Index temp_idx;
-    //     temp_idx.row_idx    = other.row_idx;
-    //     temp_idx.col_idx    = other.col_idx;
-    //     temp_idx.global_idx = other.global_idx;
-    //     temp_idx.col_name   = other.col_name;
-    //     temp_idx.row_name   = other.row_name;
-    //   }
-    //   return *this;
-    // }
+    Index& operator=(const Index& rhs) {
+      if (this != &rhs) {
+        row_idx    = rhs.row_idx;
+        col_idx    = rhs.col_idx;
+        global_idx = rhs.global_idx;
+        col_name   = rhs.col_name;
+        row_name   = rhs.row_name;
+      }
+      return *this;
+    }
 
     sizetype row_idx;
     sizetype col_idx;
@@ -56,7 +55,8 @@ namespace df {
   };
 
   template<typename T>
-  struct Cell {
+  class Cell {
+public:
     using ValueType = T;
 
     Cell() {
