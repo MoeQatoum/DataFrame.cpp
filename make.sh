@@ -9,7 +9,7 @@ Y="\033[0;93m"
 num_re='^[0-9]+$'
 
 BUILD_DIR="./build"
-QT_DIR="$HOME/Qt/6.4.2/gcc_64"
+QT_DIR="$HOME/Qt/6.5.0/gcc_64"
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
