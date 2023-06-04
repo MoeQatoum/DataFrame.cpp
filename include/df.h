@@ -121,7 +121,7 @@ public:
       return lhs.m_d > rhs.m_d;
     }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Iterator& itr) {
       dbg.noquote();
       dbg << "Iterator(current addr: " << itr.m_d << ")";
@@ -340,7 +340,7 @@ private:
   struct Shape {
     sizetype col_count;
     sizetype row_count;
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Shape& shape) {
       dbg.noquote();
       dbg << "Shape(c: " << shape.col_count << ", r: " << shape.row_count << ")";
@@ -389,7 +389,7 @@ public:
       m_d            = new ValueType[m_current_size];
 
       for (sizetype i = 0; i < m_col_count; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
         m_col_idx_map.insert(col_names[i], i);
 #else
         m_col_idx_map.insert({col_names[i], i});
@@ -400,7 +400,7 @@ public:
       }
 
       for (sizetype i = 0; i < m_row_count; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
         m_row_idx_map.insert(row_names[i], i);
 #else
         m_row_idx_map.insert({row_names[i], i});
@@ -447,7 +447,7 @@ public:
       }
 
       for (sizetype i = 0; i < m_col_count; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
         m_col_idx_map.insert(m_d[i].idx.col_name, i);
 #else
         m_col_idx_map.insert({m_d[i].idx.col_name, i});
@@ -458,7 +458,7 @@ public:
       }
 
       for (sizetype i = 0; i < m_current_size; i += m_row_size) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
         m_row_idx_map.insert(m_d[i].idx.row_name, i);
 #else
         m_row_idx_map.insert({m_d[i].idx.row_name, i});
@@ -575,7 +575,7 @@ public:
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       sizetype col_idx = m_col_idx_map[col_name];
       sizetype row_idx = m_row_idx_map[row_name];
 #else
@@ -599,7 +599,7 @@ public:
     }
 
     std::optional<String> get_col_name(sizetype col_idx) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       for (const sizetype& _col_idx : m_col_idx_map.values()) {
         if (col_idx == _col_idx) {
           return m_col_idx_map.key(col_idx);
@@ -620,7 +620,7 @@ public:
     }
 
     std::optional<String> get_row_name(sizetype row_idx) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       for (const String& row_name : m_row_idx_map.keys()) {
         if (m_row_idx_map[row_name] == row_idx) {
           return row_name;

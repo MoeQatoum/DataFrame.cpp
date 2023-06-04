@@ -9,7 +9,7 @@ int main() {
 #define TEST_ROW_COUNT 10
   StringList col_names{};
   for (sizetype i = 1; i <= TEST_COL_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     col_names.push_back(String{"col-%1"}.arg(i));
 #else
     col_names.push_back(String{"col-" + std::to_string(i)});
@@ -18,7 +18,7 @@ int main() {
 
   StringList row_names{};
   for (sizetype i = 1; i <= TEST_ROW_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     row_names.push_back(String{"row-%1"}.arg(i));
 #else
     row_names.push_back(String{"row-" + std::to_string(i)});

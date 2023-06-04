@@ -4,7 +4,7 @@
 #include <concepts>
 #include <optional>
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
   #include <QDebug>
   #include <QList>
   #include <QMap>
@@ -31,7 +31,7 @@
 
 namespace df {
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
   #define List QList
   #define clog qDebug()
   using sizetype   = std::size_t;
@@ -51,7 +51,7 @@ namespace df {
 } // namespace df
 
 #ifndef NDEBUG
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
     #define DF_ASSERT(condition, message)                         \
       do {                                                        \
         if (!(condition)) {                                       \
@@ -84,7 +84,7 @@ namespace df {
     } while (false)
 #endif
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
   #define FORCED_ASSERT(condition, message)                     \
     do {                                                        \
       if (!(condition)) {                                       \

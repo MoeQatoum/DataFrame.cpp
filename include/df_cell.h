@@ -38,7 +38,7 @@ namespace df {
     String col_name;
     String row_name;
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Index& df_idx) {
       dbg.noquote().nospace();
       dbg << "Index(<glob" << df_idx.global_idx << ">, column<" << df_idx.col_name << ", " << df_idx.col_idx
@@ -103,7 +103,7 @@ public:
       value -= off;
     }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Cell<T>& cell) {
       dbg.noquote();
       dbg << "Cell(value: " << cell.value << ", " << cell.idx << ")";

@@ -8,7 +8,7 @@ template<typename T, df::sizetype COL_COUNT, df::sizetype ROW_COUNT>
 df::DataFrame<T> create_dataframe() {
   df::StringList col_names{};
   for (df::sizetype i = 1; i <= COL_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     col_names.push_back(df::String("col-%1").arg(i));
 #else
     col_names.push_back(df::String{"col-" + std::to_string(i)});
@@ -17,7 +17,7 @@ df::DataFrame<T> create_dataframe() {
 
   df::StringList row_names{};
   for (df::sizetype i = 1; i <= ROW_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     row_names.push_back(df::String("row-%1").arg(i));
 #else
     row_names.push_back(df::String{"row-" + std::to_string(i)});

@@ -61,7 +61,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "row name not found.";
       qTerminate();
 #else
@@ -509,7 +509,7 @@ public:
       return data;
     }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Column& col) {
       dbg.noquote().nospace();
       dbg << "Column(addr: " << &col << ", size: " << col.m_size << ", type: " << typeid(T).name() << ")";

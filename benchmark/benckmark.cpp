@@ -11,10 +11,10 @@ using namespace df;
 #define BENCH_COL_COUNT 5000
 #define BENCH_ROW_COUNT 5000
 
-#define COUNT__ITER_DF_BENCH   1000
-#define COUNT__ITER_ROW_BENCH  1000
-#define COUNT__ITER_COL_BENCH  1000
-#define COUNT__ITER_SORT_BENCH 1000
+#define COUNT__ITER_DF_BENCH   100
+#define COUNT__ITER_ROW_BENCH  100
+#define COUNT__ITER_COL_BENCH  100
+#define COUNT__ITER_SORT_BENCH 100
 #define COUNT__ITER_COPY_BENCH 30
 
 #define DF_BENCH
@@ -31,7 +31,7 @@ void print_bench_result(std::array<long, N> data, const char* bench_name) {
     sum += data[i];
   }
   auto avg = static_cast<sizetype>(sum) / N;
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
   if (std::is_same<TimeUnit, std::chrono::milliseconds>::value) {
     clog << "    " << bench_name << " , avg time per it: " << String("%1%2").arg(TimeUnit(avg).count()).arg("ms");
   } else if (std::is_same<TimeUnit, std::chrono::microseconds>::value) {
@@ -57,7 +57,7 @@ int main() {
 
   StringList bench_col_names{};
   for (sizetype i = 0; i < BENCH_COL_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     bench_col_names.push_back(String{"row-%1"}.arg(i));
 #else
     bench_col_names.push_back(String{"col-" + std::to_string(i + 1)});
@@ -65,7 +65,7 @@ int main() {
   }
   StringList bench_row_names{};
   for (sizetype i = 0; i < BENCH_ROW_COUNT; i++) {
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     bench_row_names.push_back(String{"row-%1"}.arg(i));
 #else
     bench_row_names.push_back(String{"row-" + std::to_string(i + 1)});
@@ -82,7 +82,7 @@ int main() {
        << " MB, data Type: " << typeid(dataT).name() << "\n";
 
 #ifdef DF_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "  direct access, test iterations: " << COUNT__ITER_DF_BENCH;
   #else
   clog << "  direct access, iterations: " << COUNT__ITER_DF_BENCH << "\n";
@@ -127,7 +127,7 @@ int main() {
                                                "random access read single integral indexing- single cell");
 
   for (sizetype i = 0; i < COUNT__ITER_DF_BENCH; i++) {
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
     String col_name = String("col-%1").arg(static_cast<sizetype>(rand()) % (df.col_size() - 1));
     String row_name = String("row-%1").arg(static_cast<sizetype>(rand()) % (df.row_size() - 1));
   #else
@@ -152,7 +152,7 @@ int main() {
   print_bench_result<std::chrono::nanoseconds>(DataFrameIterator_bench_data, "random access wite - single cell");
 
   for (sizetype i = 0; i < COUNT__ITER_DF_BENCH; i++) {
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
     String col_name = String("col-%1").arg(static_cast<sizetype>(rand()) % (df.col_size() - 1));
     String row_name = String("row-%1").arg(static_cast<sizetype>(rand()) % (df.row_size() - 1));
   #else
@@ -169,7 +169,7 @@ int main() {
 #endif
 
 #ifdef ROW_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "\n  row access, test iterations: " << COUNT__ITER_ROW_BENCH;
   #else
   clog << "\n  row access, iterations: " << COUNT__ITER_ROW_BENCH << "\n";
@@ -228,7 +228,7 @@ int main() {
 #endif
 
 #ifdef COL_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "\n  col access, test iterations: " << COUNT__ITER_COL_BENCH;
   #else
   clog << "\n  col access, iterations: " << COUNT__ITER_COL_BENCH << "\n";
@@ -288,7 +288,7 @@ int main() {
 #endif
 
 #ifdef SORT_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH;
   #else
   clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH << "\n";
@@ -309,7 +309,7 @@ int main() {
 #endif
 
 #ifdef ROW_SORT_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "\n  sort, test iterations: " << COUNT__ITER_SORT_BENCH;
   #else
   clog << "\n  sort, iterations: " << COUNT__ITER_SORT_BENCH << "\n";
@@ -333,7 +333,7 @@ int main() {
 #endif
 
 #ifdef COPY_BENCH
-  #ifdef QT_IMPLEMENTATION
+  #ifdef QT_SUPPORT
   clog << "\n  sort, test iterations: " << COUNT__ITER_COPY_BENCH;
   #else
   clog << "\n  df copy, test iterations: " << COUNT__ITER_COPY_BENCH << "\n";
