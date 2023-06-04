@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25.0)
+cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -12,6 +12,8 @@ project(
     LANGUAGES CXX
 )
 
+include(cmake/CompilerCheck.cmake)
+
 file(GLOB_RECURSE DATA_FRAME_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/include/**.h
 )
@@ -23,7 +25,7 @@ add_library(${DATA_FRAME} INTERFACE
 # target_link_libraries(${DATA_FRAME} PRIVATE
 # )
 
-if (DF_QT_IMPLEMENTATION)
+if (DF_QT_SUPPORT)
     find_package(Qt6 HINTS $ENV{QTDIR} REQUIRED COMPONENTS Core)
     target_link_libraries(${DATA_FRAME} INTERFACE
         Qt6::Core
@@ -34,7 +36,7 @@ if (DF_QT_IMPLEMENTATION)
     message(STATUS "Building dataframelib with QT_IMPLEMENTATION.")
 else()
     message(STATUS "Building dataframelib with std implementation.")
-endif(DF_QT_IMPLEMENTATION)
+endif(DF_QT_SUPPORT)
 
 target_include_directories(${DATA_FRAME} INTERFACE
     ${CMAKE_CURRENT_LIST_DIR}/include
