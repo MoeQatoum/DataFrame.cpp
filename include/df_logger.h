@@ -111,7 +111,7 @@ public:
     DataFrame<T>* df;
 
 public:
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
       DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
@@ -299,7 +299,7 @@ public:
     RowGroup<T>* rg;
 
 public:
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
       // TODO: bug here ! "-rg->size()" ov

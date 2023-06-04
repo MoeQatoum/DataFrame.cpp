@@ -43,7 +43,7 @@ namespace df {
   #define clog std::cout
   using sizetype   = std::size_t;
   using String     = std::string;
-  using StringList = std::vector<String>;
+  using StringList = List<String>;
   using IndexHash  = std::map<String, sizetype>;
   using ostream    = std::ostream;
 #endif
