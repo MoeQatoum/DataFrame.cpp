@@ -302,6 +302,7 @@ public:
 #ifdef QT_IMPLEMENTATION
     template<typename U = T, std::enable_if_t<std::is_floating_point_v<U>, bool> = true>
     void log(int range = 0) {
+      // TODO: bug here ! "-rg->size()" ov
       DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
       QDebug dbg            = clog.noquote().nospace();

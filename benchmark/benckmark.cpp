@@ -78,7 +78,7 @@ int main() {
     df[i] = static_cast<dataT>(i);
   }
 
-  clog << df.shape() << " size: " << sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT / 1000000
+  clog << df.shape() << " size: " << (sizeof(dataT) * BENCH_COL_COUNT * BENCH_ROW_COUNT) / (1024 * 1000)
        << " MB, data Type: " << typeid(dataT).name() << "\n";
 
 #ifdef DF_BENCH

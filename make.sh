@@ -13,15 +13,16 @@ QT_DIR="$HOME/Qt/6.5.0/gcc_64"
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
-TARGET=
+TARGET=all
 CLEAN=false
-CXX_COMPILER=clang++
+CXX_COMPILER=clang++-15
+C_COMPILER=clang-15
 
 BUILD_EXAMPLES=false
 BUILD_TESTS=false
 BUILD_BENCH_MARK=false
 UPDATE_SUBMODULES=false
-USE_QT_IMPLEMENTATION=false
+QT_SUPPORT=false
 
 INSTALL_PREFIX=$("pwd")/out
 
@@ -49,8 +50,8 @@ for ((i = 0; i < $#; i++)); do
     BUILD_TESTS=true
     TARGET=tests
     ;;
-  --qt-impl)
-    USE_QT_IMPLEMENTATION=true
+  --qt-support)
+    QT_SUPPORT=true
     ;;
   --qt-dir)
     QT_DIR=${opts[$((i + 1))]}
@@ -64,8 +65,12 @@ for ((i = 0; i < $#; i++)); do
     CONFIG=${opts[$((i + 1))]}
     ((i++))
     ;;
-  --cpp-compiler)
+  --cxx-compiler)
     CXX_COMPILER=${opts[$((i + 1))]}
+    ((i++))
+    ;;
+  --c-compiler)
+    C_COMPILER=${opts[$((i + 1))]}
     ((i++))
     ;;
   --arch)
@@ -90,9 +95,11 @@ for ((i = 0; i < $#; i++)); do
     printf "  --no-run          Build but don't run the app.\n"
     printf "  --example         Build example.\n"
     printf "  --bench           Build benchmarks.\n"
+    printf "  --test            Build tests.\n"
+    printf "  --qt-support      Build with Qt support.\n"
     printf "  --prefix          Specify install prefix.\n"
     printf "  --config          Specify build type. Options RELEASE, DEBUG ...\n"
-    printf "  --cpp-compiler    Specify CXX compiler. Default clang\n"
+    printf "  --cxx-compiler    Specify CXX compiler. Default clang\n"
     printf "  --c-compiler      Specify C compiler. Default clang\n"
     printf "  --target          NOT USED. specify target.\n"
     printf "  -j                Allow N jobs at once\n"
@@ -111,7 +118,7 @@ if [[ $BUILD_EXAMPLES = false && $BUILD_TESTS = false && $BUILD_BENCH_MARK = fal
   TARGET=dataframe-example
 fi
 
-if [ $CLEAN == true ]; then
+if [ $CLEAN = true ]; then
   printf "${Y}-- Removing build folder${W}\n"
   rm -rf $BUILD_DIR
   if [[ $? -eq 1 ]]; then
@@ -125,11 +132,13 @@ if [ $CLEAN == true ]; then
   fi
 fi
 
-if [ -d "$QT_DIR" ]; then
-  printf "${G}-- Qt dir found: $QT_DIR${W}\n"
-else
-  printf "${R}-- Qt dir was not found: $QT_DIR${W}\n"
-  exit 1
+if [ $QT_SUPPORT = true ]; then
+  if [ ! -d "$QT_DIR" ]; then
+    printf "${R}-- Qt dir was not found: $QT_DIR${W}\n"
+    exit 1
+  else
+    printf "${G}-- Qt dir found: $QT_DIR${W}\n"
+  fi
 fi
 
 QTDIR=$QT_DIR cmake -S . -B $BUILD_DIR \
@@ -137,9 +146,10 @@ QTDIR=$QT_DIR cmake -S . -B $BUILD_DIR \
   -DDF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK \
   -DDF_BUILD_TESTS:BOOL=$BUILD_TESTS \
   -DDF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES \
-  -DDF_QT_IMPLEMENTATION:BOOL=$USE_QT_IMPLEMENTATION \
+  -DDF_QT_SUPPORT:BOOL=$QT_SUPPORT \
   -DCMAKE_BUILD_TYPE:STRING=$CONFIG \
   -DCMAKE_CXX_COMPILER=$CXX_COMPILER \
+  -DCMAKE_C_COMPILER=$C_COMPILER \
   -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE
 
 if [[ $? -eq 1 ]]; then
@@ -162,7 +172,7 @@ if [[ $? -eq 0 ]]; then
   fi
 
   #run tests
-  if [[ $BUILD_TESTS = true ]]; then
+  if [ $BUILD_TESTS = true ]; then
     GTEST_COLOR=1 ./build/tests/tests --output-on-failure
     if [[ $? -eq 1 ]]; then
       printf "${R}-- run tests failed.${W}\n"
