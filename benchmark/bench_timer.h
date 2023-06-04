@@ -15,10 +15,13 @@ class Timer {
     m_start = Clock::now();
   }
 
-  void tock() { m_end = Clock::now(); }
+  void tock() {
+    m_end = Clock::now();
+  }
 
   auto duration() const {
     assert(m_end != time_point{});
-    return std::chrono::duration_cast<TimeUnit>(m_end - m_start);
+    // return std::chrono::duration_cast<TimeUnit>(m_end - m_start);
+    return m_end - m_start;
   }
 };
