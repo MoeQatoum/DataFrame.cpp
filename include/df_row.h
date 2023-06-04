@@ -40,19 +40,22 @@ public:
     Row(DataFrameIterator df_begin, sizetype row_idx, sizetype row_size) {
       m_size = row_size;
       m_d    = new ValueType[m_size];
+
+      DataFrameIterator row_begin = df_begin + (row_idx * row_size);
       for (sizetype idx = 0; idx < row_size; idx++) {
-        m_d[idx] = &(df_begin + ((row_idx * row_size) + idx));
+        m_d[idx] = &(row_begin + idx);
       }
     }
 
-    Row(const Row& other) : m_size(other.m_size), m_d(new ValueType[m_size]) {
+    Row(const Row& other) : m_size(other.m_size), m_d(new ValueType[other.m_size]) {
       for (sizetype i = 0; i < m_size; i++) {
         m_d[i] = other.m_d[i];
       }
     }
 
     Row(Row&& other) : m_size(other.m_size), m_d(other.m_d) {
-      other.m_d = nullptr;
+      other.m_d    = nullptr;
+      other.m_size = 0;
     }
 
     ~Row() {
@@ -126,15 +129,15 @@ public:
       return *this;
     }
 
-    Series<T> copy_data() {
-      Series<T> data(m_size);
-      for (sizetype i = 0; i < m_size; i++) {
-        data[i] = m_d[i]->value;
-      }
-      return data;
-    }
+    // Series<T> copy_data() {
+    //   Series<T> data(m_size);
+    //   for (sizetype i = 0; i < m_size; i++) {
+    //     data[i] = m_d[i]->value;
+    //   }
+    //   return data;
+    // }
 
-    Series<T> copy_data() const {
+    Series<T> to_series() const {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         data[i] = m_d[i]->value;

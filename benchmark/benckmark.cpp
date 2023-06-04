@@ -51,9 +51,7 @@ int main() {
 
   using dataT = float;
 
-  Timer<std::chrono::milliseconds> msec_timer;
-  Timer<std::chrono::microseconds> usec_timer;
-  Timer<std::chrono::nanoseconds>  nsec_timer;
+  Timer<std::chrono::nanoseconds> nsec_timer;
 
   StringList bench_col_names{};
   for (sizetype i = 0; i < BENCH_COL_COUNT; i++) {
@@ -191,14 +189,14 @@ int main() {
 
   for (sizetype i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     sizetype row_c = df.shape().row_count;
-    msec_timer.tick();
+    nsec_timer.tick();
     for (auto i = df.iter_rows(); i < row_c; i++) {
       for (auto& c : i.current_row()) {
         c->value = 136136.136;
       }
     }
-    msec_timer.tock();
-    RowIterator_bench_data[i] = msec_timer.duration();
+    nsec_timer.tock();
+    RowIterator_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::milliseconds>(RowIterator_bench_data, "iter_row(), write to all cells");
 
@@ -216,13 +214,13 @@ int main() {
 
   for (sizetype i = 0; i < COUNT__ITER_ROW_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().row_count - 1);
-    usec_timer.tick();
+    nsec_timer.tick();
     auto row = df.row(rand_idx);
     for (auto& c : row) {
       c->value = 789789.789;
     }
-    usec_timer.tock();
-    RowIterator_bench_data[i] = usec_timer.duration();
+    nsec_timer.tock();
+    RowIterator_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::microseconds>(RowIterator_bench_data, "row rand access write to single row cells");
 #endif
@@ -249,14 +247,14 @@ int main() {
 
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype col_c = df.shape().col_count;
-    msec_timer.tick();
+    nsec_timer.tick();
     for (auto i = df.iter_cols(); i < col_c; i++) {
       for (auto& c : i.current_col()) {
         c->value = 456456.456;
       }
     }
-    msec_timer.tock();
-    ColumnIterator_bench_data[i] = msec_timer.duration();
+    nsec_timer.tock();
+    ColumnIterator_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::milliseconds>(ColumnIterator_bench_data, "iter_col(), write to all cells");
 
@@ -275,13 +273,13 @@ int main() {
 
   for (sizetype i = 0; i < COUNT__ITER_COL_BENCH; i++) {
     sizetype rand_idx = static_cast<sizetype>(rand()) % (df.shape().col_count - 1);
-    usec_timer.tick();
+    nsec_timer.tick();
     auto col = df.column(rand_idx);
     for (auto& c : col) {
       c->value = 123123.123;
     }
-    usec_timer.tock();
-    ColumnIterator_bench_data[i] = usec_timer.duration();
+    nsec_timer.tock();
+    ColumnIterator_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::microseconds>(ColumnIterator_bench_data,
                                                 "col rand access, write to single col cells");
@@ -300,10 +298,10 @@ int main() {
       df[i] = static_cast<dataT>(static_cast<sizetype>(rand()) % df.size());
     }
     String col_name = bench_col_names[static_cast<sizetype>(rand()) % (bench_col_names.size() - 1)];
-    msec_timer.tick();
+    nsec_timer.tick();
     df.inplace_ascending_sort(col_name);
-    msec_timer.tock();
-    sort_bench_data[i] = msec_timer.duration();
+    nsec_timer.tock();
+    sort_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::milliseconds>(sort_bench_data, "sort_rows(col_name), sort df by col");
 #endif
@@ -323,10 +321,10 @@ int main() {
     // String col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
     auto col_name = bench_col_names[(sizetype)rand() % (bench_col_names.size() - 1)];
     auto rows     = df.rows();
-    msec_timer.tick();
+    nsec_timer.tick();
     rows.sort(col_name, true);
-    msec_timer.tock();
-    row_sort_bench_data[i] = msec_timer.duration();
+    nsec_timer.tock();
+    row_sort_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::milliseconds>(row_sort_bench_data,
                                                 "sort(col_name, true), sort df by col, sort df rows by col value");
@@ -341,10 +339,10 @@ int main() {
   std::array<long, COUNT__ITER_COPY_BENCH> row_copy_bench_data;
 
   for (sizetype i = 0; i < COUNT__ITER_COPY_BENCH; i++) {
-    msec_timer.tick();
+    nsec_timer.tick();
     DataFrame<dataT> new_df{df};
-    msec_timer.tock();
-    row_copy_bench_data[i] = msec_timer.duration();
+    nsec_timer.tock();
+    row_copy_bench_data[i] = nsec_timer.duration();
   }
   print_bench_result<std::chrono::milliseconds>(row_copy_bench_data,
                                                 "DataFrame<T>::DataFrame(const DataFrame<T>& other): copy constructor");

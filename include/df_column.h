@@ -3,6 +3,7 @@
 
 #include "df_common.h"
 #include "df_series.h"
+
 namespace df {
 
   template<typename Iterable>
@@ -24,7 +25,7 @@ public:
     Column(DataFrameIterator col_begin, sizetype col_size, sizetype stride) {
       m_size   = col_size;
       m_stride = stride;
-      m_d      = new ValueType[m_size];
+      m_d      = new ValueType[col_size];
 
       for (sizetype idx = 0; idx < col_size; idx++) {
         m_d[idx] = &(col_begin + (idx * stride));
@@ -493,15 +494,15 @@ public:
       return temp;
     }
 
-    Series<T> copy_data() {
-      Series<T> data(m_size);
-      for (sizetype i = 0; i < m_size; i++) {
-        data[i] = m_d[i]->value;
-      }
-      return data;
-    }
+    // Series<T> copy_data() {
+    //   Series<T> data(m_size);
+    //   for (sizetype i = 0; i < m_size; i++) {
+    //     data[i] = m_d[i]->value;
+    //   }
+    //   return data;
+    // }
 
-    Series<T> copy_data() const {
+    Series<T> to_series() const {
       Series<T> data(m_size);
       for (sizetype i = 0; i < m_size; i++) {
         data[i] = m_d[i]->value;

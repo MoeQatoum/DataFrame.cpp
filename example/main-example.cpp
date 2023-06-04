@@ -37,7 +37,7 @@ int main() {
       c->value = 456;
     }
     // i.column()[0]->value = 123;
-    auto d = col_iter.current_col().copy_data();
+    auto d = col_iter.current_col().to_series();
     for (int i = 0; i < d.size(); i++) {
       clog << d[i] << ", ";
     }
@@ -50,7 +50,7 @@ int main() {
       c->value = 123;
     }
     // i.row()[0]->value = 123;
-    auto d = row_iter.current_row().copy_data();
+    auto d = row_iter.current_row().to_series();
     for (int i = 0; i < d.size(); i++) {
       clog << d[i] << ", ";
     }
