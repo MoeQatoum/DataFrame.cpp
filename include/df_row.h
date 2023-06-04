@@ -83,7 +83,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "col name not found.";
       qTerminate();
 #else
@@ -149,7 +149,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "col name not found.";
       qTerminate();
 #else
@@ -165,7 +165,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "col name not found.";
       qTerminate();
 #else
@@ -181,7 +181,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "col name not found.";
       qTerminate();
 #else
@@ -197,7 +197,7 @@ public:
         }
       }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
       qWarning() << "col name not found.";
       qTerminate();
 #else
@@ -206,7 +206,7 @@ public:
 #endif
     }
 
-#ifdef QT_IMPLEMENTATION
+#ifdef QT_SUPPORT
     friend QDebug operator<<(QDebug dbg, const Row& row) {
       dbg.noquote().nospace();
       dbg << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(T).name() << ")";
@@ -333,8 +333,6 @@ public:
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
     RowGroup& sort(const String& column_name, bool ascending = false) {
       sizetype col_idx = m_d[0].column_index(column_name);
-      sizetype insert_idx;
-      bool     found;
 
       std::function<bool(const Cell<T>*, const Cell<T>*)> sort_condition;
       if (ascending) {
@@ -348,25 +346,19 @@ public:
       }
 
       for (sizetype idx = 0; idx < m_size; idx++) {
-        found      = false;
-        insert_idx = 0;
         for (sizetype sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
           if (sort_condition(m_d[idx][col_idx], m_d[sorted_idx][col_idx])) {
-            found      = true;
-            insert_idx = sorted_idx;
+            Row<T> swap_item = std::move(m_d[idx]);
+            for (sizetype i = idx - 1; i >= sorted_idx; i--) {
+              m_d[i + 1] = std::move(m_d[i]);
+              // avoid sizetype underflow
+              if (i == 0) {
+                break;
+              }
+            }
+            m_d[sorted_idx] = std::move(swap_item);
             break;
           }
-        }
-        if (found) {
-          Row<T> swap_item = std::move(m_d[idx]);
-          for (sizetype i = idx - 1; i >= insert_idx; i--) {
-            m_d[i + 1] = std::move(m_d[i]);
-            // avoid sizetype underflow
-            if (i == 0) {
-              break;
-            }
-          }
-          m_d[insert_idx] = std::move(swap_item);
         }
       }
 
