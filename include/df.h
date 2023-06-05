@@ -16,7 +16,8 @@ namespace df {
 
   template<typename Iterable>
   class Iterator {
-    using ValueType = typename Iterable::ValueType;
+    using ValueType      = typename Iterable::ValueType;
+    using ConstValueType = typename Iterable::ConstValueType;
 
     template<typename>
     friend class RowIterator;
@@ -34,6 +35,11 @@ public:
     ~Iterator() {
     }
 
+    template<typename ValueTye1, typename = std::enable_if_t<std::is_convertible_v<ValueType, ValueTye1>, bool>>
+    operator ValueTye1() const {
+      return m_d;
+    }
+
     Iterator& operator=(const Iterator& other) {
       if (this != &other) {
         m_d = other.m_d;
@@ -41,11 +47,26 @@ public:
       return *this;
     }
 
-    ValueType* operator&() const {
+    const Iterator& operator=(const Iterator& other) const {
+      if (this != &other) {
+        m_d = other.m_d;
+      }
+      return *this;
+    }
+
+    ValueType* operator&() {
       return m_d;
     }
 
-    ValueType& operator*() const {
+    ConstValueType* operator&() const {
+      return m_d;
+    }
+
+    ValueType& operator*() {
+      return *m_d;
+    }
+
+    ConstValueType& operator*() const {
       return *m_d;
     }
 
@@ -53,13 +74,17 @@ public:
       return m_d;
     }
 
-    friend const Iterator operator+(const sizetype& lhs, const Iterator& rhs) {
+    ConstValueType* operator->() const {
+      return m_d;
+    }
+
+    friend Iterator operator+(const sizetype& lhs, const Iterator& rhs) {
       Iterator tmp{rhs};
       tmp += lhs;
       return tmp;
     }
 
-    friend const Iterator operator+(const Iterator& lhs, const sizetype& rhs) {
+    friend Iterator operator+(const Iterator& lhs, const sizetype& rhs) {
       Iterator tmp{lhs};
       tmp += rhs;
       return tmp;
@@ -70,14 +95,15 @@ public:
       return *this;
     }
 
-    Iterator operator++(int) {
+    Iterator operator++(int) const {
       Iterator tmp{*this};
       ++(*this);
       return tmp;
     }
 
-    void operator+=(sizetype off) {
+    Iterator& operator+=(sizetype off) {
       m_d += off;
+      return *this;
     }
 
     friend ptrdiff_t operator-(const Iterator& lhs, const Iterator& rhs) {
@@ -95,14 +121,15 @@ public:
       return *this;
     }
 
-    Iterator operator--(int) {
-      Iterator tmp = *this;
-      --(*this);
-      return tmp;
-    }
+    // Iterator operator--(int) const {
+    //   Iterator tmp = *this;
+    //   --(*this);
+    //   return tmp;
+    // }
 
-    void operator-=(sizetype off) {
+    Iterator& operator-=(sizetype off) const {
       m_d -= off;
+      return *this;
     }
 
     bool operator==(const Iterator& other) const {
@@ -141,6 +168,7 @@ private:
   template<typename Iterable>
   class RowIterator {
     using DataFrameIterator = typename Iterable::Iterator;
+    using ConstRow          = typename Iterable::ConstRow;
     using Row               = typename Iterable::Row;
 
 public:
@@ -163,7 +191,11 @@ public:
       return Row(m_df_begin, m_current_row_idx, m_row_size);
     }
 
-    sizetype current_row_idx() {
+    ConstRow current_row() const {
+      return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
+    }
+
+    sizetype current_row_idx() const {
       return m_current_row_idx;
     }
 
@@ -174,6 +206,16 @@ public:
         m_current_row_idx = other.m_current_row_idx;
       }
       return *this;
+    }
+
+    // TODO: move constructor ?
+
+    operator Row() {
+      return Row(m_df_begin, m_current_row_idx, m_row_size);
+    }
+
+    operator Row() const {
+      return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
     }
 
     RowIterator& operator++() {
@@ -192,7 +234,7 @@ public:
       return *this;
     }
 
-    RowIterator operator--(int) {
+    RowIterator operator--(int) const {
       RowIterator tmp{*this};
       --(*this);
       return tmp;
@@ -239,6 +281,7 @@ private:
   template<typename Iterable>
   class ColumnIterator {
     using DataFrameIter = typename Iterable::Iterator;
+    using ConstColumn   = typename Iterable::ConstColumn;
     using Column        = typename Iterable::Column;
 
 public:
@@ -249,6 +292,9 @@ public:
           m_current_col_idx(0) {
     }
 
+    ~ColumnIterator() {
+    }
+
     ColumnIterator(const ColumnIterator& other)
         : m_df_begin(other.m_df_begin),
           m_col_size(other.m_col_size),
@@ -256,15 +302,26 @@ public:
           m_current_col_idx(other.m_current_col_idx) {
     }
 
-    ~ColumnIterator() {
-    }
+    // TODO: move constructor ?
 
     Column current_col() {
       return Column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
     }
 
-    sizetype current_col_idx() {
+    ConstColumn current_col() const {
+      return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+    }
+
+    sizetype current_col_idx() const {
       return m_current_col_idx;
+    }
+
+    operator Column() {
+      return Column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+    }
+
+    operator ConstColumn() const {
+      return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
     }
 
     ColumnIterator& operator=(const ColumnIterator& other) {
@@ -277,7 +334,7 @@ public:
       return *this;
     }
 
-    ColumnIterator operator+(const sizetype& off) {
+    ColumnIterator operator+(const sizetype& off) const {
       ColumnIterator tmp{*this};
       tmp += off;
       return tmp;
@@ -359,15 +416,20 @@ private:
     friend class DF_Logger<T>;
 
 public:
-    using ValueType      = Cell<T>;
-    using pValueType     = Cell<T>*;
-    using Row            = Row<T>;
-    using RowGroup       = RowGroup<T>;
-    using Column         = Column<T>;
-    using Iterator       = Iterator<DataFrame<T>>;
-    using RowIterator    = RowIterator<DataFrame<T>>;
-    using ColumnIterator = ColumnIterator<DataFrame<T>>;
-    using Logger         = DF_Logger<T>;
+    using ValueType       = Cell<T>;
+    using ConstValueType  = const Cell<T>;
+    using pValueType      = Cell<T>*;
+    using pConstValueType = const pValueType;
+    using Row             = Row<T>;
+    using ConstRow        = const Row;
+    using RowGroup        = RowGroup<T>;
+    using ConstRowGroup   = const RowGroup;
+    using Column          = Column<T>;
+    using ConstColumn     = const Column;
+    using Iterator        = Iterator<DataFrame<T>>;
+    using RowIterator     = RowIterator<DataFrame<T>>;
+    using ColumnIterator  = ColumnIterator<DataFrame<T>>;
+    using Logger          = DF_Logger<T>;
 
     DataFrame()
         : logger(this),
@@ -531,7 +593,7 @@ public:
       return m_d[idx];
     }
 
-    const ValueType& operator[](const sizetype& idx) const {
+    ConstValueType& operator[](const sizetype& idx) const {
       return m_d[idx];
     }
 
@@ -539,42 +601,34 @@ public:
       return column(col_name);
     }
 
-    Column operator[](const String& col_name) const {
+    ConstColumn operator[](const String& col_name) const {
       return column(col_name);
     }
 
     ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) {
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
-
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
 
-    const ValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) const {
+    ConstValueType& operator[](const sizetype& col_idx, const sizetype& row_idx) const {
       DF_ASSERT(0 <= col_idx && col_idx <= (m_col_size - 1), "index out of range");
       DF_ASSERT(0 <= row_idx && row_idx <= (m_row_size - 1), "index out of range");
-
       return *(m_d + ((m_row_size * row_idx) + col_idx));
     }
 
     ValueType& operator[](const String& col_name, const String& row_name) {
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
-
-      sizetype col_idx = m_col_idx_map[col_name];
-      sizetype row_idx = m_row_idx_map[row_name];
-
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
-
-      ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
+      sizetype   col_idx = m_col_idx_map[col_name];
+      sizetype   row_idx = m_row_idx_map[row_name];
+      ValueType& cell    = *(m_d + ((m_row_size * row_idx) + col_idx));
       return cell;
     }
 
-    const ValueType& operator[](const String& col_name, const String& row_name) const {
+    ConstValueType& operator[](const String& col_name, const String& row_name) const {
       DF_ASSERT(m_col_idx_map.contains(col_name), col_name);
       DF_ASSERT(m_row_idx_map.contains(row_name), row_name);
-
 #ifdef QT_SUPPORT
       sizetype col_idx = m_col_idx_map[col_name];
       sizetype row_idx = m_row_idx_map[row_name];
@@ -582,10 +636,6 @@ public:
       sizetype col_idx = m_col_idx_map.at(col_name);
       sizetype row_idx = m_row_idx_map.at(row_name);
 #endif
-
-      DF_ASSERT(0 <= col_idx && col_idx <= (m_col_count - 1), "index out of range");
-      DF_ASSERT(0 <= row_idx && row_idx <= (m_row_count - 1), "index out of range");
-
       ValueType& cell = *(m_d + ((m_row_size * row_idx) + col_idx));
       return cell;
     }
@@ -594,11 +644,15 @@ public:
       return DataFrame(*this);
     }
 
-    sizetype get_col_idx(String col) {
+    sizetype get_col_idx(String col) const {
+#ifdef QT_SUPPORT
       return m_col_idx_map[col];
+#else
+      return m_col_idx_map.at(col);
+#endif
     }
 
-    std::optional<String> get_col_name(sizetype col_idx) {
+    std::optional<String> get_col_name(sizetype col_idx) const {
 #ifdef QT_SUPPORT
       for (const sizetype& _col_idx : m_col_idx_map.values()) {
         if (col_idx == _col_idx) {
@@ -615,11 +669,15 @@ public:
       return std::nullopt;
     }
 
-    sizetype get_row_idx(String row) {
+    sizetype get_row_idx(String row) const {
+#ifdef QT_SUPPORT
       return m_row_idx_map[row];
+#else
+      return m_row_idx_map.at(row);
+#endif
     }
 
-    std::optional<String> get_row_name(sizetype row_idx) {
+    std::optional<String> get_row_name(sizetype row_idx) const {
 #ifdef QT_SUPPORT
       for (const String& row_name : m_row_idx_map.keys()) {
         if (m_row_idx_map[row_name] == row_idx) {
@@ -640,7 +698,7 @@ public:
       return m_d[idx];
     }
 
-    const ValueType& at(sizetype idx) const {
+    ConstValueType& at(sizetype idx) const {
       return m_d[idx];
     }
 
@@ -652,24 +710,12 @@ public:
       return m_col_size;
     }
 
-    sizetype col_count() {
-      return m_col_count;
-    }
-
     sizetype col_count() const {
       return m_col_count;
     }
 
-    sizetype row_size() {
-      return m_row_size;
-    }
-
     sizetype row_size() const {
       return m_row_size;
-    }
-
-    sizetype row_count() {
-      return m_row_count;
     }
 
     sizetype row_count() const {
@@ -684,40 +730,44 @@ public:
       return Column{begin() + col_idx, m_col_size, m_row_size};
     }
 
+    ConstColumn column(sizetype col_idx) const {
+      return ConstColumn{begin() + col_idx, m_col_size, m_row_size};
+    }
+
     Column column(String col_name) {
       return Column{begin() + get_col_idx(col_name), m_col_size, m_row_size};
+    }
+
+    ConstColumn column(String col_name) const {
+      return ConstColumn{begin() + get_col_idx(col_name), m_col_size, m_row_size};
     }
 
     Row row(sizetype row_idx) {
       return Row{begin(), row_idx, m_row_size};
     }
 
-    Row row(sizetype row_idx) const {
-      return Row{begin(), row_idx, m_row_size};
+    ConstRow row(sizetype row_idx) const {
+      return ConstRow{begin(), row_idx, m_row_size};
     }
 
     Row row(String row_name) {
       return Row{begin(), get_row_idx(row_name), m_row_size};
     }
 
-    Row row(String row_name) const {
-      return Row{begin(), get_row_idx(row_name), m_row_size};
+    ConstRow row(String row_name) const {
+      return ConstRow{begin(), get_row_idx(row_name), m_row_size};
     }
 
     RowGroup rows() {
       return RowGroup(this);
     }
 
-    Iterator begin() {
-      return Iterator(m_d);
+    ConstRowGroup rows() const {
+      return ConstRowGroup(this);
     }
 
     Iterator begin() const {
       return Iterator(m_d);
-    }
-
-    Iterator end() {
-      return Iterator(m_d + m_current_size);
     }
 
     Iterator end() const {
@@ -740,7 +790,7 @@ public:
       return RowIterator(begin(), m_row_size);
     }
 
-    bool is_null() {
+    bool is_null() const {
       return (m_d == nullptr) && (m_col_count == 0) && (m_col_size == 0) && (m_row_size == 0) && (m_row_size == 0)
              && (m_current_size == 0);
     }

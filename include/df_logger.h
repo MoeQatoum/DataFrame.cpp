@@ -409,8 +409,8 @@ public:
       }
     }
 #else
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    void log(int range = 0) {
+    template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+    void log(int range = 0) const {
       DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
       sizetype idx_space      = 4;

@@ -31,6 +31,7 @@ namespace df {
   class Row {
 public:
     using ValueType         = typename DataFrame<T>::pValueType;
+    using ConstValueType    = typename DataFrame<T>::pConstValueType;
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using RowIterator       = Iterator<Row>;
 
@@ -75,11 +76,27 @@ public:
       return m_d[idx];
     }
 
-    const ValueType& operator[](const sizetype& idx) const {
+    ConstValueType& operator[](const sizetype& idx) const {
       return m_d[idx];
     }
 
-    ValueType operator[](const String& col_name) {
+    ValueType& operator[](const String& col_name) {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.col_name == col_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_SUPPORT
+      qWarning() << "col name not found.";
+      qTerminate();
+#else
+      std::cerr << "col name not found.";
+      abort();
+#endif
+    }
+
+    ConstValueType& operator[](const String& col_name) const {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.col_name == col_name) {
           return m_d[i];
@@ -111,6 +128,22 @@ public:
       return *this;
     }
 
+    const Row& operator=(const Row& rhs) const {
+      if (this != &rhs) {
+        if (is_null()) {
+          FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
+          m_size = rhs.m_size;
+          m_d    = new ValueType[m_size];
+        } else {
+          FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
+        }
+        for (sizetype i = 0; i < m_size; i++) {
+          m_d[i] = rhs.m_d[i];
+        }
+      }
+      return *this;
+    }
+
     Row& operator=(Row&& rhs) {
       if (this != &rhs) {
         m_size  = rhs.m_size;
@@ -120,7 +153,16 @@ public:
       return *this;
     }
 
-    Row& operator=(const Series<T>& rhs) {
+    const Row& operator=(Row&& rhs) const {
+      if (this != &rhs) {
+        m_size  = rhs.m_size;
+        m_d     = rhs.m_d;
+        rhs.m_d = nullptr;
+      }
+      return *this;
+    }
+
+    Row& operator=(const Series<T>& rhs) const {
       FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
       FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
       for (sizetype i = 0; i < m_size; i++) {
@@ -145,7 +187,7 @@ public:
       return data;
     }
 
-    ValueType at_column(const String& col_name) {
+    ValueType& at_column(const String& col_name) {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.col_name == col_name) {
           return m_d[i];
@@ -161,7 +203,7 @@ public:
 #endif
     }
 
-    ValueType at_column(const String& col_name) const {
+    ConstValueType& at_column(const String& col_name) const {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.col_name == col_name) {
           return m_d[i];
@@ -177,23 +219,7 @@ public:
 #endif
     }
 
-    sizetype column_index(const String& column_name) {
-      for (sizetype i = 0; i < m_size; i++) {
-        if (m_d[i]->idx.col_name == column_name) {
-          return i;
-        }
-      }
-
-#ifdef QT_SUPPORT
-      qWarning() << "col name not found.";
-      qTerminate();
-#else
-      std::cerr << "col name not found.";
-      abort();
-#endif
-    }
-
-    sizetype column_index(const String& column_name) const {
+    sizetype column_index_of(const String& column_name) const {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.col_name == column_name) {
           return i;
@@ -222,47 +248,27 @@ public:
     }
 #endif
 
-    sizetype size() {
-      return m_size;
-    }
-
     sizetype size() const {
       return m_size;
-    }
-
-    sizetype index() {
-      return m_d[0]->idx.row_idx;
     }
 
     sizetype index() const {
       return m_d[0]->idx.row_idx;
     }
 
-    String name() {
-      return m_d[0]->idx.row_name;
-    }
-
     const String name() const {
       return m_d[0]->idx.row_name;
-    }
-
-    RowIterator begin() {
-      return RowIterator(m_d);
     }
 
     RowIterator begin() const {
       return RowIterator(m_d);
     }
 
-    RowIterator end() {
-      return RowIterator(m_d + m_size);
-    }
-
     RowIterator end() const {
       return RowIterator(m_d + m_size);
     }
 
-    bool is_null() {
+    bool is_null() const {
       return (m_d == nullptr) && (m_size == 0);
     }
 
@@ -275,6 +281,7 @@ private:
   class RowGroup {
 public:
     using ValueType        = Row<T>;
+    using ConstValueType   = const Row<T>;
     using RowGroupIterator = Iterator<RowGroup>;
 
     RowGroup(const DataFrame<T>* df) : logger(this), logging_context(df->logger.context) {
@@ -313,8 +320,20 @@ public:
       delete[] m_d;
     }
 
-    RowGroup operator=(const RowGroup& other) = delete;
-    RowGroup operator=(RowGroup&& other) {
+    RowGroup operator=(const RowGroup& other) = delete; // why?
+
+    RowGroup& operator=(RowGroup&& other) {
+      if (this != &other) {
+        logging_context = other.logging_context;
+        m_size          = other.m_size;
+        m_d             = other.m_d;
+        m_row_size      = other.m_row_size;
+        other.m_d       = nullptr;
+      }
+      return *this;
+    }
+
+    const RowGroup& operator=(RowGroup&& other) const {
       if (this != &other) {
         logging_context = other.logging_context;
         m_size          = other.m_size;
@@ -333,9 +352,10 @@ public:
       return m_d[idx];
     }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    RowGroup& sort(const String& column_name, bool ascending = false) {
-      sizetype col_idx = m_d[0].column_index(column_name);
+    // TODO: should this function be marked as const ?
+    template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+    const RowGroup& sort(const String& column_name, const bool ascending = false) const {
+      sizetype col_idx = m_d[0].column_index_of(column_name);
 
       std::function<bool(const Cell<T>*, const Cell<T>*)> sort_condition;
       if (ascending) {
@@ -368,16 +388,8 @@ public:
       return *this;
     }
 
-    sizetype size() {
-      return m_size;
-    }
-
     sizetype size() const {
       return m_size;
-    }
-
-    sizetype row_size() {
-      return m_row_size;
     }
 
     sizetype row_size() const {
@@ -392,15 +404,15 @@ public:
       return m_d[index];
     }
 
-    RowGroupIterator begin() {
+    RowGroupIterator begin() const {
       return RowGroupIterator(m_d);
     }
 
-    RowGroupIterator end() {
+    RowGroupIterator end() const {
       return RowGroupIterator(m_d + m_size);
     }
 
-    void log(int range = 0) {
+    void log(int range = 0) const {
       logger.log(range);
     }
 

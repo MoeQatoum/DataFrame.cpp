@@ -16,6 +16,7 @@ namespace df {
   class Column {
 public:
     using ValueType         = typename DataFrame<T>::pValueType;
+    using ConstValueType    = typename DataFrame<T>::pConstValueType;
     using DataFrameIterator = typename DataFrame<T>::Iterator;
     using ColIterator       = Iterator<Column>;
 
@@ -47,15 +48,31 @@ public:
     //   return *this;
     // }
 
-    ValueType& operator[](const sizetype& idx) {
+    ValueType& operator[](const sizetype idx) {
       return m_d[idx];
     }
 
-    const ValueType& operator[](const sizetype& idx) const {
+    ConstValueType& operator[](const sizetype idx) const {
       return m_d[idx];
     }
 
-    ValueType operator[](const String& row_name) {
+    ValueType& operator[](const String& row_name) {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.row_name == row_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_SUPPORT
+      qWarning() << "row name not found.";
+      qTerminate();
+#else
+      std::cerr << "row name not found.";
+      abort();
+#endif
+    }
+
+    ConstValueType& operator[](const String& row_name) const {
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i]->idx.row_name == row_name) {
           return m_d[i];
@@ -139,7 +156,7 @@ public:
       return rhs == lhs;
     }
 
-    Series<bool> operator!=(const Column& rhs) {
+    Series<bool> operator!=(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -173,7 +190,7 @@ public:
       return rhs != lhs;
     }
 
-    Series<bool> operator>=(const Column& rhs) {
+    Series<bool> operator>=(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -216,7 +233,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator<=(const Column& rhs) {
+    Series<bool> operator<=(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -259,7 +276,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator<(const Column& rhs) {
+    Series<bool> operator<(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -302,7 +319,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator>(const Column& rhs) {
+    Series<bool> operator>(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -346,7 +363,7 @@ public:
     }
 
     // arithmetic operators
-    Series<T> operator+(const Column& rhs) {
+    Series<T> operator+(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series<T> res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -382,7 +399,7 @@ public:
     //   return *this;
     // }
 
-    Series<T> operator*(const Column& rhs) {
+    Series<T> operator*(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series<T> res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -404,7 +421,7 @@ public:
       return rhs * lhs;
     }
 
-    Series<T> operator-(const Column& rhs) {
+    Series<T> operator-(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series<T> res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -445,7 +462,7 @@ public:
     //   return *this;
     // }
 
-    Series<T> operator/(const Column& rhs) {
+    Series<T> operator/(const Column& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series<T> res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -472,8 +489,40 @@ public:
       return res;
     }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    T max() {
+    ValueType& at_row(const String& row_name) {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.row_name == row_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_SUPPORT
+      qWarning() << "row name not found.";
+      qTerminate();
+#else
+      std::cerr << "row name not found.";
+      abort();
+#endif
+    }
+
+    ConstValueType& at_row(const String& row_name) const {
+      for (sizetype i = 0; i < m_size; i++) {
+        if (m_d[i]->idx.row_name == row_name) {
+          return m_d[i];
+        }
+      }
+
+#ifdef QT_SUPPORT
+      qWarning() << "row name not found.";
+      qTerminate();
+#else
+      std::cerr << "row name not found.";
+      abort();
+#endif
+    }
+
+    template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+    T max() const {
       T temp = m_d[0]->value;
       for (sizetype i = 1; i < m_size; ++i) {
         if (m_d[i]->value > temp) {
@@ -483,8 +532,8 @@ public:
       return temp;
     }
 
-    template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    T min() {
+    template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+    T min() const {
       T temp = m_d[0]->value;
       for (sizetype i = 1; i < m_size; ++i) {
         if (m_d[i]->value < temp) {
@@ -493,14 +542,6 @@ public:
       }
       return temp;
     }
-
-    // Series<T> copy_data() {
-    //   Series<T> data(m_size);
-    //   for (sizetype i = 0; i < m_size; i++) {
-    //     data[i] = m_d[i]->value;
-    //   }
-    //   return data;
-    // }
 
     Series<T> to_series() const {
       Series<T> data(m_size);
@@ -523,55 +564,31 @@ public:
     }
 #endif
 
-    sizetype size() {
-      return m_size;
-    }
-
     sizetype size() const {
       return m_size;
-    }
-
-    sizetype stride() {
-      return m_stride;
     }
 
     sizetype stride() const {
       return m_stride;
     }
 
-    sizetype index() {
-      return m_d[0]->idx.col_idx;
-    }
-
     sizetype index() const {
       return m_d[0]->idx.col_idx;
-    }
-
-    String name() {
-      return m_d[0]->idx.col_name;
     }
 
     const String name() const {
       return m_d[0]->idx.col_name;
     }
 
-    ColIterator begin() {
-      return ColIterator(m_d);
-    }
-
     ColIterator begin() const {
       return ColIterator(m_d);
-    }
-
-    ColIterator end() {
-      return ColIterator(m_d + m_size);
     }
 
     ColIterator end() const {
       return ColIterator(m_d + m_size);
     }
 
-    constexpr bool is_null() {
+    constexpr bool is_null() const {
       return (m_d == nullptr) && (m_size == 0) && (m_stride == 0);
     }
 

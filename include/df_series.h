@@ -16,7 +16,7 @@ public:
     explicit Series(const sizetype& size) : m_d(new T[size]), m_size(size) {
     }
 
-    Series(const std::initializer_list<T>& il) : m_size(il.size()), m_d(new T[il.size()]) {
+    Series(const std::initializer_list<T>& il) : m_d(new T[il.size()]), m_size(il.size()) {
       std::copy(il.begin(), il.end(), m_d);
     }
 
@@ -32,7 +32,19 @@ public:
       }
     }
 
+    // TODO: move constructors ??
+
     Series& operator=(const Series& other) {
+      FORCED_ASSERT(m_size == other.m_size, "copy assignment operator on nonmatching size objects");
+      if (this != &other) {
+        for (sizetype i = 0; i < m_size; i++) {
+          m_d[i] = other[i];
+        }
+      }
+      return *this;
+    }
+
+    const Series& operator=(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "copy assignment operator on nonmatching size objects");
       if (this != &other) {
         for (sizetype i = 0; i < m_size; i++) {
@@ -60,7 +72,8 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator==(const Series& lhs, const T& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator==(const Series& lhs, const /* T1 */ T& rhs) {
       Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] == rhs);
@@ -68,11 +81,12 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator==(const T& lhs, const Series& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator==(const /* T1 */ T& lhs, const Series& rhs) {
       return rhs == lhs;
     }
 
-    Series<bool> operator!=(const Series& other) {
+    Series<bool> operator!=(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -93,7 +107,7 @@ public:
       return rhs != lhs;
     }
 
-    Series<bool> operator>=(const Series& other) {
+    Series<bool> operator>=(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -102,7 +116,8 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator>=(const Series& lhs, const T& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator>=(const Series& lhs, const /* T1 */ T& rhs) {
       Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] >= rhs);
@@ -110,7 +125,8 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator>=(const T& lhs, const Series& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator>=(const /* T1 */ T& lhs, const Series& rhs) {
       Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs >= rhs[i]);
@@ -118,7 +134,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator<=(const Series& other) {
+    Series<bool> operator<=(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -143,7 +159,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator<(const Series& other) {
+    Series<bool> operator<(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -168,7 +184,7 @@ public:
       return temp;
     }
 
-    Series<bool> operator>(const Series& other) {
+    Series<bool> operator>(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       Series<bool> temp(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -177,7 +193,8 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator>(const Series& lhs, const T& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator>(const Series& lhs, const /*TI*/ T& rhs) {
       Series<bool> temp(lhs.m_size);
       for (sizetype i = 0; i < lhs.m_size; i++) {
         temp[i] = (lhs[i] > rhs);
@@ -185,7 +202,8 @@ public:
       return temp;
     }
 
-    friend Series<bool> operator>(const T& lhs, const Series& rhs) {
+    // TODO : is comparable with T1
+    friend Series<bool> operator>(const /*TI*/ T& lhs, const Series& rhs) {
       Series<bool> temp(rhs.m_size);
       for (sizetype i = 0; i < rhs.m_size; i++) {
         temp[i] = (lhs > rhs[i]);
@@ -194,7 +212,7 @@ public:
     }
 
     // arithmetic operators
-    Series operator+(const Series& rhs) {
+    Series operator+(const Series& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -235,7 +253,7 @@ public:
       return *this;
     }
 
-    Series operator*(const Series& rhs) {
+    Series operator*(const Series& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -256,7 +274,7 @@ public:
       return rhs * lhs;
     }
 
-    Series operator-(const Series& rhs) {
+    Series operator-(const Series& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -301,7 +319,7 @@ public:
       return *this;
     }
 
-    Series operator/(const Series& rhs) {
+    Series operator/(const Series& rhs) const {
       FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
       Series res(m_size);
       for (sizetype i = 0; i < m_size; i++) {
@@ -327,7 +345,7 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    T max() {
+    T max() const {
       T temp = m_d[0]->value;
       for (sizetype i = 1; i < m_size; ++i) {
         if (m_d[i]->value > temp) {
@@ -338,7 +356,7 @@ public:
     }
 
     template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-    T min() {
+    T min() const {
       T temp = m_d[0]->value;
       for (sizetype i = 1; i < m_size; ++i) {
         if (m_d[i]->value < temp) {
@@ -348,7 +366,7 @@ public:
       return temp;
     }
 
-    bool is_equal_with(const Series& other) {
+    bool is_equal_with(const Series& other) const {
       FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
       for (sizetype i = 0; i < m_size; i++) {
         if (m_d[i] != other[i]) {
@@ -358,24 +376,22 @@ public:
       return true;
     }
 
+    // TODO: this function should return a const iterator.
+    //  SeriesIterator begin() const {
+    //    return SeriesIterator(m_d);
+    //  }
+
     SeriesIterator begin() {
       return SeriesIterator(m_d);
     }
 
-    SeriesIterator begin() const {
-      return SeriesIterator(m_d);
-    }
+    // TODO: this function should return a const iterator.
+    // SeriesIterator end() const {
+    //   return SeriesIterator(m_d + m_size);
+    // }
 
     SeriesIterator end() {
       return SeriesIterator(m_d + m_size);
-    }
-
-    SeriesIterator end() const {
-      return SeriesIterator(m_d + m_size);
-    }
-
-    sizetype size() {
-      return m_size;
     }
 
     sizetype size() const {
