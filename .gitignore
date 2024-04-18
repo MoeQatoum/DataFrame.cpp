@@ -1,6 +1,7 @@
 .cache
 .env
 *.key
-build
-out
+.build
+.out
+.test_df
 core.*

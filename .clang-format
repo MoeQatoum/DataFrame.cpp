@@ -1,12 +1,9 @@
----
 BasedOnStyle: LLVM
-IndentWidth: 2
----
+IndentWidth: 4
 Language: Cpp
-AccessModifierOffset: -4
+AccessModifierOffset: -2
 AlignArrayOfStructures: Left
 AlignTrailingComments: true
-AlignArrayOfStructures: Right 
 AlignConsecutiveAssignments: true
 AlignConsecutiveDeclarations: true
 AlignConsecutiveBitFields: true
@@ -14,7 +11,7 @@ AlignConsecutiveMacros: true
 AlignEscapedNewlines: true
 AllowShortBlocksOnASingleLine: true
 AllowShortFunctionsOnASingleLine: None
-AllowShortIfStatementsOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: Always
 AllowShortLambdasOnASingleLine: true
 AllowShortEnumsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
@@ -22,14 +19,14 @@ BreakBeforeBinaryOperators: All
 AllowAllParametersOfDeclarationOnNextLine: false
 BinPackArguments: false
 BinPackParameters: false
-BreakBeforeBraces: Attach 
-ColumnLimit: 120
-ContinuationIndentWidth: 2
-EmptyLineBeforeAccessModifier: Always 
+BreakBeforeBraces: Attach
+ColumnLimit: 150
+ContinuationIndentWidth: 0
+EmptyLineBeforeAccessModifier: Always
 FixNamespaceComments: true
 IndentPPDirectives: BeforeHash
 IndentWrappedFunctionNames: true
-TabWidth: 2
+TabWidth: 4
 NamespaceIndentation: All
 PackConstructorInitializers: CurrentLine
 PointerAlignment: Left
@@ -40,7 +37,7 @@ SpaceAfterCStyleCast: false
 SpaceAfterLogicalNot: false
 AlwaysBreakTemplateDeclarations: true
 SpaceAfterTemplateKeyword: false
-MaxEmptyLinesToKeep: 1 
+MaxEmptyLinesToKeep: 1
 SpacesInLineCommentPrefix:
   Minimum: 1
   Maximum: 1

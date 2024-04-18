@@ -1,2 +1,3 @@
-InlayHints:
-  Enabled: No
+
+CompileFlags:
+   CompilationDatabase: .build

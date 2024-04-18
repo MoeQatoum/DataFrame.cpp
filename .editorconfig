@@ -1,0 +1,19 @@
+[{*.cpp,*.hpp,*.c,*.h}]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[{CMakeLists.txt,*.cmake}]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[*.sh]
+charset = utf-8
+indent_style = space
+indent_size = 4
+
+[*.yaml]
+charset = utf-8
+indent_style = space
+indent_size = 2
