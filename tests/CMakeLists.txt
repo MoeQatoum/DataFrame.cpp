@@ -1,21 +1,42 @@
-cmake_minimum_required(VERSION 3.22)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(DF_TESTS dataframe-tests CACHE INTERNAL "")
 
-set(DF_TESTS tests CACHE INTERNAL "")
+set(INSTALL_GTEST OFF)
+include(CTest)
+
+if(DF_UPDATE_SUBMODULES)
+    include(cmake/UpdateSubmodules.cmake)
+endif()
+
+add_subdirectory(third_party/GoogleTest)
 
 file(GLOB_RECURSE DF_TESTS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/*.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/*.h
 )
 
-add_executable(${DF_TESTS} 
-    ${DF_TESTS_SOURCES}
-)
-target_link_libraries(${DF_TESTS} PRIVATE 
+add_executable(${DF_TESTS} ${DF_TESTS_SOURCES})
+
+target_link_libraries(${DF_TESTS} PRIVATE
     GTest::gtest_main
-    ${DATA_FRAME}
+    dataframe
+)
+
+include(${CMAKE_SOURCE_DIR}/cmake/CompilerCheck.cmake)
+
+target_compile_options(${DF_TESTS} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${LIB_DF_REL_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_REL_WARN_FLAGS}>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${LIB_DF_DBG_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_DBG_WARN_FLAGS}>>
+)
+
+target_link_options(${DF_TESTS} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>: ${STD_LIB_CXX_LINKER_FLAGS}>
+)
+
+set_target_properties(${DF_TESTS} PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    VERSION ${PROJECT_VERSION}
 )
 
 include(GoogleTest)

@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.22)
-
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(DF_EXAMPLE dataframe-example CACHE INTERNAL "")
 
@@ -16,22 +12,24 @@ file(GLOB_RECURSE DATA_FRAME_EXAMPLE_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/main-example.cpp
 )
 
-add_executable(${DF_EXAMPLE} 
-    ${DATA_FRAME_EXAMPLE_SOURCES} 
+add_executable(${DF_EXAMPLE} ${DATA_FRAME_EXAMPLE_SOURCES})
+
+include(${CMAKE_SOURCE_DIR}/cmake/CompilerCheck.cmake)
+
+target_compile_options(${DF_EXAMPLE} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${LIB_DF_REL_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_REL_WARN_FLAGS}>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${LIB_DF_DBG_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_DBG_WARN_FLAGS}>>
 )
 
-target_link_libraries(${DF_EXAMPLE} PRIVATE
-    ${DATA_FRAME}
+target_link_options(${DF_EXAMPLE} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>: ${STD_LIB_CXX_LINKER_FLAGS}>
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
-    target_compile_options(${DF_EXAMPLE} PUBLIC
-        -O3
-    )
+target_link_libraries(${DF_EXAMPLE} PRIVATE dataframe)
 
-elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
-    target_compile_options(${DF_EXAMPLE} PUBLIC
-        -g -Wall -Weverything -Wconversion -Wextra -Wpedantic -O0
-    )
-    
-endif()
+set_target_properties(${DF_EXAMPLE} PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    VERSION ${PROJECT_VERSION}
+)

@@ -1,7 +1,3 @@
-cmake_minimum_required(VERSION 3.22)
-
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(DF_BENCHMARK dataframe-benchmark CACHE INTERNAL "")
 
@@ -17,22 +13,24 @@ file(GLOB_RECURSE DF_BENCHMARK_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/*.h
 )
 
-add_executable(${DF_BENCHMARK} 
-    ${DF_BENCHMARK_SOURCES} 
+add_executable(${DF_BENCHMARK} ${DF_BENCHMARK_SOURCES})
+
+target_link_libraries(${DF_BENCHMARK} PRIVATE dataframe)
+
+include(${CMAKE_SOURCE_DIR}/cmake/CompilerCheck.cmake)
+
+target_compile_options(${DF_BENCHMARK} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${LIB_DF_REL_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_REL_WARN_FLAGS}>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${LIB_DF_DBG_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_DBG_WARN_FLAGS}>>
 )
 
-target_link_libraries(${DF_BENCHMARK} PRIVATE
-    ${DATA_FRAME}
+target_link_options(${DF_BENCHMARK} PUBLIC
+    $<$<COMPILE_LANGUAGE:CXX>: ${STD_LIB_CXX_LINKER_FLAGS}>
 )
 
-if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
-    target_compile_options(${DF_BENCHMARK} PUBLIC
-        -O3
-    )
-
-elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
-    target_compile_options(${DF_BENCHMARK} PUBLIC
-        -g -Wall -Weverything -Wconversion -Wextra -Wpedantic -O0
-    )
-    
-endif()
+set_target_properties(${DF_BENCHMARK} PROPERTIES
+    CXX_STANDARD 23
+    CXX_STANDARD_REQUIRED ON
+    CXX_EXTENSIONS OFF
+    VERSION ${PROJECT_VERSION}
+)

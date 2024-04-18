@@ -1,60 +1,19 @@
-cmake_minimum_required(VERSION 3.22)
+cmake_minimum_required(VERSION 3.27)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-set(DATA_FRAME dataframe CACHE INTERNAL "")
+set(LIB_DF dataframe CACHE INTERNAL "Project Name")
 
 project(
-    ${DATA_FRAME}
+    ${LIB_DF}
     VERSION 0.1.0
-    DESCRIPTION "simple dataframe object with python pandas like api, in c++"
+    DESCRIPTION "simple dataframe, in C++"
     LANGUAGES CXX
 )
 
 include(cmake/CompilerCheck.cmake)
 
-file(GLOB_RECURSE DATA_FRAME_SOURCES
-    ${CMAKE_CURRENT_LIST_DIR}/include/**.h
-)
+include(GNUInstallDirs)
 
-add_library(${DATA_FRAME} INTERFACE
-    ${DATA_FRAME_SOURCES} 
-)
-
-# target_link_libraries(${DATA_FRAME} PRIVATE
-# )
-
-if (DF_QT_SUPPORT)
-    find_package(Qt6 HINTS $ENV{QTDIR} REQUIRED COMPONENTS Core)
-    target_link_libraries(${DATA_FRAME} INTERFACE
-        Qt6::Core
-    )
-    target_compile_definitions(${DATA_FRAME} INTERFACE
-        QT_IMPLEMENTATION
-    )
-    message(STATUS "Building dataframelib with QT_IMPLEMENTATION.")
-else()
-    message(STATUS "Building dataframelib with std implementation.")
-endif(DF_QT_SUPPORT)
-
-target_include_directories(${DATA_FRAME} INTERFACE
-    ${CMAKE_CURRENT_LIST_DIR}/include
-)
-
-if(CMAKE_BUILD_TYPE STREQUAL RELEASE)
-    target_compile_options(${DATA_FRAME} INTERFACE
-        -O3 -Wall -Wextra -Wreorder-ctor
-        # -O3 #-Wconversion -Wno-c++98-compat #-static-libstdc++
-        #profile CPU with as small performance impact as possible: use -pg
-    )
-elseif(CMAKE_BUILD_TYPE STREQUAL DEBUG)
-    # target_compile_definitions(${DATA_FRAME} INTERFACE _GLIBCXX_DEBUG)
-
-    target_compile_options(${DATA_FRAME} INTERFACE
-    -O0 -g -Wconversion # -Wall -Weverything -Wextra -Wpedantic
-    )
-endif()
+add_subdirectory(libdataframe)
 
 if(DF_BUILD_EXAMPLES)
     add_subdirectory(example)
@@ -65,11 +24,49 @@ if(DF_BUILD_BENCH_MARKS)
 endif()
 
 if(DF_BUILD_TESTS)
-    if(DF_UPDATE_SUBMODULES)
-        include(cmake/UpdateSubmodules.cmake)
-    endif()
-    include (CTest)
-    add_subdirectory(third_party/GoogleTest)
     add_subdirectory(tests)
 endif()
 
+if(DF_INSTALL)
+    include(CMakePackageConfigHelpers)
+
+    set(config_dir ${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_DF}-${PROJECT_VERSION})
+
+    write_basic_package_version_file(${LIB_DF}ConfigVersion.cmake COMPATIBILITY ExactVersion)
+
+    configure_package_config_file(
+        ${PROJECT_SOURCE_DIR}/cmake/${LIB_DF}Config.cmake.in
+        ${PROJECT_BINARY_DIR}/${LIB_DF}Config.cmake
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_DF}-${PROJECT_VERSION}
+        INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}
+    )
+
+    write_basic_package_version_file(
+        ${LIB_DF}ConfigVersion.cmake
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+    )
+
+    install(
+        EXPORT ${LIB_DF}_Targets
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_DF}-${PROJECT_VERSION}
+    )
+
+    install(FILES
+        ${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake
+        ${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
+        DESTINATION
+        ${CMAKE_INSTALL_LIBDIR}/cmake/${LIB_DF}-${PROJECT_VERSION}
+    )
+
+    if(${CMAKE_SYSTEM_NAME} STREQUAL Windows)
+        set(CPACK_GENERATOR ZIP)
+    else()
+        set(CPACK_GENERATOR TGZ)
+    endif()
+
+    set(CPACK_PACKAGE_FILE_NAME ${PROJECT_NAME}-${PROJECT_VERSION})
+    set(CPACK_PACKAGE_CHECKSUM SHA256)
+    set(CPACK_INCLUDE_TOPLEVEL_DIRECTORY FALSE)
+    include(CPack)
+endif(DF_INSTALL)
