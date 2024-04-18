@@ -1,8 +1,8 @@
 #ifndef DATA_FRAME_H
 #define DATA_FRAME_H
 
-#include "df.h"
-#include "df_algo.h"
-#include "df_series.h"
+#include "df.hpp"
+#include "df_algo.hpp"
+#include "df_series.hpp"
 
 #endif // DATA_FRAME_H
