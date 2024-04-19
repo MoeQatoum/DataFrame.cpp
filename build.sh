@@ -9,15 +9,15 @@ Y="\033[0;93m"
 num_re='^[0-9]+$'
 
 ROOT_DIR=$(realpath "$(dirname "${BASH_SOURCE[0]}")")
-BUILD_DIR="./.build"
+BUILD_DIR=$ROOT_DIR/.build
 INSTALL_PREFIX=$ROOT_DIR/.out
-QT_DIR=$HOME/Qt/6.7.0/gcc_64
 
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
 TARGETS="--target install"
-CLEAN=false
+CLEAN_BUILD=false
+CLEAN_INSTALL=false
 CXX_COMPILER=clang++-19
 C_COMPILER=clang-19
 
@@ -146,7 +146,7 @@ if [ $CLEAN_INSTALL == true ]; then
     fi
 fi
 
-QTDIR=$QT_DIR cmake -S . -B $BUILD_DIR \
+cmake -S . -B $BUILD_DIR \
     -D CMAKE_BUILD_TYPE:STRING=$CONFIG \
     -D CMAKE_CXX_COMPILER=$CXX_COMPILER \
     -D CMAKE_C_COMPILER=$C_COMPILER \

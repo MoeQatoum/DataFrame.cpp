@@ -1,6 +1,13 @@
 
 set(DF_TESTS dataframe-tests CACHE INTERNAL "")
 
+project(
+    ${DF_TESTS}
+    VERSION 0.1.0
+    DESCRIPTION "dataframe tests"
+    LANGUAGES CXX
+)
+
 set(INSTALL_GTEST OFF)
 include(CTest)
 
@@ -23,13 +30,16 @@ target_link_libraries(${DF_TESTS} PRIVATE
 
 include(${CMAKE_SOURCE_DIR}/cmake/CompilerCheck.cmake)
 
-target_compile_options(${DF_TESTS} PUBLIC
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${LIB_DF_REL_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_REL_WARN_FLAGS}>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${LIB_DF_DBG_BUILD_FLAGS} ${STD_LIB_CPP_FLAGS} ${LIB_DF_DBG_WARN_FLAGS}>>
+include(${CMAKE_SOURCE_DIR}/cmake/buildFlags.cmake)
+
+target_compile_options(${DF_TESTS} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${LIB_DF_REL_BUILD_FLAGS} ${LIB_DF_REL_WARN_FLAGS} ${TCMALLOC_FLAGS}>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${LIB_DF_DBG_BUILD_FLAGS} ${LIB_DF_DBG_WARN_FLAGS} ${TCMALLOC_FLAGS}>>
 )
 
-target_link_options(${DF_TESTS} PUBLIC
-    $<$<COMPILE_LANGUAGE:CXX>: ${STD_LIB_CXX_LINKER_FLAGS}>
+target_link_options(${DF_TESTS} PRIVATE
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: -s ${TCMALLOC_LINKER_FLAGS}>>
+    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${TCMALLOC_LINKER_FLAGS}>>
 )
 
 set_target_properties(${DF_TESTS} PROPERTIES
