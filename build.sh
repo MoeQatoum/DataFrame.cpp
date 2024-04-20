@@ -15,7 +15,7 @@ INSTALL_PREFIX=$ROOT_DIR/.out
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
-TARGETS="--target install"
+TARGETS="install"
 CLEAN_BUILD=false
 CLEAN_INSTALL=false
 CXX_COMPILER=clang++-19
@@ -163,10 +163,7 @@ if [[ $? -eq 1 ]]; then
         exit 1
 fi
 
-cmake --build $BUILD_DIR --target $TARGETS install $JOBS $CMAKE_VERBOSE
-if [[ $? -eq 0 ]]; then
-    printf "${G}-- Build successful.${W}\n"
-
+cmake --build $BUILD_DIR --target $TARGETS $JOBS $CMAKE_VERBOSE
     #run example
     if [[ $RUN = true && $BUILD_EXAMPLES = true ]]; then
         printf "${G}-- Running Application.${W}\n\n"

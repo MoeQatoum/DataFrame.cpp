@@ -12,7 +12,7 @@ set(INSTALL_GTEST OFF)
 include(CTest)
 
 if(DF_UPDATE_SUBMODULES)
-    include(cmake/UpdateSubmodules.cmake)
+    include(${CMAKE_SOURCE_DIR}/cmake/UpdateSubmodules.cmake)
 endif()
 
 add_subdirectory(third_party/GoogleTest)
