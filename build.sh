@@ -15,7 +15,7 @@ INSTALL_PREFIX=$ROOT_DIR/.out
 CONFIG=RELEASE
 RUN=true
 JOBS="-j"
-TARGETS="install"
+TARGETS=install
 CLEAN_BUILD=false
 CLEAN_INSTALL=false
 CXX_COMPILER=clang++-19
@@ -68,15 +68,15 @@ for ((i = 0; i < $#; i++)); do
         ;;
     --example)
         BUILD_EXAMPLES=true
-        TARGETS=dataframe-example
+        TARGETS="${TARGETS} dataframe-example"
         ;;
     --bench)
         BUILD_BENCH_MARK=true
-        TARGETS=dataframe-benchmark
+        TARGETS="${TARGETS} dataframe-benchmark"
         ;;
     --test)
         BUILD_TESTS=true
-        TARGETS=tests
+        TARGETS="${TARGETS} dataframe-tests"
         ;;
     --prefix)
         INSTALL_PREFIX=${opts[$((i + 1))]}
@@ -126,7 +126,7 @@ done
 
 if [[ $BUILD_EXAMPLES = false && $BUILD_TESTS = false && $BUILD_BENCH_MARK = false ]]; then
     BUILD_EXAMPLES=true
-    TARGETS=dataframe-example
+    TARGETS="${TARGETS} dataframe-example"
 fi
 
 if [ $CLEAN_BUILD == true ]; then
@@ -157,7 +157,7 @@ cmake -S . -B $BUILD_DIR \
     -D DF_BUILD_BENCH_MARKS:BOOL=$BUILD_BENCH_MARK \
     -D DF_BUILD_TESTS:BOOL=$BUILD_TESTS \
     -D DF_UPDATE_SUBMODULES:BOOL=$UPDATE_SUBMODULES \
-    -D DF_INSTALL:BOOL=TRUE
+    -D DF_INSTALL:BOOL=true
 
 if [[ $? -eq 1 ]]; then
     printf "${R}-- Cmake failed${W}\n" &&
@@ -165,6 +165,8 @@ if [[ $? -eq 1 ]]; then
 fi
 
 cmake --build $BUILD_DIR --target $TARGETS $JOBS $CMAKE_VERBOSE
+
+if [[ $? -eq 0 ]]; then
     #run example
     if [[ $RUN = true && $BUILD_EXAMPLES = true ]]; then
         printf "${G}-- Running Application.${W}\n\n"

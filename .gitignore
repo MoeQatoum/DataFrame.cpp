@@ -5,3 +5,4 @@
 .out
 .test_df
 core.*
+.test_cmake
