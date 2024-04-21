@@ -42,8 +42,9 @@ print_help() {
     printf "  --c-compiler      Specify C compiler. Default clang\n"
     printf "  --arch            NOY USED\n"
     printf "  --target          NOT USED. specify target.\n"
-    printf "  -j                Allow N jobs at once\n"
-    printf "  -h                this help.\n"
+    printf "  -v | --verbose    cmake verbose output."
+    printf "  -j | --jobs       Allow N jobs at once\n"
+    printf "  -h | --help       This help.\n"
 }
 
 opts=("$@")
