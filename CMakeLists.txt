@@ -9,9 +9,9 @@ project(
     LANGUAGES CXX
 )
 
-include(cmake/CompilerCheck.cmake)
-
 include(GNUInstallDirs)
+include(cmake/CompilerCheck.cmake)
+include(cmake/UpdateSubmodules.cmake)
 
 add_subdirectory(libdataframe)
 

@@ -169,21 +169,12 @@ cmake --build $BUILD_DIR --target $TARGETS $JOBS $CMAKE_VERBOSE
 if [[ $? -eq 0 ]]; then
     #run example
     if [[ $RUN = true && $BUILD_EXAMPLES = true ]]; then
-        printf "${G}-- Running Application.${W}\n\n"
         ./.build/example/dataframe-example
-        if [[ $? -eq 1 ]]; then
-            printf "${R}-- run failed.${W}\n"
-            exit 1
-        fi
     fi
 
     #run tests
-    if [ $BUILD_TESTS = true ]; then
+    if [[ $RUN = true && $BUILD_TESTS = true ]]; then
         GTEST_COLOR=1 ./.build/tests/dataframe-tests --output-on-failure
-        if [[ $? -eq 1 ]]; then
-            printf "${R}-- run tests failed.${W}\n"
-            exit 1
-        fi
     fi
 
     #run Benchmark

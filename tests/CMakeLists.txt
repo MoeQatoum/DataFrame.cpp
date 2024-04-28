@@ -10,12 +10,9 @@ project(
 
 set(INSTALL_GTEST OFF)
 include(CTest)
-
-if(DF_UPDATE_SUBMODULES)
-    include(${CMAKE_SOURCE_DIR}/cmake/UpdateSubmodules.cmake)
-endif()
-
 add_subdirectory(third_party/GoogleTest)
+
+target_compile_options(gtest PRIVATE -stdlib=libc++ -std=c++23)
 
 file(GLOB_RECURSE DF_TESTS_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/*.cpp
@@ -28,18 +25,17 @@ target_link_libraries(${DF_TESTS} PRIVATE
     dataframe
 )
 
-include(${CMAKE_SOURCE_DIR}/cmake/CompilerCheck.cmake)
-
-include(${CMAKE_SOURCE_DIR}/cmake/buildFlags.cmake)
+include(../cmake/CompilerCheck.cmake)
+include(../cmake/compilerFlags.cmake)
 
 target_compile_options(${DF_TESTS} PRIVATE
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: ${DF_LIB_DF_REL_BUILD_FLAGS} ${DF_LIB_DF_REL_WARN_FLAGS} ${DF_TCMALLOC_FLAGS}>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${DF_LIB_DF_DBG_BUILD_FLAGS} ${DF_LIB_DF_DBG_WARN_FLAGS} ${DF_TCMALLOC_FLAGS}>>
+    $<$<CONFIG:RELEASE>: ${DF_REL_BUILD_FLAGS} ${DF_STD_LIB_CXX_FLAGS} ${DF_REL_WARN_FLAGS} ${DF_TCMALLOC_FLAGS}>
+    $<$<CONFIG:DEBUG>: ${DF_DBG_BUILD_FLAGS} ${DF_STD_LIB_CXX_FLAGS} ${DF_DBG_WARN_FLAGS} ${DF_TCMALLOC_FLAGS}>
 )
 
 target_link_options(${DF_TESTS} PRIVATE
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:RELEASE>: -s ${DF_TCMALLOC_LINKER_FLAGS}>>
-    $<$<COMPILE_LANGUAGE:CXX>:$<$<CONFIG:DEBUG>: ${DF_TCMALLOC_LINKER_FLAGS}>>
+    $<$<CONFIG:RELEASE>: -s ${DF_STD_LIB_CXX_LINKER_FLAGS} ${DF_TCMALLOC_LINKER_FLAGS}>
+    $<$<CONFIG:DEBUG>: ${DF_STD_LIB_CXX_LINKER_FLAGS} ${DF_TCMALLOC_LINKER_FLAGS}>
 )
 
 set_target_properties(${DF_TESTS} PROPERTIES

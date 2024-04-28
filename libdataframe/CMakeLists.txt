@@ -30,7 +30,7 @@ if(DF_INSTALL)
 
     install(
         DIRECTORY ${DF_INCLUDE_DIR}/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/
+        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
         FILES_MATCHING
         PATTERN "*.hpp"
         REGEX "/[^.]+$"
