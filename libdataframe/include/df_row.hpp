@@ -114,32 +114,7 @@ namespace df {
             return *this;
         }
 
-        const Row& operator=(const Row& rhs) const {
-            if (this != &rhs) {
-                if (is_null()) {
-                    FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
-                    m_size = rhs.m_size;
-                    m_d    = new ValueType[m_size];
-                } else {
-                    FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
-                }
-                for (std::size_t i = 0; i < m_size; i++) {
-                    m_d[i] = rhs.m_d[i];
-                }
-            }
-            return *this;
-        }
-
         Row& operator=(Row&& rhs) {
-            if (this != &rhs) {
-                m_size  = rhs.m_size;
-                m_d     = rhs.m_d;
-                rhs.m_d = nullptr;
-            }
-            return *this;
-        }
-
-        const Row& operator=(Row&& rhs) const {
             if (this != &rhs) {
                 m_size  = rhs.m_size;
                 m_d     = rhs.m_d;
@@ -280,17 +255,6 @@ namespace df {
         RowGroup operator=(const RowGroup& other) = delete; // why?
 
         RowGroup& operator=(RowGroup&& other) {
-            if (this != &other) {
-                logging_context = other.logging_context;
-                m_size          = other.m_size;
-                m_d             = other.m_d;
-                m_row_size      = other.m_row_size;
-                other.m_d       = nullptr;
-            }
-            return *this;
-        }
-
-        const RowGroup& operator=(RowGroup&& other) const {
             if (this != &other) {
                 logging_context = other.logging_context;
                 m_size          = other.m_size;
