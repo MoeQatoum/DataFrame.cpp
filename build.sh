@@ -18,7 +18,7 @@ JOBS="-j"
 TARGETS=install
 CLEAN_BUILD=false
 CLEAN_INSTALL=false
-CXX_COMPILER=clang+
+CXX_COMPILER=clang++
 C_COMPILER=clang
 
 BUILD_EXAMPLES=false
