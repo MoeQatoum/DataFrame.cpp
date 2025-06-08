@@ -14,8 +14,10 @@ target_include_directories(${LIB_DF} INTERFACE
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
+include(../cmake/compilerFlags.cmake)
+
 set_target_properties(${LIB_DF} PROPERTIES
-    CXX_STANDARD 23
+    CXX_STANDARD ${DF_CXX_STANDARD}
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
     VERSION ${PROJECT_VERSION}

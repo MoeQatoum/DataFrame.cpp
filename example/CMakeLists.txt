@@ -30,7 +30,7 @@ target_link_options(${DF_EXAMPLE} PRIVATE
 target_link_libraries(${DF_EXAMPLE} PRIVATE dataframe)
 
 set_target_properties(${DF_EXAMPLE} PROPERTIES
-    CXX_STANDARD 23
+    CXX_STANDARD ${DF_CXX_STANDARD}
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
     VERSION ${PROJECT_VERSION}
