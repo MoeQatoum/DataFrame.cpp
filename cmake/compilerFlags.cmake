@@ -1,4 +1,3 @@
-set(DF_CXX_STANDARD 26)
 
 set(DF_TCMALLOC_FLAGS -fno-builtin-malloc -fno-builtin-calloc -fno-builtin-realloc -fno-builtin-free)
 set(DF_TCMALLOC_LINKER_FLAGS -ltcmalloc_minimal)
