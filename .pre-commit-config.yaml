@@ -1,3 +1,4 @@
+exclude: "third_party"
 repos:
   - repo: local
     hooks:
