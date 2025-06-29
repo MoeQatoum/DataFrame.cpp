@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.27)
 
+include(cmake/checks.cmake)
+
 set(LIB_DF dataframe CACHE INTERNAL "Project Name")
 
 project(
