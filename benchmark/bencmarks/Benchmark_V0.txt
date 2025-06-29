@@ -9,7 +9,7 @@ Benchmarks:
   df.iter_row, write to all cells, iterations 1000, avg time per it: 221ms
   df rand access row read single row cells, iterations 1000, avg time per it: 43µs
   df rand access row write to single row cells, iterations 1000, avg time per it: 47µs
-  
+
   df.iter_col, read all cells, iterations 1000, avg time per it: 660ms
   df.iter_col, write to all cells, iterations 1000, avg time per it: 662ms
   df rand access col read single col cell values, iterations 1000, avg time per it: 223µs

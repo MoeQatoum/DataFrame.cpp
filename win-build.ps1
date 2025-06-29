@@ -37,14 +37,14 @@ if ($h -eq $true) {
 [bool]$USE_QT_IMPLEMENTATION = $qtImpl
 
 if ($clean -eq $true) {
-    if (Test-Path -Path $BUILD_PATH) { 
-        Remove-Item $BUILD_PATH -Recurse -Force 
+    if (Test-Path -Path $BUILD_PATH) {
+        Remove-Item $BUILD_PATH -Recurse -Force
     }
 }
 
 if ($cleanBuild -eq $true) {
-    if (Test-Path -Path $INSTALL_PREFIX) { 
-        Remove-Item $INSTALL_PREFIX -Recurse -Force 
+    if (Test-Path -Path $INSTALL_PREFIX) {
+        Remove-Item $INSTALL_PREFIX -Recurse -Force
     }
 }
 
@@ -59,7 +59,7 @@ if ($qtImpl -eq $true) {
     }
 
     if (-not (Test-Path -Path $QTDIR)) {
-        Write-Error "QTDIR: $QTDIR is invalid." 
+        Write-Error "QTDIR: $QTDIR is invalid."
         exit 1
     }
     $env:QTDIR = $QTDIR
@@ -82,7 +82,7 @@ if ($COMPILER -eq "msvc") {
     cmake -S . -B $BUILD_PATH -G "Visual Studio 17 2022" -T "host=x64" -A x64 `
         -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=TRUE `
         -DCMAKE_INSTALL_PREFIX:PATH=$INSTALL_PREFIX `
-        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES 
+        -DBUILD_CPP_DATA_FRAME_EXAMPLES:BOOL=$BUILD_EXAMPLES
     if ( -not $? ) {
         Write-Error "Cmake configraion failed"
         exit 1
