@@ -128,7 +128,8 @@ namespace df {
             if (std::is_floating_point_v<T>) { std::cout.precision(this->context.floatPrecision + 1); }
 
             std::cout << std::left << std::setw(row_name_space + idx_space) << "idx";
-            for (const auto& [col_name, v] : this->df->m_col_idx_map) {
+            for (auto col_iter = df->iter_cols(); col_iter < df->end(); ++col_iter) {
+                std::string col_name = col_iter.current_col().name();
                 if (!contains(this->context.excluded_cols, col_name)) {
                     if (col_name == last_col_name) {
                         std::cout << col_name;
@@ -137,7 +138,7 @@ namespace df {
                     }
                 }
             }
-            std::cout << "\n";
+            std::cout << std::endl;
 
             int range_start;
             int range_end;
@@ -165,7 +166,7 @@ namespace df {
                         }
                     }
                 }
-                std::cout << "\n";
+                std::cout << std::endl;
             }
         }
     };
@@ -183,7 +184,7 @@ namespace df {
         RowGroup<T>* rg;
 
       public:
-        template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+        template<typename = std::enable_if_t<std::is_arithmetic_v<T>, bool>>
         void log(int range = 0) const {
             DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
 
@@ -211,7 +212,7 @@ namespace df {
                     }
                 }
             }
-            std::cout << "\n";
+            std::cout << std::endl;
 
             int range_start;
             int range_end;
@@ -239,7 +240,7 @@ namespace df {
                         }
                     }
                 }
-                std::cout << "\n";
+                std::cout << std::endl;
             }
         }
     };
