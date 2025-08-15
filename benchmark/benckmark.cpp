@@ -269,7 +269,7 @@ int main() {
         nsec_timer.tock();
         row_sort_bench_data[i] = nsec_timer.duration();
     }
-    print_bench_result<std::chrono::milliseconds>(row_sort_bench_data, "sort(col_name, true), sort df by col, sort df rows by col value");
+    print_bench_result<std::chrono::microseconds>(row_sort_bench_data, "sort(col_name, true), sort df by col, sort df rows by col value");
 #endif
 
 #ifdef COPY_BENCH
