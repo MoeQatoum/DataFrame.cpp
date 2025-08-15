@@ -275,30 +275,14 @@ namespace df {
 
         // TODO: should this function be marked as const ?
         template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
-        const RowGroup& sort(const std::string& column_name, const bool ascending = false) const {
+        RowGroup& sort(const std::string& column_name, const bool ascending = false) {
             std::size_t col_idx = m_d[0].column_index_of(column_name);
 
-            std::function<bool(const Cell<T>*, const Cell<T>*)> sort_condition;
-            if (ascending) {
-                sort_condition = [](const Cell<T>* current_value, const Cell<T>* sorted_value) { return current_value->value < sorted_value->value; };
-            } else {
-                sort_condition = [](const Cell<T>* current_value, const Cell<T>* sorted_value) { return current_value->value > sorted_value->value; };
-            }
-
-            for (std::size_t idx = 0; idx < m_size; idx++) {
-                for (std::size_t sorted_idx = 0; sorted_idx < idx; sorted_idx++) {
-                    if (sort_condition(m_d[idx][col_idx], m_d[sorted_idx][col_idx])) {
-                        Row<T> swap_item = std::move(m_d[idx]);
-                        for (std::size_t i = idx - 1; i >= sorted_idx; i--) {
-                            m_d[i + 1] = std::move(m_d[i]);
-                            // avoid std::size_t underflow
-                            if (i == 0) { break; }
-                        }
-                        m_d[sorted_idx] = std::move(swap_item);
-                        break;
-                    }
-                }
-            }
+            std::sort(m_d, m_d + m_size, [&](const Row<T>& a, const Row<T>& b) {
+                const T& a_val = a[col_idx]->value;
+                const T& b_val = b[col_idx]->value;
+                return ascending ? (a_val < b_val) : (a_val > b_val);
+            });
 
             return *this;
         }
@@ -342,4 +326,4 @@ namespace df {
 
 } // namespace df
 
-#endif // COLUMN_SERIES_H
+#endif // DATA_FRAME_ROW_H
