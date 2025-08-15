@@ -10,7 +10,7 @@ using namespace df;
 TEST(df_iter_tests, dfIter) {
     DataFrame<int> df = create_dataframe<int, 10, 10>();
 
-    for (int i = 0; i < df.size(); i++) {
+    for (std::size_t i = 0; i < df.size(); i++) {
         df[(std::size_t)i] = i;
     }
 
@@ -24,7 +24,7 @@ TEST(df_iter_tests, dfIter) {
 TEST(df_iter_tests, dfIterModifyValues) {
     DataFrame<int> df = create_dataframe<int, 10, 10>();
 
-    for (int i = 0; i < df.size(); i++) {
+    for (std::size_t i = 0; i < df.size(); i++) {
         df[i] = i;
     }
 
@@ -122,7 +122,7 @@ TEST(df_sort, dfRowsAscendingSort) {
     }
 
     std::size_t col_idx  = 2;
-    std::string col_name = df.get_col_name(col_idx).value();
+    std::string col_name = df.get_col_name(col_idx);
 
     RowGroup<int> sorted_rows = df.sort(col_name, true);
 
