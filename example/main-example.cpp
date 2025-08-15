@@ -1,4 +1,3 @@
-#include <array>
 #include <dataframe>
 #include <format>
 
@@ -19,35 +18,39 @@ int main() {
     }
 
     DataFrame<int> df{col_names, row_names};
-    int            i = 0;
     for (std::size_t i = 0; i < df.size(); ++i) {
         df[i] = static_cast<int>(i);
     }
     df.log();
 
     for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
-        for (auto& c : col_iter.current_col()) {
-            c->value = 456;
+        if (col_iter.current_col().index() == 1) {
+            for (auto& c : col_iter.current_col()) {
+                c->value = 456;
+            }
+            // i.column()[0]->value = 123;
+
+            auto d = col_iter.current_col().to_series();
+            for (std::size_t i = 0; i < d.size(); i++) {
+                std::cout << d[i] << ", ";
+            }
+            std::cout << "\n";
         }
-        // i.column()[0]->value = 123;
-        auto d = col_iter.current_col().to_series();
-        for (int i = 0; i < d.size(); i++) {
-            std::cout << d[i] << ", ";
-        }
-        std::cout << "\n";
     }
     df.log();
 
     for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
-        for (auto& c : row_iter.current_row()) {
-            c->value = 123;
+        if (row_iter.current_row().index() == 1) {
+            for (auto& c : row_iter.current_row()) {
+                c->value = 123;
+            }
+            // i.row()[0]->value = 123;
+            auto d = row_iter.current_row().to_series();
+            for (std::size_t i = 0; i < d.size(); i++) {
+                std::cout << d[i] << ", ";
+            }
+            std::cout << "\n";
         }
-        // i.row()[0]->value = 123;
-        auto d = row_iter.current_row().to_series();
-        for (int i = 0; i < d.size(); i++) {
-            std::cout << d[i] << ", ";
-        }
-        std::cout << "\n";
     }
 
     df.log();
@@ -55,6 +58,8 @@ int main() {
     for (std::size_t i = 0; i < df.size(); ++i) {
         df[i] = static_cast<int>(i);
     }
+
+    df.log();
 
     std::cout << "------------------COPY_DF------------------\n";
     for (std::size_t i = 0; i < df.size(); i++) {
