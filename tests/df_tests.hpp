@@ -118,17 +118,17 @@ TEST(df_sort, dfRowsAscendingSort) {
     DataFrame<int> df = create_dataframe<int, 10, 10>();
 
     for (std::size_t i = 0; i < df.size(); i++) {
-        df[i] = (long)rand();
+        df[i] = (int)rand() % 100;
     }
 
     std::size_t col_idx  = 2;
     std::string col_name = df.get_col_name(col_idx).value();
 
-    RowGroup<int> sorted_rows = df.sort(col_name);
+    RowGroup<int> sorted_rows = df.sort(col_name, true);
 
     EXPECT_EQ(sorted_rows.size(), df.row_count());
 
-    int sorted_values[sorted_rows.size()];
+    std::vector<int> sorted_values(sorted_rows.size());
 
     for (std::size_t idx = 0; idx < sorted_rows.size(); idx++) {
         sorted_values[idx] = sorted_rows[idx][col_idx]->value;

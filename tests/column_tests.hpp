@@ -12,8 +12,6 @@ using namespace df;
 // 7 8 9
 
 TEST(col_operators_tests, is_equal) {
-    constexpr int N = 9;
-
     DataFrame<int> df = create_dataframe<int, 3, 3>();
 
     int values[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -42,8 +40,6 @@ TEST(col_operators_tests, is_equal) {
 }
 
 TEST(col_operators_tests, is_not_equal_operator) {
-    constexpr int N = 9;
-
     DataFrame<int> df = create_dataframe<int, 3, 3>();
 
     int values[9] = {1, 2, 3, 4, 5, 6, 7, 8, 9};
@@ -72,7 +68,6 @@ TEST(col_operators_tests, is_not_equal_operator) {
 }
 
 TEST(col_operators_tests, grater_or_equal_operator) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -102,7 +97,6 @@ TEST(col_operators_tests, grater_or_equal_operator) {
 }
 
 TEST(col_operators_tests, less_than_or_equal_operator) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -132,7 +126,6 @@ TEST(col_operators_tests, less_than_or_equal_operator) {
 }
 
 TEST(col_operators_tests, less_than_operator) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -165,7 +158,6 @@ TEST(col_operators_tests, less_than_operator) {
 }
 
 TEST(col_operators_tests, grater_than_operator) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -199,7 +191,6 @@ TEST(col_operators_tests, grater_than_operator) {
 }
 
 TEST(col_operators_tests, add_operators) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -234,7 +225,6 @@ TEST(col_operators_tests, add_operators) {
 }
 
 TEST(col_operators_tests, multiplication_operators) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -262,7 +252,6 @@ TEST(col_operators_tests, multiplication_operators) {
 }
 
 TEST(col_operators_tests, subtraction_operators) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
@@ -297,7 +286,6 @@ TEST(col_operators_tests, subtraction_operators) {
 }
 
 TEST(col_operators_tests, division_operators) {
-    constexpr int N = 9;
     // 1 2 3
     // 4 5 6
     // 7 8 9
