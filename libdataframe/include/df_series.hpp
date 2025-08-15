@@ -44,16 +44,6 @@ namespace df {
             return *this;
         }
 
-        const Series& operator=(const Series& other) const {
-            FORCED_ASSERT(m_size == other.m_size, "copy assignment operator on nonmatching size objects");
-            if (this != &other) {
-                for (std::size_t i = 0; i < m_size; i++) {
-                    m_d[i] = other[i];
-                }
-            }
-            return *this;
-        }
-
         T& operator[](std::size_t idx) {
             return *(m_d + idx);
         }
