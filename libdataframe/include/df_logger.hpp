@@ -26,40 +26,51 @@ namespace df {
         using RowNameColorCond     = std::function<std::string(const Row<T>*)>;
         using CellLoggingPrecCond  = std::function<int(const Cell<T>*)>;
 
-        void with_exclude_columns(std::vector<std::string> column_names) {
+        LoggingContext& with_exclude_columns(std::vector<std::string> column_names) {
+            // TODO: should be appended instead of replaced
+            // TODO: use columns index instead of names
             excluded_cols = column_names;
+            return *this;
         }
 
-        void with_exclude_column(std::string col_name) {
+        LoggingContext& with_exclude_column(std::string col_name) {
             excluded_cols.push_back(col_name);
+            return *this;
         }
 
-        void set_precision(std::size_t precision) {
+        LoggingContext& set_precision(std::size_t precision) {
             floatPrecision = precision;
+            return *this;
         }
 
-        void set_space_adjustment(std::size_t spaceAdjustment) {
+        LoggingContext& set_space_adjustment(std::size_t spaceAdjustment) {
             spacing = spaceAdjustment;
+            return *this;
         }
 
-        void set_max_col_name_size(std::size_t size) {
+        LoggingContext& set_max_col_name_size(std::size_t size) {
             max_col_name_size = size;
+            return *this;
         }
 
-        void set_max_row_name_size(std::size_t size) {
+        LoggingContext& set_max_row_name_size(std::size_t size) {
             max_row_name_size = size;
+            return *this;
         }
 
-        void with_cell_color_condition(CellLoggingColorCond condition) {
+        LoggingContext& with_cell_color_condition(CellLoggingColorCond condition) {
             cell_color_condition = condition;
+            return *this;
         }
 
-        void with_row_color_condition(RowNameColorCond condition) {
+        LoggingContext& with_row_color_condition(RowNameColorCond condition) {
             row_name_color_condition = condition;
+            return *this;
         }
 
-        void with_cell_precision_condition(CellLoggingPrecCond condition) {
+        LoggingContext& with_cell_precision_condition(CellLoggingPrecCond condition) {
             cell_precision_condition = condition;
+            return *this;
         }
 
         CellLoggingColorCond     cell_color_condition     = [](const Cell<T>*) { return std::string(DF_COLOR_W); };
@@ -109,9 +120,11 @@ namespace df {
         DataFrame<T>* df;
 
       public:
-        template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
-        void log(int range = 0) {
-            DF_ASSERT(range <= df->m_row_count || range >= -df->m_row_count, "range is grater then row count");
+        template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
+        void log(int range = 0) const {
+            if (range > static_cast<int>(df->m_row_count) || range < -static_cast<int>(df->m_row_count)) {
+                throw std::logic_error{"range is grater than row count"};
+            }
 
             std::size_t idx_space      = 4;
             std::size_t row_name_space = this->context.max_row_name_size + this->context.spacing;
@@ -121,7 +134,7 @@ namespace df {
             auto contains = [](const std::vector<std::string>& excluded_cols_list, const std::string& cur_col_name) {
                 return std::find_if(excluded_cols_list.begin(),
                                     excluded_cols_list.end(),
-                                    [cur_col_name](std::string col_name) { return cur_col_name == col_name; })
+                                    [cur_col_name](const std::string& col_name) { return cur_col_name == col_name; })
                        != excluded_cols_list.end();
             };
 
@@ -130,33 +143,22 @@ namespace df {
             std::cout << std::left << std::setw(row_name_space + idx_space) << "idx";
             for (auto col_iter = df->iter_cols(); col_iter < df->end(); ++col_iter) {
                 std::string col_name = col_iter.current_col().name();
-                if (!contains(this->context.excluded_cols, col_name)) {
-                    if (col_name == last_col_name) {
-                        std::cout << col_name;
-                    } else {
-                        std::cout << std::left << std::setw(col_spacing) << col_name;
-                    }
-                }
+                if (!contains(this->context.excluded_cols, col_name)) { std::cout << std::left << std::setw(col_spacing) << col_name; }
             }
             std::cout << std::endl;
 
-            int range_start;
-            int range_end;
-            if (range == 0) {
-                range_start = 0;
-                range_end   = this->df->m_row_count;
-            } else if (range > 0) {
-                range_start = 0;
-                range_end   = range;
-            } else {
-                range_start = this->df->m_row_count + range;
-                range_end   = this->df->m_row_count;
+            int range_start = 0;
+            int range_end   = df->m_row_count;
+            if (range > 0) {
+                range_end = std::min(range, static_cast<int>(df->m_row_count));
+            } else if (range < 0) {
+                range_start = std::max(0, static_cast<int>(df->m_row_count) + range);
             }
 
             for (int idx = range_start; idx < range_end; idx++) {
                 const auto& current_row = this->df->row(idx);
                 std::cout << std::left << std::setw(idx_space) << current_row.index() << this->context.row_name_color_condition(&current_row)
-                          << std ::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
+                          << std::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
                 for (const auto& cell : current_row) {
                     if (!contains(this->context.excluded_cols, cell->idx.col_name)) {
                         if (cell->idx.col_name == last_col_name) {
@@ -184,9 +186,11 @@ namespace df {
         RowGroup<T>* rg;
 
       public:
-        template<typename = std::enable_if_t<std::is_arithmetic_v<T>, bool>>
+        template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
         void log(int range = 0) const {
-            DF_ASSERT(range <= rg->size() || range >= -rg->size(), "range is grater then row count");
+            if (range > static_cast<int>(rg->size()) || range < -static_cast<int>(rg->size())) {
+                throw std::logic_error{"range is grater than row count"};
+            }
 
             std::size_t idx_space      = 4;
             std::size_t row_name_space = this->context.max_row_name_size + this->context.spacing;
@@ -196,7 +200,7 @@ namespace df {
             auto contains = [](const std::vector<std::string>& excluded_cols_list, const std::string& cur_col_name) {
                 return std::find_if(excluded_cols_list.begin(),
                                     excluded_cols_list.end(),
-                                    [cur_col_name](std::string col_name) { return cur_col_name == col_name; })
+                                    [cur_col_name](const std::string& col_name) { return cur_col_name == col_name; })
                        != excluded_cols_list.end();
             };
 
@@ -204,27 +208,16 @@ namespace df {
 
             std::cout << std::left << std::setw(row_name_space + idx_space) << "idx";
             for (const auto& c : rg->at(0)) {
-                if (!contains(this->context.excluded_cols, c->idx.col_name)) {
-                    if (c->idx.col_name == last_col_name) {
-                        std::cout << c->idx.col_name;
-                    } else {
-                        std::cout << std::left << std::setw(col_spacing) << c->idx.col_name;
-                    }
-                }
+                if (!contains(this->context.excluded_cols, c->idx.col_name)) { std::cout << std::left << std::setw(col_spacing) << c->idx.col_name; }
             }
             std::cout << std::endl;
 
-            int range_start;
-            int range_end;
-            if (range == 0) {
-                range_start = 0;
-                range_end   = rg->size();
-            } else if (range > 0) {
-                range_start = 0;
-                range_end   = range;
-            } else {
-                range_start = rg->size() + range;
-                range_end   = rg->size();
+            int range_start = 0;
+            int range_end   = rg->size();
+            if (range > 0) {
+                range_end = std::min(range, static_cast<int>(rg->size()));
+            } else if (range < 0) {
+                range_start = std::max(0, static_cast<int>(rg->size()) + range);
             }
 
             for (int idx = range_start; idx < range_end; idx++) {
