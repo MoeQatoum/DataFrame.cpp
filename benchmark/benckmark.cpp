@@ -31,7 +31,7 @@ void print_bench_result(std::array<std::chrono::nanoseconds, N> data, const char
         sum += std::chrono::duration_cast<TimeUnit>(data[i]);
     }
     auto avg = sum / N;
-    std::cout << "    " << bench_name << " , avg time per it: " << avg << "\n";
+    std::cout << "    " << bench_name << ", avg time per it: " << avg << "\n";
 }
 
 int main() {
@@ -42,11 +42,11 @@ int main() {
 
     std::vector<std ::string> bench_col_names{};
     for (std::size_t i = 0; i < BENCH_COL_COUNT; i++) {
-        bench_col_names.push_back(std::string{"col-" + std::to_string(i + 1)});
+        bench_col_names.push_back(std::string{"col-" + std::to_string(i)});
     }
     std::vector<std ::string> bench_row_names{};
     for (std::size_t i = 0; i < BENCH_ROW_COUNT; i++) {
-        bench_row_names.push_back(std::string{"row-" + std::to_string(i + 1)});
+        bench_row_names.push_back(std::string{"row-" + std::to_string(i)});
     }
 
     DataFrame<dataT> df{bench_col_names, bench_row_names};
@@ -69,7 +69,7 @@ int main() {
         //   auto v = df[i].value;
         // }
         for (const auto& cell : df) {
-            auto c = cell.value;
+            auto c __attribute__((unused)) = cell.value;
         }
         nsec_timer.tock();
         DataFrameIterator_bench_data[i] = nsec_timer.duration();
@@ -92,7 +92,7 @@ int main() {
     for (std::size_t i = 0; i < COUNT__ITER_DF_BENCH; i++) {
         std::size_t rand_idx = static_cast<std::size_t>(rand()) % (df.size() - 1);
         nsec_timer.tick();
-        auto v = df[rand_idx].value;
+        auto v __attribute__((unused)) = df[rand_idx].value;
         nsec_timer.tock();
         DataFrameIterator_bench_data[i] = nsec_timer.duration();
     }
@@ -102,7 +102,7 @@ int main() {
         std::string col_name{"col-" + std::to_string(static_cast<std::size_t>(rand()) % (df.col_size() - 1))};
         std::string row_name{"row-" + std::to_string(static_cast<std::size_t>(rand()) % (df.row_size() - 1))};
         nsec_timer.tick();
-        auto v = df[col_name, row_name].value;
+        auto v __attribute__((unused)) = df[col_name, row_name].value;
         nsec_timer.tock();
         DataFrameIterator_bench_data[i] = nsec_timer.duration();
     }
@@ -136,7 +136,7 @@ int main() {
         nsec_timer.tick();
         for (auto i = df.iter_rows(); i < df.end(); i++) {
             for (const auto& c : i.current_row()) {
-                c->value;
+                auto v __attribute__((unused)) = c->value;
             }
         }
         nsec_timer.tock();
@@ -162,7 +162,7 @@ int main() {
         nsec_timer.tick();
         auto row = df.row(rand_idx);
         for (const auto& c : row) {
-            auto v = c->value;
+            auto v __attribute__((unused)) = c->value;
         }
         nsec_timer.tock();
         RowIterator_bench_data[i] = nsec_timer.duration();
@@ -190,7 +190,7 @@ int main() {
         nsec_timer.tick();
         for (auto i = df.iter_cols(); i < df.end(); i++) {
             for (auto& c : i.current_col()) {
-                auto v = c->value;
+                auto v __attribute__((unused)) = c->value;
             }
         }
         nsec_timer.tock();
@@ -216,7 +216,7 @@ int main() {
         nsec_timer.tick();
         auto col = df.column(rand_idx);
         for (auto& c : col) {
-            auto v = c->value;
+            auto v __attribute__((unused)) = c->value;
         }
         nsec_timer.tock();
         ColumnIterator_bench_data[i] = nsec_timer.duration();
