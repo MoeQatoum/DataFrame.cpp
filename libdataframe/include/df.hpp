@@ -16,8 +16,8 @@ namespace df {
 
     template<typename Iterable>
     class Iterator {
-        using ValueType      = typename Iterable::ValueType;
-        using ConstValueType = typename Iterable::ConstValueType;
+        using value_type       = typename Iterable::value_type;
+        using const_value_type = typename Iterable::const_value_type;
 
         template<typename>
         friend class RowIterator;
@@ -26,7 +26,7 @@ namespace df {
         friend class ColumnIterator;
 
       public:
-        Iterator(ValueType* p_data) : m_d(p_data) {
+        Iterator(value_type* p_data) : m_d(p_data) {
         }
 
         Iterator(const Iterator& other) : m_d(other.m_d) {
@@ -35,7 +35,7 @@ namespace df {
         ~Iterator() {
         }
 
-        template<typename ValueType1, typename = std::enable_if_t<std::is_convertible_v<ValueType, ValueType1>, bool>>
+        template<typename ValueType1, typename = std::enable_if_t<std::is_convertible_v<value_type, ValueType1>, bool>>
         operator ValueType1() const {
             return m_d;
         }
@@ -45,27 +45,27 @@ namespace df {
             return *this;
         }
 
-        ValueType* operator&() {
+        value_type* operator&() {
             return m_d;
         }
 
-        ConstValueType* operator&() const {
+        const value_type* operator&() const {
             return m_d;
         }
 
-        ValueType& operator*() {
+        value_type& operator*() {
             return *m_d;
         }
 
-        ConstValueType& operator*() const {
+        const value_type& operator*() const {
             return *m_d;
         }
 
-        ValueType* operator->() {
+        value_type* operator->() {
             return m_d;
         }
 
-        ConstValueType* operator->() const {
+        const value_type* operator->() const {
             return m_d;
         }
 
@@ -145,17 +145,17 @@ namespace df {
         }
 
       private:
-        ValueType* m_d;
+        value_type* m_d;
     };
 
-    template<typename Iterable>
+    template<typename dataframe>
     class RowIterator {
-        using DataFrameIterator = typename Iterable::Iterator;
-        using ConstRow          = typename Iterable::ConstRow;
-        using Row               = typename Iterable::Row;
 
       public:
-        RowIterator(DataFrameIterator df_begin, std::size_t row_size) : m_df_begin(df_begin), m_row_size(row_size), m_current_row_idx(0) {
+        using iterator = typename dataframe::iterator;
+        using row      = Row<typename dataframe::data_type>;
+
+        RowIterator(const iterator df_begin, std::size_t row_size) : m_df_begin(df_begin), m_row_size(row_size), m_current_row_idx(0) {
         }
 
         RowIterator(const RowIterator& other)
@@ -168,12 +168,12 @@ namespace df {
         }
 
         // Returns the current row explicitly; use when you want to access the row at the current iterator position.
-        Row current_row() {
-            return Row(m_df_begin, m_current_row_idx, m_row_size);
+        row current_row() {
+            return row(m_df_begin, m_current_row_idx, m_row_size);
         }
 
-        ConstRow current_row() const {
-            return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
+        row current_row() const {
+            return row(m_df_begin, m_current_row_idx, m_row_size);
         }
 
         std::size_t current_row_idx() const {
@@ -192,13 +192,13 @@ namespace df {
         // TODO: move constructor ?
 
         // Implicit conversion to Row; use for syntactic convenience (e.g., auto r = *it).
-        operator Row() {
-            return Row(m_df_begin, m_current_row_idx, m_row_size);
+        operator row() {
+            return row(m_df_begin, m_current_row_idx, m_row_size);
         }
 
-        operator ConstRow() const {
-            return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
-        }
+        // operator ConstRow() const {
+        //     return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
+        // }
 
         RowIterator& operator++() {
             ++m_current_row_idx;
@@ -222,19 +222,19 @@ namespace df {
             return tmp;
         }
 
-        friend bool operator<(const RowIterator& lhs, const DataFrameIterator& rhs) {
+        friend bool operator<(const RowIterator& lhs, const iterator& rhs) {
             return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) < rhs;
         }
 
-        friend bool operator<(const DataFrameIterator& lhs, const RowIterator& rhs) {
+        friend bool operator<(const iterator& lhs, const RowIterator& rhs) {
             return lhs < (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
         }
 
-        friend bool operator>(const RowIterator& lhs, const DataFrameIterator& rhs) {
+        friend bool operator>(const RowIterator& lhs, const iterator& rhs) {
             return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) > rhs;
         }
 
-        friend bool operator>(const DataFrameIterator& lhs, const RowIterator& rhs) {
+        friend bool operator>(const iterator& lhs, const RowIterator& rhs) {
             return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
         }
 
@@ -255,19 +255,18 @@ namespace df {
         }
 
       private:
-        DataFrameIterator m_df_begin;
-        std::size_t       m_row_size;
-        std::size_t       m_current_row_idx;
+        iterator    m_df_begin;
+        std::size_t m_row_size;
+        std::size_t m_current_row_idx;
     };
 
-    template<typename Iterable>
+    template<typename dataframe>
     class ColumnIterator {
-        using DataFrameIter = typename Iterable::Iterator;
-        using ConstColumn   = typename Iterable::ConstColumn;
-        using Column        = typename Iterable::Column;
+        using dataframe_iterator = typename dataframe::iterator;
+        using column             = Column<typename dataframe::data_type>;
 
       public:
-        ColumnIterator(DataFrameIter df_begin, std::size_t col_size, std::size_t row_size)
+        ColumnIterator(dataframe_iterator df_begin, std::size_t col_size, std::size_t row_size)
             : m_df_begin(df_begin),
               m_col_size(col_size),
               m_row_size(row_size),
@@ -286,25 +285,25 @@ namespace df {
 
         // TODO: move constructor ?
 
-        Column current_col() {
-            return Column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+        column current_col() {
+            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
         }
 
-        ConstColumn current_col() const {
-            return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+        column current_col() const {
+            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
         }
 
         std::size_t current_col_idx() const {
             return m_current_col_idx;
         }
 
-        operator Column() {
-            return Column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+        operator column() {
+            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
         }
 
-        operator ConstColumn() const {
-            return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
-        }
+        // operator ConstColumn() const {
+        //     return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
+        // }
 
         ColumnIterator& operator=(const ColumnIterator& other) {
             if (this != &other) {
@@ -339,19 +338,19 @@ namespace df {
             return *this;
         }
 
-        friend bool operator<(const ColumnIterator& lhs, const DataFrameIter& rhs) {
+        friend bool operator<(const ColumnIterator& lhs, const dataframe_iterator& rhs) {
             return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * (lhs.m_col_size - 1)))) < rhs.m_d;
         }
 
-        friend bool operator<(const DataFrameIter& lhs, const ColumnIterator& rhs) {
+        friend bool operator<(const dataframe_iterator& lhs, const ColumnIterator& rhs) {
             return lhs.m_d < (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
         }
 
-        friend bool operator>(const ColumnIterator& lhs, const DataFrameIter& rhs) {
+        friend bool operator>(const ColumnIterator& lhs, const dataframe_iterator& rhs) {
             return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * lhs.m_col_size))) > rhs.m_d;
         }
 
-        friend bool operator>(const DataFrameIter& lhs, const ColumnIterator& rhs) {
+        friend bool operator>(const dataframe_iterator& lhs, const ColumnIterator& rhs) {
             return lhs.m_d > (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
         }
 
@@ -372,10 +371,10 @@ namespace df {
         }
 
       private:
-        DataFrameIter m_df_begin;
-        std::size_t   m_col_size;
-        std::size_t   m_row_size;
-        std::size_t   m_current_col_idx;
+        dataframe_iterator m_df_begin;
+        std::size_t        m_col_size;
+        std::size_t        m_row_size;
+        std::size_t        m_current_col_idx;
     };
 
     struct Shape {
@@ -392,21 +391,15 @@ namespace df {
         friend class DF_Logger<T>;
 
       public:
-        using ValueType       = Cell<T>;
-        using ConstValueType  = const ValueType;
-        using pValueType      = ValueType*;
-        using pConstValueType = const pValueType;
-        using Row             = Row<T>;
-        using ConstRow        = const Row;
-        using RowGroup        = RowGroup<T>;
-        using ConstRowGroup   = const RowGroup;
-        using Column          = Column<T>;
-        using ConstColumn     = const Column;
-        using Iterator        = Iterator<DataFrame<T>>;
-        using ConstIterator   = const Iterator;
-        using RowIterator     = RowIterator<DataFrame<T>>;
-        using ColumnIterator  = ColumnIterator<DataFrame<T>>;
-        using Logger          = DF_Logger<T>;
+        using data_type          = T;
+        using value_type         = Cell<data_type>;
+        using const_value_type   = const Cell<data_type>;
+        using pointer_type       = Cell<data_type>*;
+        using const_pointer_type = const Cell<data_type>*;
+        using iterator           = Iterator<DataFrame<T>>;
+        using row_iterator       = RowIterator<DataFrame<T>>;
+        using column_iterator    = ColumnIterator<DataFrame<T>>;
+        using dataframe_logger   = DF_Logger<T>;
 
         DataFrame()
             : logger(this),
@@ -425,7 +418,7 @@ namespace df {
             m_col_size     = m_row_count;
             m_row_size     = m_col_count;
             m_current_size = m_col_count * m_row_count;
-            m_d            = new ValueType[m_current_size];
+            m_d            = new value_type[m_current_size];
 
             for (std::size_t i = 0; i < m_col_count; i++) {
                 m_col_idx_map.insert({col_names[i], i});
@@ -457,13 +450,13 @@ namespace df {
             logger.with_context(logging_context);
         }
 
-        DataFrame(const RowGroup& rows) : logger(this), logging_context({}) {
+        DataFrame(const RowGroup<data_type>& rows) : logger(this), logging_context({}) {
             m_col_count    = rows.row_size();
             m_row_count    = rows.size();
             m_col_size     = m_row_count;
             m_row_size     = m_col_count;
             m_current_size = m_col_count * m_row_count;
-            m_d            = new ValueType[m_current_size];
+            m_d            = new value_type[m_current_size];
 
             std::size_t idx = 0;
             for (std::size_t row_idx = 0; row_idx < m_row_count; row_idx++) {
@@ -499,7 +492,7 @@ namespace df {
               m_col_count(other.m_col_count),
               m_row_size(other.m_row_size),
               m_row_count(other.m_row_count),
-              m_d(new ValueType[m_current_size]),
+              m_d(new value_type[m_current_size]),
               logging_context(other.logging_context) {
             for (std::size_t idx = 0; idx < m_current_size; idx++) {
                 m_d[idx] = other.m_d[idx];
@@ -523,7 +516,7 @@ namespace df {
                     m_row_size      = other.m_row_size;
                     m_row_count     = other.m_row_count;
                     logging_context = other.logging_context;
-                    m_d             = new ValueType[other.m_current_size];
+                    m_d             = new value_type[other.m_current_size];
                     for (std::size_t idx = 0; idx < m_current_size; idx++) {
                         m_d[idx] = other.m_d[idx];
                     }
@@ -547,35 +540,35 @@ namespace df {
             return *this;
         }
 
-        ValueType& operator[](const std::size_t& idx) {
+        value_type& operator[](const std::size_t& idx) {
             return m_d[idx];
         }
 
-        ConstValueType& operator[](const std::size_t& idx) const {
+        const_value_type& operator[](const std::size_t& idx) const {
             return m_d[idx];
         }
 
-        Column operator[](const std::string& col_name) {
+        Column<data_type> operator[](const std::string& col_name) {
             return column(col_name);
         }
 
-        ConstColumn operator[](const std::string& col_name) const {
+        Column<data_type> operator[](const std::string& col_name) const {
             return column(col_name);
         }
 
-        ValueType& operator[](const std::size_t& col_idx, const std::size_t& row_idx) {
+        value_type& operator[](const std::size_t& col_idx, const std::size_t& row_idx) {
             if (col_idx >= m_col_size) { throw std::out_of_range("column index out of range"); };
             if (row_idx >= m_row_size) { throw std::out_of_range("row index out of range"); };
             return *(m_d + ((m_row_size * row_idx) + col_idx));
         }
 
-        ConstValueType& operator[](const std::size_t& col_idx, const std::size_t& row_idx) const {
+        const_value_type& operator[](const std::size_t& col_idx, const std::size_t& row_idx) const {
             if (col_idx >= m_col_size) { throw std::out_of_range("column index out of range"); };
             if (row_idx >= m_row_size) { throw std::out_of_range("row index out of range"); };
             return *(m_d + ((m_row_size * row_idx) + col_idx));
         }
 
-        ValueType& operator[](const std::string& col_name, const std::string& row_name) {
+        value_type& operator[](const std::string& col_name, const std::string& row_name) {
             if (!m_col_idx_map.contains(col_name) || !m_row_idx_map.contains(row_name)) {
                 throw std::out_of_range("Column/row name not found: " + col_name + "/" + row_name);
             }
@@ -584,7 +577,7 @@ namespace df {
             return *(m_d + ((m_row_size * row_idx) + col_idx));
         }
 
-        ConstValueType& operator[](const std::string& col_name, const std::string& row_name) const {
+        const_value_type& operator[](const std::string& col_name, const std::string& row_name) const {
             if (!m_col_idx_map.contains(col_name) && !m_row_idx_map.contains(row_name)) {
                 throw std::out_of_range("Column/row name not found: " + col_name + "/" + row_name);
             }
@@ -619,11 +612,11 @@ namespace df {
             throw std::logic_error("Row index not found: " + std::to_string(row_idx));
         }
 
-        ValueType& at(std::size_t idx) {
+        value_type& at(std::size_t idx) {
             return m_d[idx];
         }
 
-        ConstValueType& at(std::size_t idx) const {
+        const_value_type& at(std::size_t idx) const {
             return m_d[idx];
         }
 
@@ -651,76 +644,76 @@ namespace df {
             return {.col_count = m_col_count, .row_count = m_row_count};
         }
 
-        Column column(std::size_t col_idx) {
-            return Column{begin() + col_idx, m_col_size, m_row_size};
+        Column<data_type> column(std::size_t col_idx) {
+            return {begin() + col_idx, m_col_size, m_row_size};
         }
 
-        ConstColumn column(std::size_t col_idx) const {
-            return ConstColumn{begin() + col_idx, m_col_size, m_row_size};
+        Column<data_type> column(std::size_t col_idx) const {
+            return {begin() + col_idx, m_col_size, m_row_size};
         }
 
-        Column column(std::string col_name) {
-            return Column{begin() + get_col_idx(col_name), m_col_size, m_row_size};
+        Column<data_type> column(std::string col_name) {
+            return {begin() + get_col_idx(col_name), m_col_size, m_row_size};
         }
 
-        ConstColumn column(std::string col_name) const {
-            return ConstColumn{begin() + get_col_idx(col_name), m_col_size, m_row_size};
+        Column<data_type> column(std::string col_name) const {
+            return {begin() + get_col_idx(col_name), m_col_size, m_row_size};
         }
 
-        Row row(std::size_t row_idx) {
-            return Row{begin(), row_idx, m_row_size};
+        Row<data_type> row(std::size_t row_idx) {
+            return {begin(), row_idx, m_row_size};
         }
 
-        ConstRow row(std::size_t row_idx) const {
-            return ConstRow{begin(), row_idx, m_row_size};
+        Row<data_type> row(std::size_t row_idx) const {
+            return {begin(), row_idx, m_row_size};
         }
 
-        Row row(std::string row_name) {
-            return Row{begin(), get_row_idx(row_name), m_row_size};
+        Row<data_type> row(std::string row_name) {
+            return {begin(), get_row_idx(row_name), m_row_size};
         }
 
-        ConstRow row(std::string row_name) const {
-            return ConstRow{begin(), get_row_idx(row_name), m_row_size};
+        Row<data_type> row(std::string row_name) const {
+            return {begin(), get_row_idx(row_name), m_row_size};
         }
 
-        RowGroup rows() {
-            return RowGroup(this);
+        RowGroup<data_type> rows() {
+            return {this};
         }
 
-        ConstRowGroup rows() const {
-            return ConstRowGroup(this);
+        RowGroup<data_type> rows() const {
+            return {this};
         }
 
-        Iterator begin() {
-            return Iterator(m_d);
+        iterator begin() {
+            return iterator(m_d);
         }
 
-        Iterator end() {
-            return Iterator(m_d + m_current_size);
+        iterator end() {
+            return iterator(m_d + m_current_size);
         }
 
-        ConstIterator begin() const {
-            return ConstIterator(m_d);
+        iterator begin() const {
+            return iterator(m_d);
         }
 
-        ConstIterator end() const {
-            return ConstIterator(m_d + m_current_size);
+        iterator end() const {
+            return iterator(m_d + m_current_size);
         }
 
-        ColumnIterator iter_cols() {
-            return ColumnIterator(begin(), m_col_size, m_row_size);
+        column_iterator iter_cols() {
+            return column_iterator(begin(), m_col_size, m_row_size);
         }
 
-        ColumnIterator iter_cols() const {
-            return ColumnIterator(begin(), m_col_size, m_row_size);
+        column_iterator iter_cols() const {
+            return column_iterator(begin(), m_col_size, m_row_size);
         }
 
-        RowIterator iter_rows() {
-            return RowIterator(begin(), m_row_size);
+        row_iterator iter_rows() {
+            return row_iterator(begin(), m_row_size);
         }
 
-        RowIterator iter_rows() const {
-            return RowIterator(begin(), m_row_size);
+        row_iterator iter_rows() const {
+            return row_iterator(begin(), m_row_size);
         }
 
         bool is_null() const {
@@ -728,7 +721,7 @@ namespace df {
         }
 
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-        RowGroup sort(std::string column_name, bool ascending = false) {
+        RowGroup<data_type> sort(std::string column_name, bool ascending = false) {
             return RowGroup(this).sort(column_name, ascending);
         }
 
@@ -737,7 +730,7 @@ namespace df {
             logger.log(range);
         }
 
-        Logger logger;
+        dataframe_logger logger;
 
       private:
         std::map<std::string, std::size_t> m_col_idx_map;
@@ -747,9 +740,9 @@ namespace df {
         std::size_t                        m_col_count;
         std::size_t                        m_row_size;
         std::size_t                        m_row_count;
-        ValueType*                         m_d;
+        value_type*                        m_d;
 
-        LoggingContext<T> logging_context;
+        LoggingContext<data_type> logging_context;
     };
 
 } // namespace df

@@ -23,6 +23,23 @@ int main() {
     }
     df.log();
 
+    const DataFrame<int> const_df = df.copy();
+    // const_df[1,1] = 123;
+
+    for (auto row_iter = const_df.iter_rows(); row_iter < const_df.end(); row_iter++) {
+        if (row_iter.current_row().index() == 1) {
+            for (auto& c : row_iter.current_row()) {
+                c->value = 123;
+            }
+            // i.row()[0]->value = 123;
+            auto d = row_iter.current_row().to_series();
+            for (std::size_t i = 0; i < d.size(); i++) {
+                std::cout << d[i] << ", ";
+            }
+            std::cout << "\n";
+        }
+    }
+
     for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
         if (col_iter.current_col().index() == 1) {
             for (auto& c : col_iter.current_col()) {

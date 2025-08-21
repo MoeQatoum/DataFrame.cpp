@@ -19,9 +19,6 @@ namespace df {
     class DataFrame;
 
     template<typename T>
-    class Column;
-
-    template<typename T>
     class RowGroup_Logger;
 
     template<typename T>
@@ -30,28 +27,30 @@ namespace df {
     template<typename T>
     class Row {
       public:
-        using ValueType         = typename DataFrame<T>::pValueType;
-        using ConstValueType    = typename DataFrame<T>::pConstValueType;
-        using DataFrameIterator = typename DataFrame<T>::Iterator;
-        using RowIterator       = Iterator<Row>;
+        using data_type          = T;
+        using value_type         = typename DataFrame<data_type>::pointer_type;
+        using const_value_type   = typename DataFrame<data_type>::const_pointer_type;
+        using dataframe_iterator = typename DataFrame<data_type>::iterator;
+        using iterator           = Iterator<Row>;
 
         Row() : m_size(0), m_d(nullptr) {
         }
 
-        Row(DataFrameIterator df_begin, std::size_t row_idx, std::size_t row_size) {
+        Row(dataframe_iterator df_begin, std::size_t row_idx, std::size_t row_size) {
             m_size = row_size;
-            m_d    = new ValueType[m_size];
+            m_d    = new value_type[m_size];
 
-            DataFrameIterator row_begin = df_begin + (row_idx * row_size);
+            dataframe_iterator row_begin = df_begin + (row_idx * row_size);
             for (std::size_t idx = 0; idx < row_size; idx++) {
                 m_d[idx] = &(row_begin + idx);
             }
         }
 
-        Row(const Row& other) : m_size(other.m_size), m_d(new ValueType[other.m_size]) {
-            for (std::size_t i = 0; i < m_size; i++) {
-                m_d[i] = other.m_d[i];
-            }
+        Row(const Row& other) : m_size(other.m_size), m_d(new value_type[other.m_size]) {
+            // for (std::size_t i = 0; i < m_size; i++) {
+            //     m_d[i] = other.m_d[i];
+            // }
+            std::copy(other.begin(), other.end(), m_d);
         }
 
         Row(Row&& other) : m_size(other.m_size), m_d(other.m_d) {
@@ -72,15 +71,15 @@ namespace df {
         //   return *this;
         // }
 
-        ValueType& operator[](const std::size_t& idx) {
+        value_type& operator[](const std::size_t& idx) {
             return m_d[idx];
         }
 
-        ConstValueType& operator[](const std::size_t& idx) const {
+        const value_type& operator[](const std::size_t& idx) const {
             return m_d[idx];
         }
 
-        ValueType& operator[](const std::string& col_name) {
+        value_type& operator[](const std::string& col_name) {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -89,7 +88,7 @@ namespace df {
             abort();
         }
 
-        ConstValueType& operator[](const std::string& col_name) const {
+        const_value_type& operator[](const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -103,7 +102,7 @@ namespace df {
                 if (is_null()) {
                     FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
                     m_size = rhs.m_size;
-                    m_d    = new ValueType[m_size];
+                    m_d    = new value_type[m_size];
                 } else {
                     FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
                 }
@@ -148,7 +147,7 @@ namespace df {
             return data;
         }
 
-        ValueType& at_column(const std::string& col_name) {
+        value_type& at_column(const std::string& col_name) {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -157,7 +156,7 @@ namespace df {
             abort();
         }
 
-        ConstValueType& at_column(const std::string& col_name) const {
+        const value_type& at_column(const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -192,12 +191,12 @@ namespace df {
             return m_d[0]->idx.row_name;
         }
 
-        RowIterator begin() const {
-            return RowIterator(m_d);
+        iterator begin() const {
+            return iterator(m_d);
         }
 
-        RowIterator end() const {
-            return RowIterator(m_d + m_size);
+        iterator end() const {
+            return iterator(m_d + m_size);
         }
 
         bool is_null() const {
@@ -206,15 +205,15 @@ namespace df {
 
       private:
         std::size_t m_size;
-        ValueType*  m_d;
+        value_type* m_d;
     };
 
     template<typename T>
     class RowGroup {
       public:
-        using ValueType        = Row<T>;
-        using ConstValueType   = const Row<T>;
-        using RowGroupIterator = Iterator<RowGroup>;
+        using value_type       = Row<T>;
+        using const_value_type = const Row<T>;
+        using iterator         = Iterator<RowGroup>;
 
         RowGroup(const DataFrame<T>* df) : logger(this), logging_context(df->logger.context) {
             m_size     = df->row_count();
@@ -303,12 +302,12 @@ namespace df {
             return m_d[index];
         }
 
-        RowGroupIterator begin() const {
-            return RowGroupIterator(m_d);
+        iterator begin() const {
+            return iterator(m_d);
         }
 
-        RowGroupIterator end() const {
-            return RowGroupIterator(m_d + m_size);
+        iterator end() const {
+            return iterator(m_d + m_size);
         }
 
         void log(int range = 0) const {
@@ -320,7 +319,7 @@ namespace df {
       private:
         LoggingContext<T> logging_context;
         std::size_t       m_size;
-        Row<T>*           m_d;
+        value_type*       m_d;
         std::size_t       m_row_size;
     };
 

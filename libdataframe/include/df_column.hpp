@@ -15,18 +15,19 @@ namespace df {
     template<typename T>
     class Column {
       public:
-        using ValueType         = typename DataFrame<T>::pValueType;
-        using ConstValueType    = typename DataFrame<T>::pConstValueType;
-        using DataFrameIterator = typename DataFrame<T>::Iterator;
-        using ColIterator       = Iterator<Column>;
+        using data_type          = T;
+        using value_type         = typename DataFrame<data_type>::pointer_type;
+        using const_value_type   = typename DataFrame<data_type>::const_pointer_type;
+        using dataframe_iterator = typename DataFrame<data_type>::iterator;
+        using iterator           = Iterator<Column>;
 
         Column() : m_size(0), m_stride(0), m_d(nullptr) {
         }
 
-        Column(DataFrameIterator col_begin, std::size_t col_size, std::size_t stride) {
+        Column(dataframe_iterator col_begin, std::size_t col_size, std::size_t stride) {
             m_size   = col_size;
             m_stride = stride;
-            m_d      = new ValueType[col_size];
+            m_d      = new value_type[col_size];
 
             for (std::size_t idx = 0; idx < col_size; idx++) {
                 m_d[idx] = &(col_begin + (idx * stride));
@@ -48,15 +49,15 @@ namespace df {
         //   return *this;
         // }
 
-        ValueType& operator[](const std::size_t idx) {
+        value_type& operator[](const std::size_t idx) {
             return m_d[idx];
         }
 
-        ConstValueType& operator[](const std::size_t idx) const {
+        const value_type& operator[](const std::size_t idx) const {
             return m_d[idx];
         }
 
-        ValueType& operator[](const std::string& row_name) {
+        value_type& operator[](const std::string& row_name) {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.row_name == row_name) { return m_d[i]; }
             }
@@ -65,7 +66,7 @@ namespace df {
             abort();
         }
 
-        ConstValueType& operator[](const std::string& row_name) const {
+        const value_type& operator[](const std::string& row_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.row_name == row_name) { return m_d[i]; }
             }
@@ -79,7 +80,7 @@ namespace df {
                 if (is_null()) {
                     FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
                     m_size = rhs.m_size;
-                    m_d    = new ValueType[m_size];
+                    m_d    = new value_type[m_size];
                 } else {
                     FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
                 }
@@ -475,7 +476,7 @@ namespace df {
             return res;
         }
 
-        ValueType& at_row(const std::string& row_name) {
+        value_type& at_row(const std::string& row_name) {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.row_name == row_name) { return m_d[i]; }
             }
@@ -484,7 +485,7 @@ namespace df {
             abort();
         }
 
-        ConstValueType& at_row(const std::string& row_name) const {
+        const value_type& at_row(const std::string& row_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.row_name == row_name) { return m_d[i]; }
             }
@@ -540,12 +541,12 @@ namespace df {
             return m_d[0]->idx.col_name;
         }
 
-        ColIterator begin() const {
-            return ColIterator(m_d);
+        iterator begin() const {
+            return iterator(m_d);
         }
 
-        ColIterator end() const {
-            return ColIterator(m_d + m_size);
+        iterator end() const {
+            return iterator(m_d + m_size);
         }
 
         constexpr bool is_null() const {
@@ -555,7 +556,7 @@ namespace df {
       private:
         std::size_t m_size;
         std::size_t m_stride;
-        ValueType*  m_d;
+        value_type* m_d;
     };
 } // namespace df
 

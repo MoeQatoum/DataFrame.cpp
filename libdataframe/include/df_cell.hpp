@@ -4,6 +4,11 @@
 #include "df_common.hpp"
 
 namespace df {
+    /*
+     TODO: is copying the index correct or even required? we should not touch the index of the cell,
+     once set shout not be tampered with, otherwise
+     copying cells will mix the indexing, therefore we should copy values only!
+    */
 
     struct Index {
 
@@ -18,7 +23,7 @@ namespace df {
               row_name(other.row_name) {
         }
 
-        // Index(const Index&& other) = delete;
+        // Index(const Index&& other) = delete; // TODO: should we allow move semantics?
 
         Index& operator=(const Index& rhs) {
             if (this != &rhs) {
@@ -48,7 +53,7 @@ namespace df {
     template<typename T>
     class Cell {
       public:
-        using ValueType = T;
+        using data_type = T;
 
         Cell() {
         }
@@ -56,17 +61,17 @@ namespace df {
         Cell(const Cell& other) : value(other.value), idx(other.idx) {
         }
 
-        // Cell(const Cell&& other) = delete;
+        // Cell(const Cell&& other) = delete; //TODO: should we allow move semantics?
 
-        Cell<T>& operator=(const Cell<T>& other) {
+        Cell& operator=(const Cell& other) {
             if (this != &other) {
                 value = other.value;
-                idx   = other.idx;
+                idx   = other.idx; // TODO: should we copy the index?
             }
             return *this;
         }
 
-        void operator=(const T val) {
+        void operator=(const data_type val) {
             value = val;
         }
 
@@ -86,21 +91,21 @@ namespace df {
             --value;
         }
 
-        void operator+=(T off) {
+        void operator+=(data_type off) {
             value += off;
         }
 
-        void operator-=(T off) {
+        void operator-=(data_type off) {
             value -= off;
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const Cell<T>& cell) {
+        friend std::ostream& operator<<(std::ostream& os, const Cell& cell) {
             os << "Cell(value: " << cell.value << ", idx: " << cell.idx << ")";
             return os;
         }
 
-        T     value;
-        Index idx;
+        data_type value;
+        Index     idx;
     };
 
 } // namespace df
