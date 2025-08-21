@@ -16,8 +16,10 @@ namespace df {
     class Column {
       public:
         using data_type          = T;
-        using value_type         = typename DataFrame<data_type>::pointer_type;
-        using const_value_type   = typename DataFrame<data_type>::const_pointer_type;
+        using value_type         = typename DataFrame<data_type>::value_type*;
+        using const_value_type   = const value_type;
+        using pointer_type       = value_type*;
+        using const_pointer_type = const value_type*;
         using dataframe_iterator = typename DataFrame<data_type>::iterator;
         using iterator           = Iterator<Column>;
 

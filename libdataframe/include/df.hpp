@@ -16,8 +16,12 @@ namespace df {
 
     template<typename Iterable>
     class Iterator {
-        using value_type       = typename Iterable::value_type;
-        using const_value_type = typename Iterable::const_value_type;
+        using iterator_category  = std::random_access_iterator_tag;
+        using value_type         = typename Iterable::value_type;
+        using const_value_type   = typename Iterable::const_value_type;
+        using pointer_type       = value_type*;
+        using const_pointer_type = const value_type*;
+        using difference_type    = std::ptrdiff_t;
 
         template<typename>
         friend class RowIterator;
@@ -145,7 +149,7 @@ namespace df {
         }
 
       private:
-        value_type* m_d;
+        pointer_type m_d;
     };
 
     template<typename dataframe>
@@ -391,15 +395,13 @@ namespace df {
         friend class DF_Logger<T>;
 
       public:
-        using data_type          = T;
-        using value_type         = Cell<data_type>;
-        using const_value_type   = const Cell<data_type>;
-        using pointer_type       = Cell<data_type>*;
-        using const_pointer_type = const Cell<data_type>*;
-        using iterator           = Iterator<DataFrame<T>>;
-        using row_iterator       = RowIterator<DataFrame<T>>;
-        using column_iterator    = ColumnIterator<DataFrame<T>>;
-        using dataframe_logger   = DF_Logger<T>;
+        using data_type        = T;
+        using value_type       = Cell<data_type>;
+        using const_value_type = const Cell<data_type>;
+        using iterator         = Iterator<DataFrame<T>>;
+        using row_iterator     = RowIterator<DataFrame<T>>;
+        using column_iterator  = ColumnIterator<DataFrame<T>>;
+        using dataframe_logger = DF_Logger<data_type>;
 
         DataFrame()
             : logger(this),
@@ -735,12 +737,13 @@ namespace df {
       private:
         std::map<std::string, std::size_t> m_col_idx_map;
         std::map<std::string, std::size_t> m_row_idx_map;
-        std::size_t                        m_current_size;
-        std::size_t                        m_col_size;
-        std::size_t                        m_col_count;
-        std::size_t                        m_row_size;
-        std::size_t                        m_row_count;
-        value_type*                        m_d;
+        // we call it current size because it can change, when we implement appending/removing cols and rows
+        std::size_t m_current_size;
+        std::size_t m_col_size;
+        std::size_t m_col_count;
+        std::size_t m_row_size;
+        std::size_t m_row_count;
+        value_type* m_d;
 
         LoggingContext<data_type> logging_context;
     };

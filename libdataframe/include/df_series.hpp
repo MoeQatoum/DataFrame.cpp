@@ -10,8 +10,8 @@ namespace df {
     template<typename T>
     class Series {
       public:
-        using ValueType      = T;
-        using SeriesIterator = Iterator<Series>;
+        using value_type = T;
+        using iterator   = Iterator<Series>;
 
         explicit Series(const std::size_t& size) : m_d(new T[size]), m_size(size) {
         }
@@ -365,8 +365,8 @@ namespace df {
         //    return SeriesIterator(m_d);
         //  }
 
-        SeriesIterator begin() {
-            return SeriesIterator(m_d);
+        iterator begin() {
+            return {m_d};
         }
 
         // TODO: this function should return a const iterator.
@@ -374,8 +374,8 @@ namespace df {
         //   return SeriesIterator(m_d + m_size);
         // }
 
-        SeriesIterator end() {
-            return SeriesIterator(m_d + m_size);
+        iterator end() {
+            return {m_d + m_size};
         }
 
         std::size_t size() const {
@@ -391,7 +391,7 @@ namespace df {
         }
 
       private:
-        T*          m_d;
+        value_type* m_d;
         std::size_t m_size;
     };
 
