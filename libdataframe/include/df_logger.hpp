@@ -123,13 +123,12 @@ namespace df {
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
         void log(int range = 0) const {
             if (range > static_cast<int>(df->m_row_count) || range < -static_cast<int>(df->m_row_count)) {
-                throw std::logic_error{"range is grater than row count"};
+                throw std::runtime_error{"range is grater than row count"};
             }
 
             std::size_t idx_space      = 4;
             std::size_t row_name_space = this->context.max_row_name_size + this->context.spacing;
             int         col_spacing    = this->context.max_col_name_size + this->context.spacing;
-            std::string last_col_name  = df->column(df->col_count() - 1).name();
 
             auto contains = [](const std::vector<std::string>& excluded_cols_list, const std::string& cur_col_name) {
                 return std::find_if(excluded_cols_list.begin(),
@@ -161,11 +160,7 @@ namespace df {
                           << std::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
                 for (const auto& cell : current_row) {
                     if (!contains(this->context.excluded_cols, cell->idx.col_name)) {
-                        if (cell->idx.col_name == last_col_name) {
-                            std::cout << this->context.cell_color_condition(cell) << cell->value << DF_COLOR_W;
-                        } else {
-                            std::cout << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
-                        }
+                        std::cout << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
                     }
                 }
                 std::cout << std::endl;
@@ -189,13 +184,12 @@ namespace df {
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
         void log(int range = 0) const {
             if (range > static_cast<int>(rg->size()) || range < -static_cast<int>(rg->size())) {
-                throw std::logic_error{"range is grater than row count"};
+                throw std::runtime_error{"range is grater than row count"};
             }
 
             std::size_t idx_space      = 4;
             std::size_t row_name_space = this->context.max_row_name_size + this->context.spacing;
             int         col_spacing    = this->context.max_col_name_size + this->context.spacing;
-            std::string last_col_name  = rg->at(0)[rg->row_size() - 1]->idx.col_name;
 
             auto contains = [](const std::vector<std::string>& excluded_cols_list, const std::string& cur_col_name) {
                 return std::find_if(excluded_cols_list.begin(),
@@ -226,11 +220,7 @@ namespace df {
                           << std ::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
                 for (const auto& cell : current_row) {
                     if (!contains(this->context.excluded_cols, cell->idx.col_name)) {
-                        if (cell->idx.col_name == last_col_name) {
-                            std::cout << this->context.cell_color_condition(cell) << cell->value << DF_COLOR_W;
-                        } else {
-                            std::cout << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
-                        }
+                        std::cout << this->context.cell_color_condition(cell) << std::left << std::setw(col_spacing) << cell->value << DF_COLOR_W;
                     }
                 }
                 std::cout << std::endl;
