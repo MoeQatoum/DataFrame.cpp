@@ -3,383 +3,16 @@
 
 #include "df_common.hpp"
 
+#include "df_base_iterator.hpp"
 #include "df_cell.hpp"
 #include "df_column.hpp"
+#include "df_column_iterator.hpp"
 #include "df_logger.hpp"
 #include "df_row.hpp"
-#include "df_series.hpp"
+#include "df_row_group.hpp"
+#include "df_row_iterator.hpp"
 
 namespace df {
-
-    template<typename T>
-    class DataFrame;
-
-    template<typename Iterable>
-    class Iterator {
-        using iterator_category  = std::random_access_iterator_tag;
-        using value_type         = typename Iterable::value_type;
-        using const_value_type   = typename Iterable::const_value_type;
-        using pointer_type       = value_type*;
-        using const_pointer_type = const value_type*;
-        using difference_type    = std::ptrdiff_t;
-
-        template<typename>
-        friend class RowIterator;
-
-        template<typename>
-        friend class ColumnIterator;
-
-      public:
-        Iterator(value_type* p_data) : m_d(p_data) {
-        }
-
-        Iterator(const Iterator& other) : m_d(other.m_d) {
-        }
-
-        ~Iterator() {
-        }
-
-        template<typename ValueType1, typename = std::enable_if_t<std::is_convertible_v<value_type, ValueType1>, bool>>
-        operator ValueType1() const {
-            return m_d;
-        }
-
-        Iterator& operator=(const Iterator& other) {
-            if (this != &other) { m_d = other.m_d; }
-            return *this;
-        }
-
-        value_type* operator&() {
-            return m_d;
-        }
-
-        const value_type* operator&() const {
-            return m_d;
-        }
-
-        value_type& operator*() {
-            return *m_d;
-        }
-
-        const value_type& operator*() const {
-            return *m_d;
-        }
-
-        value_type* operator->() {
-            return m_d;
-        }
-
-        const value_type* operator->() const {
-            return m_d;
-        }
-
-        friend Iterator operator+(const std::size_t& lhs, const Iterator& rhs) {
-            Iterator tmp{rhs};
-            tmp += lhs;
-            return tmp;
-        }
-
-        friend Iterator operator+(const Iterator& lhs, const std::size_t& rhs) {
-            Iterator tmp{lhs};
-            tmp += rhs;
-            return tmp;
-        }
-
-        Iterator& operator++() {
-            m_d++;
-            return *this;
-        }
-
-        Iterator operator++(int) {
-            Iterator tmp{*this};
-            ++(*this);
-            return tmp;
-        }
-
-        Iterator& operator+=(std::size_t off) {
-            m_d += off;
-            return *this;
-        }
-
-        friend ptrdiff_t operator-(const Iterator& lhs, const Iterator& rhs) {
-            return lhs.m_d - rhs.m_d;
-        }
-
-        friend Iterator operator-(const Iterator& lhs, const std::size_t& rhs) {
-            Iterator tmp{lhs};
-            tmp -= rhs;
-            return tmp;
-        }
-
-        Iterator& operator--() {
-            m_d--;
-            return *this;
-        }
-
-        Iterator operator--(int) {
-            Iterator tmp{*this};
-            --(*this);
-            return tmp;
-        }
-
-        Iterator& operator-=(std::size_t off) {
-            m_d -= off;
-            return *this;
-        }
-
-        bool operator==(const Iterator& other) const {
-            return other.m_d == this->m_d;
-        }
-
-        bool operator!=(const Iterator& other) const {
-            return this->m_d != other.m_d;
-        }
-
-        friend bool operator<(const Iterator& lhs, const Iterator& rhs) {
-            return lhs.m_d < rhs.m_d;
-        }
-
-        friend bool operator>(const Iterator& lhs, const Iterator& rhs) {
-            return lhs.m_d > rhs.m_d;
-        }
-
-        friend std::ostream& operator<<(std::ostream& os, const Iterator& itr) {
-            os << "Iterator(current addr: 0x" << std::hex << reinterpret_cast<void*>(itr.m_d) << std::dec << ")";
-            return os;
-        }
-
-      private:
-        pointer_type m_d;
-    };
-
-    template<typename dataframe>
-    class RowIterator {
-
-      public:
-        using iterator = typename dataframe::iterator;
-        using row      = Row<typename dataframe::data_type>;
-
-        RowIterator(const iterator df_begin, std::size_t row_size) : m_df_begin(df_begin), m_row_size(row_size), m_current_row_idx(0) {
-        }
-
-        RowIterator(const RowIterator& other)
-            : m_df_begin(other.m_df_begin),
-              m_row_size(other.m_row_size),
-              m_current_row_idx(other.m_current_row_idx) {
-        }
-
-        ~RowIterator() {
-        }
-
-        // Returns the current row explicitly; use when you want to access the row at the current iterator position.
-        row current_row() {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
-        }
-
-        row current_row() const {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
-        }
-
-        std::size_t current_row_idx() const {
-            return m_current_row_idx;
-        }
-
-        RowIterator& operator=(const RowIterator& other) {
-            if (this != &other) {
-                m_df_begin        = other.m_df_begin;
-                m_row_size        = other.m_row_size;
-                m_current_row_idx = other.m_current_row_idx;
-            }
-            return *this;
-        }
-
-        // TODO: move constructor ?
-
-        // Implicit conversion to Row; use for syntactic convenience (e.g., auto r = *it).
-        operator row() {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
-        }
-
-        // operator ConstRow() const {
-        //     return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
-        // }
-
-        RowIterator& operator++() {
-            ++m_current_row_idx;
-            return *this;
-        }
-
-        RowIterator operator++(int) {
-            RowIterator tmp{*this};
-            ++(*this);
-            return tmp;
-        }
-
-        RowIterator& operator--() {
-            --m_current_row_idx;
-            return *this;
-        }
-
-        RowIterator operator--(int) {
-            RowIterator tmp{*this};
-            --(*this);
-            return tmp;
-        }
-
-        friend bool operator<(const RowIterator& lhs, const iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) < rhs;
-        }
-
-        friend bool operator<(const iterator& lhs, const RowIterator& rhs) {
-            return lhs < (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
-        }
-
-        friend bool operator>(const RowIterator& lhs, const iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) > rhs;
-        }
-
-        friend bool operator>(const iterator& lhs, const RowIterator& rhs) {
-            return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
-        }
-
-        friend bool operator<(const RowIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_row_idx < rhs;
-        }
-
-        friend bool operator<(const std::size_t& lhs, const RowIterator& rhs) {
-            return lhs < rhs.m_current_row_idx;
-        }
-
-        friend bool operator>(const RowIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_row_idx > rhs;
-        }
-
-        friend bool operator>(const std::size_t& lhs, const RowIterator& rhs) {
-            return lhs > rhs.m_current_row_idx;
-        }
-
-      private:
-        iterator    m_df_begin;
-        std::size_t m_row_size;
-        std::size_t m_current_row_idx;
-    };
-
-    template<typename dataframe>
-    class ColumnIterator {
-        using dataframe_iterator = typename dataframe::iterator;
-        using column             = Column<typename dataframe::data_type>;
-
-      public:
-        ColumnIterator(dataframe_iterator df_begin, std::size_t col_size, std::size_t row_size)
-            : m_df_begin(df_begin),
-              m_col_size(col_size),
-              m_row_size(row_size),
-              m_current_col_idx(0) {
-        }
-
-        ~ColumnIterator() {
-        }
-
-        ColumnIterator(const ColumnIterator& other)
-            : m_df_begin(other.m_df_begin),
-              m_col_size(other.m_col_size),
-              m_row_size(other.m_row_size),
-              m_current_col_idx(other.m_current_col_idx) {
-        }
-
-        // TODO: move constructor ?
-
-        column current_col() {
-            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
-        }
-
-        column current_col() const {
-            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
-        }
-
-        std::size_t current_col_idx() const {
-            return m_current_col_idx;
-        }
-
-        operator column() {
-            return column(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
-        }
-
-        // operator ConstColumn() const {
-        //     return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
-        // }
-
-        ColumnIterator& operator=(const ColumnIterator& other) {
-            if (this != &other) {
-                m_df_begin        = other.m_df_begin;
-                m_col_size        = other.m_col_size;
-                m_row_size        = other.m_row_size;
-                m_current_col_idx = other.m_current_col_idx;
-            }
-            return *this;
-        }
-
-        ColumnIterator operator+(const std::size_t& off) const {
-            ColumnIterator tmp{*this};
-            if (tmp.m_current_col_idx + off >= tmp.m_col_size) { throw std::out_of_range("ColumnIterator::operator+ out of range"); }
-            tmp += off;
-            return tmp;
-        }
-
-        ColumnIterator& operator++() {
-            ++m_current_col_idx;
-            return *this;
-        }
-
-        ColumnIterator operator++(int) {
-            ColumnIterator tmp{*this};
-            ++(*this);
-            return tmp;
-        }
-
-        ColumnIterator& operator+=(std::size_t off) {
-            m_current_col_idx += off;
-            return *this;
-        }
-
-        friend bool operator<(const ColumnIterator& lhs, const dataframe_iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * (lhs.m_col_size - 1)))) < rhs.m_d;
-        }
-
-        friend bool operator<(const dataframe_iterator& lhs, const ColumnIterator& rhs) {
-            return lhs.m_d < (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
-        }
-
-        friend bool operator>(const ColumnIterator& lhs, const dataframe_iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_col_idx + (lhs.m_row_size * lhs.m_col_size))) > rhs.m_d;
-        }
-
-        friend bool operator>(const dataframe_iterator& lhs, const ColumnIterator& rhs) {
-            return lhs.m_d > (rhs.m_df_begin + (rhs.m_current_col_idx + (rhs.m_row_size * rhs.m_col_size)));
-        }
-
-        friend bool operator<(const ColumnIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_col_idx < rhs;
-        }
-
-        friend bool operator<(const std::size_t& lhs, const ColumnIterator& rhs) {
-            return lhs < rhs.m_current_col_idx;
-        }
-
-        friend bool operator>(const ColumnIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_col_idx > rhs;
-        }
-
-        friend bool operator>(const std::size_t& lhs, const ColumnIterator& rhs) {
-            return lhs > rhs.m_current_col_idx;
-        }
-
-      private:
-        dataframe_iterator m_df_begin;
-        std::size_t        m_col_size;
-        std::size_t        m_row_size;
-        std::size_t        m_current_col_idx;
-    };
 
     struct Shape {
         std::size_t          col_count;
@@ -398,7 +31,8 @@ namespace df {
         using data_type        = T;
         using value_type       = Cell<data_type>;
         using const_value_type = const Cell<data_type>;
-        using iterator         = Iterator<DataFrame<T>>;
+        using iterator         = BaseIterator<DataFrame<T>, false>;
+        using const_iterator   = BaseIterator<DataFrame<T>, true>;
         using row_iterator     = RowIterator<DataFrame<T>>;
         using column_iterator  = ColumnIterator<DataFrame<T>>;
         using dataframe_logger = DF_Logger<data_type>;
@@ -600,7 +234,7 @@ namespace df {
             for (const auto& [col_name, idx] : m_col_idx_map) {
                 if (idx == col_idx) { return col_name; }
             }
-            throw std::logic_error("Column index not found: " + std::to_string(col_idx));
+            throw std::runtime_error("Column index not found: " + std::to_string(col_idx));
         }
 
         std::size_t get_row_idx(std::string row) const {
@@ -611,7 +245,7 @@ namespace df {
             for (const auto& [row_name, idx] : m_row_idx_map) {
                 if (idx == row_idx) { return row_name; }
             }
-            throw std::logic_error("Row index not found: " + std::to_string(row_idx));
+            throw std::runtime_error("Row index not found: " + std::to_string(row_idx));
         }
 
         value_type& at(std::size_t idx) {

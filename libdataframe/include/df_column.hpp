@@ -1,13 +1,11 @@
 #ifndef DATA_FRAME_COLUMN_H
 #define DATA_FRAME_COLUMN_H
 
+#include "df_base_iterator.hpp"
 #include "df_common.hpp"
 #include "df_series.hpp"
 
 namespace df {
-
-    template<typename Iterable>
-    class Iterator;
 
     template<typename T>
     class DataFrame;
@@ -21,7 +19,8 @@ namespace df {
         using pointer_type       = value_type*;
         using const_pointer_type = const value_type*;
         using dataframe_iterator = typename DataFrame<data_type>::iterator;
-        using iterator           = Iterator<Column>;
+        using iterator           = BaseIterator<Column, false>;
+        using const_iterator     = BaseIterator<Column, true>;
 
         Column() : m_size(0), m_stride(0), m_d(nullptr) {
         }

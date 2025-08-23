@@ -4,25 +4,13 @@
 
 #include "df_common.hpp"
 
+#include "df_base_iterator.hpp"
+#include "df_series.hpp"
+
 namespace df {
-
-    template<typename Iterable>
-    class Iterator;
-
-    template<typename T>
-    class Cell;
-
-    template<typename T>
-    class Series;
 
     template<typename T>
     class DataFrame;
-
-    template<typename T>
-    class RowGroup_Logger;
-
-    template<typename T>
-    class LoggingContext;
 
     template<typename T>
     class Row {
@@ -33,7 +21,8 @@ namespace df {
         using pointer_type       = value_type*;
         using const_pointer_type = const pointer_type;
         using dataframe_iterator = typename DataFrame<data_type>::iterator;
-        using iterator           = Iterator<Row>;
+        using iterator           = BaseIterator<Row, false>;
+        using const_iterator     = BaseIterator<Row, true>;
 
         Row() : m_size(0), m_d(nullptr) {
         }
@@ -208,121 +197,6 @@ namespace df {
       private:
         std::size_t m_size;
         value_type* m_d;
-    };
-
-    template<typename T>
-    class RowGroup {
-      public:
-        using value_type       = Row<T>;
-        using const_value_type = const Row<T>;
-        using iterator         = Iterator<RowGroup>;
-
-        RowGroup(const DataFrame<T>* df) : logger(this), logging_context(df->logger.context) {
-            m_size     = df->row_count();
-            m_d        = new Row<T>[m_size];
-            m_row_size = df->row_size();
-            for (auto row_iter = df->iter_rows(); row_iter < df->end(); row_iter++) {
-                m_d[row_iter.current_row_idx()] = row_iter.current_row();
-            }
-            logger.with_context(logging_context);
-        }
-
-        RowGroup(const RowGroup& other)
-            : logger(this),
-              logging_context(other.logging_context),
-              m_size(other.m_size),
-              m_d(new Row<T>[m_size]),
-              m_row_size(other.m_row_size) {
-            for (std::size_t i = 0; i < m_size; i++) {
-                m_d[i] = other.m_d[i];
-            }
-            logger.with_context(logging_context);
-        }
-
-        RowGroup(RowGroup&& other)
-            : logger(this),
-              logging_context(other.logging_context),
-              m_size(other.m_size),
-              m_d(other.m_d),
-              m_row_size(other.m_row_size) {
-            logger.with_context(logging_context);
-            other.m_d = nullptr;
-        }
-
-        ~RowGroup() {
-            delete[] m_d;
-        }
-
-        RowGroup operator=(const RowGroup& other) = delete; // why?
-
-        RowGroup& operator=(RowGroup&& other) {
-            if (this != &other) {
-                logging_context = other.logging_context;
-                m_size          = other.m_size;
-                m_d             = other.m_d;
-                m_row_size      = other.m_row_size;
-                other.m_d       = nullptr;
-            }
-            return *this;
-        }
-
-        Row<T>& operator[](const std::size_t& idx) {
-            return m_d[idx];
-        }
-
-        const Row<T>& operator[](const std::size_t& idx) const {
-            return m_d[idx];
-        }
-
-        // TODO: should this function be marked as const ?
-        template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
-        RowGroup& sort(const std::string& column_name, const bool ascending = false) {
-            std::size_t col_idx = m_d[0].column_index_of(column_name);
-
-            std::sort(m_d, m_d + m_size, [&](const Row<T>& a, const Row<T>& b) {
-                const T& a_val = a[col_idx]->value;
-                const T& b_val = b[col_idx]->value;
-                return ascending ? (a_val < b_val) : (a_val > b_val);
-            });
-
-            return *this;
-        }
-
-        std::size_t size() const {
-            return m_size;
-        }
-
-        std::size_t row_size() const {
-            return m_row_size;
-        }
-
-        Row<T>& at(std::size_t index) {
-            return m_d[index];
-        }
-
-        const Row<T>& at(std::size_t index) const {
-            return m_d[index];
-        }
-
-        iterator begin() const {
-            return iterator(m_d);
-        }
-
-        iterator end() const {
-            return iterator(m_d + m_size);
-        }
-
-        void log(int range = 0) const {
-            logger.log(range);
-        }
-
-        RowGroup_Logger<T> logger;
-
-      private:
-        LoggingContext<T> logging_context;
-        std::size_t       m_size;
-        value_type*       m_d;
-        std::size_t       m_row_size;
     };
 
 } // namespace df

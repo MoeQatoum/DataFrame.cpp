@@ -1,35 +1,32 @@
 #ifndef DATA_FRAME_SERIES_H
 #define DATA_FRAME_SERIES_H
 
+#include "df_base_iterator.hpp"
 #include "df_common.hpp"
 
 namespace df {
-    template<typename Iterable>
-    class Iterator;
-
     template<typename T>
     class Series {
       public:
-        using value_type = T;
-        using iterator   = Iterator<Series>;
+        using value_type     = T;
+        using iterator       = BaseIterator<Series, false>;
+        using const_iterator = BaseIterator<Series, true>;
 
-        explicit Series(const std::size_t& size) : m_d(new T[size]), m_size(size) {
+        explicit Series(const std::size_t& size) : m_ptr(new T[size]), m_size(size) {
         }
 
-        Series(const std::initializer_list<T>& il) : m_d(new T[il.size()]), m_size(il.size()) {
-            std::copy(il.begin(), il.end(), m_d);
+        Series(const std::initializer_list<T>& il) : m_ptr(new T[il.size()]), m_size(il.size()) {
+            std::copy(il.begin(), il.end(), m_ptr);
         }
 
         ~Series() {
-            delete[] m_d;
+            delete[] m_ptr;
         }
 
         Series(const Series& other) {
             m_size = other.m_size;
-            m_d    = new T[m_size];
-            for (std::size_t i = 0; i < m_size; i++) {
-                m_d[i] = other[i];
-            }
+            m_ptr  = new T[m_size];
+            std::copy(other.begin(), other.end(), m_ptr);
         }
 
         // TODO: move constructors ??
@@ -38,18 +35,18 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "copy assignment operator on nonmatching size objects");
             if (this != &other) {
                 for (std::size_t i = 0; i < m_size; i++) {
-                    m_d[i] = other[i];
+                    m_ptr[i] = other[i];
                 }
             }
             return *this;
         }
 
         T& operator[](std::size_t idx) {
-            return *(m_d + idx);
+            return *(m_ptr + idx);
         }
 
         const T& operator[](std::size_t idx) const {
-            return *(m_d + idx);
+            return *(m_ptr + idx);
         }
 
         // comparaison operators
@@ -57,12 +54,12 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] == other[i]);
+                temp[i] = (m_ptr[i] == other[i]);
             }
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator==(const Series& lhs, const /* T1 */ T& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -71,7 +68,7 @@ namespace df {
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator==(const /* T1 */ T& lhs, const Series& rhs) {
             return rhs == lhs;
         }
@@ -80,7 +77,7 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] != other[i]);
+                temp[i] = (m_ptr[i] != other[i]);
             }
             return temp;
         }
@@ -101,12 +98,12 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] >= other[i]);
+                temp[i] = (m_ptr[i] >= other[i]);
             }
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator>=(const Series& lhs, const /* T1 */ T& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -115,7 +112,7 @@ namespace df {
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator>=(const /* T1 */ T& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -128,7 +125,7 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] <= other[i]);
+                temp[i] = (m_ptr[i] <= other[i]);
             }
             return temp;
         }
@@ -153,7 +150,7 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] < other[i]);
+                temp[i] = (m_ptr[i] < other[i]);
             }
             return temp;
         }
@@ -178,12 +175,12 @@ namespace df {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                temp[i] = (m_d[i] > other[i]);
+                temp[i] = (m_ptr[i] > other[i]);
             }
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator>(const Series& lhs, const /*TI*/ T& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -192,7 +189,7 @@ namespace df {
             return temp;
         }
 
-        // TODO : is comparable with T1
+        // TODO: is comparable with T1
         friend Series<bool> operator>(const /*TI*/ T& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -206,7 +203,7 @@ namespace df {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                res[i] = m_d[i] + rhs[i];
+                res[i] = m_ptr[i] + rhs[i];
             }
             return res;
         }
@@ -223,9 +220,10 @@ namespace df {
             return rhs + lhs;
         }
 
+        // TODO: returns a reference to the current Series
         Series operator+=(const T& rhs) {
             for (std::size_t i = 0; i < m_size; i++) {
-                m_d[i] += rhs;
+                m_ptr[i] += rhs;
             }
             return *this;
         }
@@ -238,7 +236,7 @@ namespace df {
 
         Series operator++() {
             for (std::size_t i = 0; i < m_size; i++) {
-                ++m_d[i];
+                ++m_ptr[i];
             }
             return *this;
         }
@@ -247,7 +245,7 @@ namespace df {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                res[i] = m_d[i] * rhs[i];
+                res[i] = m_ptr[i] * rhs[i];
             }
             return res;
         }
@@ -268,7 +266,7 @@ namespace df {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                res[i] = m_d[i] - rhs[i];
+                res[i] = m_ptr[i] - rhs[i];
             }
             return res;
         }
@@ -291,7 +289,7 @@ namespace df {
 
         Series operator-=(const T& rhs) {
             for (std::size_t i = 0; i < m_size; i++) {
-                m_d[i] -= rhs;
+                m_ptr[i] -= rhs;
             }
             return *this;
         }
@@ -304,7 +302,7 @@ namespace df {
 
         Series operator--() {
             for (std::size_t i = 0; i < m_size; i++) {
-                --m_d[i];
+                --m_ptr[i];
             }
             return *this;
         }
@@ -313,7 +311,7 @@ namespace df {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
-                res[i] = m_d[i] / rhs[i];
+                res[i] = m_ptr[i] / rhs[i];
             }
             return res;
         }
@@ -336,18 +334,18 @@ namespace df {
 
         template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
         T max() const {
-            T temp = m_d[0]->value;
+            T temp = m_ptr[0]->value;
             for (std::size_t i = 1; i < m_size; ++i) {
-                if (m_d[i]->value > temp) { temp = m_d[i]->value; }
+                if (m_ptr[i]->value > temp) { temp = m_ptr[i]->value; }
             }
             return temp;
         }
 
         template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
         T min() const {
-            T temp = m_d[0]->value;
+            T temp = m_ptr[0]->value;
             for (std::size_t i = 1; i < m_size; ++i) {
-                if (m_d[i]->value < temp) { temp = m_d[i]->value; }
+                if (m_ptr[i]->value < temp) { temp = m_ptr[i]->value; }
             }
             return temp;
         }
@@ -355,27 +353,27 @@ namespace df {
         bool is_equal_with(const Series& other) const {
             FORCED_ASSERT(m_size == other.m_size, "comparaison operation on nonmatching size objects");
             for (std::size_t i = 0; i < m_size; i++) {
-                if (m_d[i] != other[i]) { return false; }
+                if (m_ptr[i] != other[i]) { return false; }
             }
             return true;
         }
 
         // TODO: this function should return a const iterator.
-        //  SeriesIterator begin() const {
-        //    return SeriesIterator(m_d);
-        //  }
+        iterator begin() const {
+            return iterator(m_ptr);
+        }
 
         iterator begin() {
-            return {m_d};
+            return {m_ptr};
         }
 
         // TODO: this function should return a const iterator.
-        // SeriesIterator end() const {
-        //   return SeriesIterator(m_d + m_size);
-        // }
+        iterator end() const {
+            return iterator(m_ptr + m_size);
+        }
 
         iterator end() {
-            return {m_d + m_size};
+            return {m_ptr + m_size};
         }
 
         std::size_t size() const {
@@ -383,15 +381,15 @@ namespace df {
         }
 
         T* data() {
-            return m_d;
+            return m_ptr;
         }
 
         const T* data() const {
-            return m_d;
+            return m_ptr;
         }
 
       private:
-        value_type* m_d;
+        value_type* m_ptr;
         std::size_t m_size;
     };
 
