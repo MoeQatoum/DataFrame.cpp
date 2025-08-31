@@ -1,0 +1,23 @@
+Shape(c: 5000, r: 5000) size: 195 MB, data Type: d
+  direct access, iterations: 1000
+    iter(), read value - all cells, avg time per it: 12ns
+    iter(), write value - all cells, avg time per it: 143ms
+    random access read single integral indexing- single cell, avg time per it: 15ns
+    random access, read value col row string indexing - single cell, avg time per it: 721ns
+    random access wite - single cell, avg time per it: 119ns
+    random access, write value col row string indexing - single cell, avg time per it: 746ns
+
+  row access, iterations: 1000
+    iter_row(), read all cells, avg time per it: 12ns
+    iter_row(), write to all cells, avg time per it: 142ms
+    row rand access read single row cells, avg time per it: 12ns
+    row rand access write to single row cells, avg time per it: 28µs
+
+  col access, iterations: 1000
+    iter_col(), read all cells, avg time per it: 12ns
+    iter_col(), write to all cells, avg time per it: 355ms
+    col rand access, read single col cell values, avg time per it: 14ns
+    col rand access, write to single col cells, avg time per it: 77µs
+
+  sort, iterations: 1000
+    sort(col_name, true), sort df by col, sort df rows by col value, avg time per it: 707µs
