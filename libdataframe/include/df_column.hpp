@@ -18,7 +18,6 @@ namespace df {
         using pointer_type = value_type*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
-        // using iterator = BaseIterator<Column<std::remove_const_t<CellType>>, std::is_const_v<CellType>>;
         using iterator = BaseIterator<Column<CellType>, std::is_const_v<CellType>>;
 
         Column() : m_size(0), m_stride(0), m_d(nullptr) {

@@ -76,7 +76,6 @@ namespace df {
             return m_d[idx];
         }
 
-        // TODO: should this function be marked as const ?
         template<typename U = data_type, typename = std::enable_if_t<std::is_arithmetic_v<data_type>, bool>>
         RowGroup& sort(const std::string& column_name, const bool ascending = false) {
             std::size_t col_idx = m_d[0].column_index_of(column_name);
