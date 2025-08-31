@@ -115,30 +115,29 @@ TEST(df_copy_tests, dfCopy_verifyDataAddr) {
 }
 
 TEST(df_sort, dfRowsAscendingSort) {
-    DataFrame<int> df = create_dataframe<int, 10, 10>();
+    DataFrame<int> df = create_dataframe<int, 3, 10>();
 
     for (std::size_t i = 0; i < df.size(); i++) {
-        df[i] = (int)rand() % 100;
+        df[i] = static_cast<int>(i);
     }
 
-    std::size_t col_idx  = 2;
-    std::string col_name = df.get_col_name(col_idx);
+    std::size_t col_idx = 1;
 
-    RowGroup<DataFrame<int>::row_type> sorted_rows = df.sort(col_name, true);
+    RowGroup<DataFrame<int>::row_type> sorted_rows = df.sort("col-2", false);
 
     EXPECT_EQ(sorted_rows.size(), df.row_count());
 
-    std::vector<int> sorted_values(sorted_rows.size());
-
-    for (std::size_t idx = 0; idx < sorted_rows.size(); idx++) {
-        sorted_values[idx] = sorted_rows[idx][col_idx]->value;
-    }
+    std::array<int, 10> sorted_values = {28, 25, 22, 19, 16, 13, 10, 7, 4, 1};
 
     for (const auto& row : sorted_rows) {
         for (auto c : row) {
             EXPECT_EQ(c, &df[c->idx.global_idx]);
             EXPECT_EQ(c->value, df[c->idx.global_idx].value);
         }
+    }
+
+    for (std::size_t i = 0; i < df.row_count(); i++) {
+        EXPECT_EQ(sorted_rows[i][col_idx]->value, sorted_values[i]);
     }
 }
 

@@ -15,9 +15,7 @@ df::DataFrame<T> create_dataframe() {
         row_names.push_back(std::string{"row-" + std::to_string(i)});
     }
 
-    df::DataFrame<T> df{col_names, row_names};
-
-    return df;
+    return df::DataFrame<T>{col_names, row_names};
 }
 
 template<typename T>
