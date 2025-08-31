@@ -46,7 +46,7 @@ TEST(df_iter_tests, dfRowIter) {
 
     std::size_t idx   = 0;
     std::size_t value = 0;
-    for (RowIterator<DataFrame<int>> row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
+    for (auto row_iterator = df.iter_rows(); row_iterator < df.end(); row_iterator++) {
         for (auto& c : row_iterator.current_row()) {
             EXPECT_EQ(c, &df[idx]);
             EXPECT_EQ(c->value, df[idx].value);
@@ -65,7 +65,7 @@ TEST(df_iter_tests, dfColIter) {
     }
 
     std::size_t idx = 0;
-    for (ColumnIterator<DataFrame<int>> col_iterator = df.iter_cols(); col_iterator < df.end(); col_iterator++) {
+    for (auto col_iterator = df.iter_cols(); col_iterator < df.end(); col_iterator++) {
         idx = col_iterator.current_col_idx();
         for (auto c : col_iterator.current_col()) {
             EXPECT_EQ(c, &df[idx]);
@@ -124,7 +124,7 @@ TEST(df_sort, dfRowsAscendingSort) {
     std::size_t col_idx  = 2;
     std::string col_name = df.get_col_name(col_idx);
 
-    RowGroup<int> sorted_rows = df.sort(col_name, true);
+    RowGroup<DataFrame<int>::row_type> sorted_rows = df.sort(col_name, true);
 
     EXPECT_EQ(sorted_rows.size(), df.row_count());
 
@@ -134,7 +134,7 @@ TEST(df_sort, dfRowsAscendingSort) {
         sorted_values[idx] = sorted_rows[idx][col_idx]->value;
     }
 
-    for (Row<int> row : sorted_rows) {
+    for (const auto& row : sorted_rows) {
         for (auto c : row) {
             EXPECT_EQ(c, &df[c->idx.global_idx]);
             EXPECT_EQ(c->value, df[c->idx.global_idx].value);

@@ -25,14 +25,14 @@ int main() {
 
     const DataFrame<int> const_df = df.copy();
     // const_df[1,1] = 123;
-
-    for (auto row_iter = const_df.iter_rows(); row_iter < const_df.end(); row_iter++) {
-        if (row_iter.current_row().index() == 1) {
-            for (auto& c : row_iter.current_row()) {
-                c->value = 123;
+    for (auto col_iter = const_df.iter_cols(); col_iter < const_df.end(); ++col_iter) {
+        if (col_iter.current_col().index() == 1) {
+            // col_iter.current_col()[0]->value = 123;
+            for (auto& c : col_iter.current_col()) {
+                // c->value = 456;
             }
-            // i.row()[0]->value = 123;
-            auto d = row_iter.current_row().to_series();
+
+            auto d = col_iter.current_col().to_series();
             for (std::size_t i = 0; i < d.size(); i++) {
                 std::cout << d[i] << ", ";
             }
@@ -42,10 +42,9 @@ int main() {
 
     for (auto col_iter = df.iter_cols(); col_iter < df.end(); ++col_iter) {
         if (col_iter.current_col().index() == 1) {
-            for (auto& c : col_iter.current_col()) {
+            for (const auto& c : col_iter.current_col()) {
                 c->value = 456;
             }
-            // i.column()[0]->value = 123;
 
             auto d = col_iter.current_col().to_series();
             for (std::size_t i = 0; i < d.size(); i++) {
@@ -58,7 +57,7 @@ int main() {
 
     for (auto row_iter = df.iter_rows(); row_iter < df.end(); row_iter++) {
         if (row_iter.current_row().index() == 1) {
-            for (auto& c : row_iter.current_row()) {
+            for (const auto& c : row_iter.current_row()) {
                 c->value = 123;
             }
             // i.row()[0]->value = 123;

@@ -6,32 +6,29 @@
 
 namespace df {
 
-    template<typename dataframe>
+    template<typename dataframe, bool IsConst>
     class RowIterator {
 
       public:
-        using iterator = typename dataframe::iterator;
-        using row      = Row<typename dataframe::data_type>;
+        using dataframe_iterator = std::conditional_t<IsConst, typename dataframe::const_iterator, typename dataframe::iterator>;
+        using row                = Row<std::conditional_t<IsConst, typename dataframe::const_value_type, typename dataframe::value_type>>;
 
-        RowIterator(const iterator df_begin, std::size_t row_size) : m_df_begin(df_begin), m_row_size(row_size), m_current_row_idx(0) {
+        RowIterator(const dataframe_iterator df_begin, std::size_t row_size) : m_df_iter(df_begin), m_row_size(row_size), m_current_row_idx(0) {
         }
 
-        RowIterator(const RowIterator& other)
-            : m_df_begin(other.m_df_begin),
-              m_row_size(other.m_row_size),
-              m_current_row_idx(other.m_current_row_idx) {
+        RowIterator(const RowIterator<dataframe, true>& other)
+            requires(IsConst)
+            : m_df_iter(other.m_df_iter) {
+        }
+
+        RowIterator(const RowIterator& other) : m_df_iter(other.m_df_iter), m_row_size(other.m_row_size), m_current_row_idx(other.m_current_row_idx) {
         }
 
         ~RowIterator() {
         }
 
-        // Returns the current row explicitly; use when you want to access the row at the current iterator position.
         row current_row() {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
-        }
-
-        row current_row() const {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
+            return row(m_df_iter, m_current_row_idx, m_row_size);
         }
 
         std::size_t current_row_idx() const {
@@ -40,7 +37,7 @@ namespace df {
 
         RowIterator& operator=(const RowIterator& other) {
             if (this != &other) {
-                m_df_begin        = other.m_df_begin;
+                m_df_iter         = other.m_df_iter;
                 m_row_size        = other.m_row_size;
                 m_current_row_idx = other.m_current_row_idx;
             }
@@ -51,12 +48,8 @@ namespace df {
 
         // Implicit conversion to Row; use for syntactic convenience (e.g., auto r = *it).
         operator row() {
-            return row(m_df_begin, m_current_row_idx, m_row_size);
+            return row(m_df_iter, m_current_row_idx, m_row_size);
         }
-
-        // operator ConstRow() const {
-        //     return ConstRow(m_df_begin, m_current_row_idx, m_row_size);
-        // }
 
         RowIterator& operator++() {
             ++m_current_row_idx;
@@ -80,42 +73,46 @@ namespace df {
             return tmp;
         }
 
-        friend bool operator<(const RowIterator& lhs, const iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) < rhs;
+        template<bool B>
+        friend bool operator<(const RowIterator& lhs, const BaseIterator<dataframe, B>& rhs) {
+            return (lhs.m_df_iter + (lhs.m_current_row_idx * lhs.m_row_size)) < rhs;
         }
 
-        friend bool operator<(const iterator& lhs, const RowIterator& rhs) {
-            return lhs < (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
+        template<bool B>
+        friend bool operator<(const BaseIterator<dataframe, B>& lhs, const RowIterator& rhs) {
+            return lhs < (rhs.m_df_iter + (rhs.m_current_row_idx * rhs.m_row_size));
         }
 
-        friend bool operator>(const RowIterator& lhs, const iterator& rhs) {
-            return (lhs.m_df_begin + (lhs.m_current_row_idx * lhs.m_row_size)) > rhs;
+        template<bool B>
+        friend bool operator>(const RowIterator& lhs, const BaseIterator<dataframe, B>& rhs) {
+            return (lhs.m_df_iter + (lhs.m_current_row_idx * lhs.m_row_size)) > rhs;
         }
 
-        friend bool operator>(const iterator& lhs, const RowIterator& rhs) {
-            return lhs > (rhs.m_df_begin + (rhs.m_current_row_idx * rhs.m_row_size));
+        template<bool B>
+        friend bool operator>(const BaseIterator<dataframe, B>& lhs, const RowIterator& rhs) {
+            return lhs > (rhs.m_df_iter + (rhs.m_current_row_idx * rhs.m_row_size));
         }
 
-        friend bool operator<(const RowIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_row_idx < rhs;
-        }
+        // friend bool operator<(const RowIterator& lhs, const std::size_t& rhs) {
+        //     return lhs.m_current_row_idx < rhs;
+        // }
 
-        friend bool operator<(const std::size_t& lhs, const RowIterator& rhs) {
-            return lhs < rhs.m_current_row_idx;
-        }
+        // friend bool operator<(const std::size_t& lhs, const RowIterator& rhs) {
+        //     return lhs < rhs.m_current_row_idx;
+        // }
 
-        friend bool operator>(const RowIterator& lhs, const std::size_t& rhs) {
-            return lhs.m_current_row_idx > rhs;
-        }
+        // friend bool operator>(const RowIterator& lhs, const std::size_t& rhs) {
+        //     return lhs.m_current_row_idx > rhs;
+        // }
 
-        friend bool operator>(const std::size_t& lhs, const RowIterator& rhs) {
-            return lhs > rhs.m_current_row_idx;
-        }
+        // friend bool operator>(const std::size_t& lhs, const RowIterator& rhs) {
+        //     return lhs > rhs.m_current_row_idx;
+        // }
 
       private:
-        iterator    m_df_begin;
-        std::size_t m_row_size;
-        std::size_t m_current_row_idx;
+        dataframe_iterator m_df_iter;
+        std::size_t        m_row_size;
+        std::size_t        m_current_row_idx;
     };
 } // namespace df
 

@@ -31,10 +31,20 @@ namespace df {
         using data_type        = T;
         using value_type       = Cell<data_type>;
         using const_value_type = const Cell<data_type>;
-        using iterator         = BaseIterator<DataFrame<T>, false>;
-        using const_iterator   = BaseIterator<DataFrame<T>, true>;
-        using row_iterator     = RowIterator<DataFrame<T>>;
-        using column_iterator  = ColumnIterator<DataFrame<T>>;
+
+        using iterator       = BaseIterator<DataFrame<data_type>, false>;
+        using const_iterator = BaseIterator<DataFrame<data_type>, true>;
+
+        using row_type           = Row<value_type>;
+        using const_row_type     = Row<const value_type>;
+        using row_iterator       = RowIterator<DataFrame<data_type>, false>;
+        using const_row_iterator = RowIterator<DataFrame<data_type>, true>;
+
+        using column_type           = Column<value_type>;
+        using const_column_type     = Column<const value_type>;
+        using column_iterator       = ColumnIterator<DataFrame<data_type>, false>;
+        using const_column_iterator = ColumnIterator<DataFrame<data_type>, true>;
+
         using dataframe_logger = DF_Logger<data_type>;
 
         DataFrame()
@@ -86,7 +96,7 @@ namespace df {
             logger.with_context(logging_context);
         }
 
-        DataFrame(const RowGroup<data_type>& rows) : logger(this), logging_context({}) {
+        DataFrame(const RowGroup<row_type>& rows) : logger(this), logging_context({}) {
             m_col_count    = rows.row_size();
             m_row_count    = rows.size();
             m_col_size     = m_row_count;
@@ -184,11 +194,11 @@ namespace df {
             return m_d[idx];
         }
 
-        Column<data_type> operator[](const std::string& col_name) {
+        column_type operator[](const std::string& col_name) {
             return column(col_name);
         }
 
-        Column<data_type> operator[](const std::string& col_name) const {
+        column_type operator[](const std::string& col_name) const {
             return column(col_name);
         }
 
@@ -280,43 +290,43 @@ namespace df {
             return {.col_count = m_col_count, .row_count = m_row_count};
         }
 
-        Column<data_type> column(std::size_t col_idx) {
+        column_type column(std::size_t col_idx) {
             return {begin() + col_idx, m_col_size, m_row_size};
         }
 
-        Column<data_type> column(std::size_t col_idx) const {
+        const_column_type column(std::size_t col_idx) const {
             return {begin() + col_idx, m_col_size, m_row_size};
         }
 
-        Column<data_type> column(std::string col_name) {
+        column_type column(std::string col_name) {
             return {begin() + get_col_idx(col_name), m_col_size, m_row_size};
         }
 
-        Column<data_type> column(std::string col_name) const {
+        const_column_type column(std::string col_name) const {
             return {begin() + get_col_idx(col_name), m_col_size, m_row_size};
         }
 
-        Row<data_type> row(std::size_t row_idx) {
+        row_type row(std::size_t row_idx) {
             return {begin(), row_idx, m_row_size};
         }
 
-        Row<data_type> row(std::size_t row_idx) const {
+        const_row_type row(std::size_t row_idx) const {
             return {begin(), row_idx, m_row_size};
         }
 
-        Row<data_type> row(std::string row_name) {
+        row_type row(std::string row_name) {
             return {begin(), get_row_idx(row_name), m_row_size};
         }
 
-        Row<data_type> row(std::string row_name) const {
+        const_row_type row(std::string row_name) const {
             return {begin(), get_row_idx(row_name), m_row_size};
         }
 
-        RowGroup<data_type> rows() {
+        RowGroup<row_type> rows() {
             return {this};
         }
 
-        RowGroup<data_type> rows() const {
+        RowGroup<const_row_type> rows() const {
             return {this};
         }
 
@@ -324,41 +334,62 @@ namespace df {
             return iterator(m_d);
         }
 
+        const_iterator begin() const {
+            return const_iterator(m_d);
+        }
+
+        const_iterator cbegin() {
+            return const_iterator(m_d);
+        }
+
         iterator end() {
             return iterator(m_d + m_current_size);
         }
 
-        iterator begin() const {
-            return iterator(m_d);
+        const_iterator end() const {
+            return const_iterator(m_d + m_current_size);
         }
 
-        iterator end() const {
-            return iterator(m_d + m_current_size);
+        const_iterator cend() {
+            return const_iterator(m_d + m_current_size);
         }
 
         column_iterator iter_cols() {
             return column_iterator(begin(), m_col_size, m_row_size);
         }
 
-        column_iterator iter_cols() const {
-            return column_iterator(begin(), m_col_size, m_row_size);
+        const_column_iterator iter_cols() const {
+            return const_column_iterator(begin(), m_col_size, m_row_size);
+        }
+
+        const_column_iterator citer_cols() const {
+            return const_column_iterator(begin(), m_col_size, m_row_size);
         }
 
         row_iterator iter_rows() {
             return row_iterator(begin(), m_row_size);
         }
 
-        row_iterator iter_rows() const {
-            return row_iterator(begin(), m_row_size);
+        const_row_iterator iter_rows() const {
+            return const_row_iterator(begin(), m_row_size);
+        }
+
+        const_row_iterator citer_rows() {
+            return const_row_iterator(begin(), m_row_size);
         }
 
         bool is_null() const {
             return (m_d == nullptr) && (m_col_count == 0) && (m_col_size == 0) && (m_row_size == 0) && (m_row_count == 0) && (m_current_size == 0);
         }
 
-        template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
-        RowGroup<data_type> sort(std::string column_name, bool ascending = false) {
-            return RowGroup(this).sort(column_name, ascending);
+        template<std::enable_if_t<std::is_arithmetic_v<data_type>, bool> = true>
+        RowGroup<row_type> sort(std::string column_name, bool ascending = false) {
+            return RowGroup<row_type>(this).sort(column_name, ascending);
+        }
+
+        template<std::enable_if_t<std::is_arithmetic_v<data_type>, bool> = true>
+        RowGroup<const_row_type> sort(std::string column_name, bool ascending = false) const {
+            return RowGroup<const_row_type>(this).sort(column_name, ascending);
         }
 
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>

@@ -30,10 +30,13 @@ namespace df {
         template<typename>
         friend class RowGroup;
 
-        template<typename>
+        template<typename, bool>
         friend class RowIterator;
 
-        template<typename>
+        template<typename, bool>
+        friend class ColumnIterator;
+
+        template<typename, bool>
         friend class ColumnIterator;
 
         explicit BaseIterator(pointer ptr = nullptr) : m_ptr(ptr) {
@@ -42,7 +45,7 @@ namespace df {
       public:
         BaseIterator() = default;
 
-        BaseIterator(const BaseIterator<Iterable, false>& other)
+        BaseIterator(const BaseIterator<Iterable, true>& other)
             requires(IsConst)
             : m_ptr(other.m_ptr) {
         }
@@ -74,24 +77,23 @@ namespace df {
         BaseIterator& operator+=(difference_type n) { m_ptr+=n; return *this; }
         BaseIterator& operator-=(difference_type n) { m_ptr-=n; return *this; }
 
-        // /*
-        // bool operator==(const BaseIterator& other) const { return m_ptr == other.m_ptr; }
-        // bool operator!=(const BaseIterator& other) const { return m_ptr != other.m_ptr; }
-        // bool operator<(const  BaseIterator& other) const  { return m_ptr < other.m_ptr; }
-        // bool operator>(const  BaseIterator& other) const  { return m_ptr > other.m_ptr; }
-        // bool operator<=(const BaseIterator& other) const { return m_ptr <= other.m_ptr; }
-        // bool operator>=(const BaseIterator& other) const { return m_ptr >= other.m_ptr; }
+        /*
+        bool operator==(const BaseIterator& other) const { return m_ptr == other.m_ptr; }
+        bool operator!=(const BaseIterator& other) const { return m_ptr != other.m_ptr; }
+        bool operator<(const  BaseIterator& other) const  { return m_ptr < other.m_ptr; }
+        bool operator>(const  BaseIterator& other) const  { return m_ptr > other.m_ptr; }
+        bool operator<=(const BaseIterator& other) const { return m_ptr <= other.m_ptr; }
+        bool operator>=(const BaseIterator& other) const { return m_ptr >= other.m_ptr; }
 
         // Cross-const comparisons
-        // template <bool B> bool operator==(const BaseIterator<Iterable,B>& other) const { return m_ptr == other.m_ptr; }
-        // template <bool B> bool operator!=(const BaseIterator<Iterable,B>& other) const { return m_ptr != other.m_ptr; }
-        // template <bool B> bool operator<(const  BaseIterator<Iterable,B>& other) const  { return m_ptr < other.m_ptr; }
-        // template <bool B> bool operator>(const  BaseIterator<Iterable,B>& other) const  { return m_ptr > other.m_ptr; }
-        // template <bool B> bool operator<=(const BaseIterator<Iterable,B>& other) const { return m_ptr <= other.m_ptr; }
-        // template <bool B> bool operator>=(const BaseIterator<Iterable,B>& other) const { return m_ptr >= other.m_ptr; }
-        // */
+        template <bool B> bool operator==(const BaseIterator<Iterable,B>& other) const { return m_ptr == other.m_ptr; }
+        template <bool B> bool operator!=(const BaseIterator<Iterable,B>& other) const { return m_ptr != other.m_ptr; }
+        template <bool B> bool operator<(const  BaseIterator<Iterable,B>& other) const  { return m_ptr < other.m_ptr; }
+        template <bool B> bool operator>(const  BaseIterator<Iterable,B>& other) const  { return m_ptr > other.m_ptr; }
+        template <bool B> bool operator<=(const BaseIterator<Iterable,B>& other) const { return m_ptr <= other.m_ptr; }
+        template <bool B> bool operator>=(const BaseIterator<Iterable,B>& other) const { return m_ptr >= other.m_ptr; }
+        */
 
-        // auto operator<=>(const BaseIterator& other) const { return m_ptr <=> other.m_ptr; };
         auto operator<=>(const BaseIterator& other) const = default;
         template <bool B> std::strong_ordering operator<=>(const BaseIterator<Iterable,B>& other) const { return m_ptr <=> other.m_ptr; }
 

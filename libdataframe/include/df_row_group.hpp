@@ -14,14 +14,14 @@ namespace df {
     template<typename T>
     class RowGroup {
       public:
-        using value_type       = Row<T>;
-        using const_value_type = const Row<T>;
-        using iterator         = BaseIterator<RowGroup, false>;
-        using const_iterator   = BaseIterator<RowGroup, true>;
+        using value_type     = T;
+        using data_type      = typename value_type::data_type;
+        using iterator       = BaseIterator<RowGroup, false>;
+        using const_iterator = BaseIterator<RowGroup, true>;
 
-        RowGroup(const DataFrame<T>* df) : logger(this), logging_context(df->logger.context) {
+        RowGroup(DataFrame<data_type>* df) : logger(this), logging_context(df->logger.context) {
             m_size     = df->row_count();
-            m_d        = new Row<T>[m_size];
+            m_d        = new value_type[m_size];
             m_row_size = df->row_size();
             for (auto row_iter = df->iter_rows(); row_iter < df->end(); row_iter++) {
                 m_d[row_iter.current_row_idx()] = row_iter.current_row();
@@ -33,7 +33,7 @@ namespace df {
             : logger(this),
               logging_context(other.logging_context),
               m_size(other.m_size),
-              m_d(new Row<T>[m_size]),
+              m_d(new value_type[m_size]),
               m_row_size(other.m_row_size) {
             for (std::size_t i = 0; i < m_size; i++) {
                 m_d[i] = other.m_d[i];
@@ -68,22 +68,22 @@ namespace df {
             return *this;
         }
 
-        Row<T>& operator[](const std::size_t& idx) {
+        value_type& operator[](const std::size_t& idx) {
             return m_d[idx];
         }
 
-        const Row<T>& operator[](const std::size_t& idx) const {
+        const value_type& operator[](const std::size_t& idx) const {
             return m_d[idx];
         }
 
         // TODO: should this function be marked as const ?
-        template<typename U = T, typename = std::enable_if_t<std::is_arithmetic_v<U>, bool>>
+        template<typename U = data_type, typename = std::enable_if_t<std::is_arithmetic_v<data_type>, bool>>
         RowGroup& sort(const std::string& column_name, const bool ascending = false) {
             std::size_t col_idx = m_d[0].column_index_of(column_name);
 
-            std::sort(m_d, m_d + m_size, [&](const Row<T>& a, const Row<T>& b) {
-                const T& a_val = a[col_idx]->value;
-                const T& b_val = b[col_idx]->value;
+            std::sort(m_d, m_d + m_size, [ascending, col_idx](const value_type& a, const value_type& b) {
+                const data_type& a_val = a[col_idx]->value;
+                const data_type& b_val = b[col_idx]->value;
                 return ascending ? (a_val < b_val) : (a_val > b_val);
             });
 
@@ -98,11 +98,11 @@ namespace df {
             return m_row_size;
         }
 
-        Row<T>& at(std::size_t index) {
+        value_type& at(std::size_t index) {
             return m_d[index];
         }
 
-        const Row<T>& at(std::size_t index) const {
+        const value_type& at(std::size_t index) const {
             return m_d[index];
         }
 
@@ -118,13 +118,13 @@ namespace df {
             logger.log(range);
         }
 
-        RowGroup_Logger<T> logger;
+        RowGroup_Logger<data_type> logger;
 
       private:
-        LoggingContext<T> logging_context;
-        std::size_t       m_size;
-        value_type*       m_d;
-        std::size_t       m_row_size;
+        LoggingContext<data_type> logging_context;
+        std::size_t               m_size;
+        value_type*               m_d;
+        std::size_t               m_row_size;
     };
 
 } // namespace df

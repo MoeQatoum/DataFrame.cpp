@@ -12,17 +12,15 @@ namespace df {
     template<typename T>
     class DataFrame;
 
-    template<typename T>
+    template<typename CellType>
     class Row {
       public:
-        using data_type          = T;
-        using value_type         = typename DataFrame<data_type>::value_type*;
-        using const_value_type   = const value_type;
-        using pointer_type       = value_type*;
-        using const_pointer_type = const pointer_type;
-        using dataframe_iterator = typename DataFrame<data_type>::iterator;
-        using iterator           = BaseIterator<Row, false>;
-        using const_iterator     = BaseIterator<Row, true>;
+        using data_type    = typename CellType::data_type;
+        using value_type   = CellType*;
+        using pointer_type = value_type*;
+        using dataframe_iterator
+        = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
+        using iterator = BaseIterator<Row<std::remove_const_t<CellType>>, std::is_const_v<CellType>>;
 
         Row() : m_size(0), m_d(nullptr) {
         }
@@ -79,7 +77,7 @@ namespace df {
             abort();
         }
 
-        const_value_type& operator[](const std::string& col_name) const {
+        /* TODO: need to check here */ const value_type& operator[](const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -113,7 +111,7 @@ namespace df {
             return *this;
         }
 
-        Row& operator=(const Series<T>& rhs) const {
+        Row& operator=(const Series<CellType>& rhs) const {
             FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
             FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
             for (std::size_t i = 0; i < m_size; i++) {
@@ -130,8 +128,8 @@ namespace df {
         //   return data;
         // }
 
-        Series<T> to_series() const {
-            Series<T> data(m_size);
+        Series<CellType> to_series() const {
+            Series<CellType> data(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
                 data[i] = m_d[i]->value;
             }
@@ -166,7 +164,7 @@ namespace df {
         }
 
         friend std::ostream& operator<<(std::ostream& os, const Row& row) {
-            os << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(T).name() << ")";
+            os << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(CellType).name() << ")";
             return os;
         }
 
