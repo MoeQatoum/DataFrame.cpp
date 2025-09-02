@@ -77,7 +77,8 @@ namespace df {
             abort();
         }
 
-        /* TODO: need to check here */ const value_type& operator[](const std::string& col_name) const {
+        const std::conditional_t<std::is_const_v<value_type>, std::remove_const_t<value_type>, value_type>&
+        operator[](const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
