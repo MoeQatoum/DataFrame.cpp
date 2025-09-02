@@ -45,6 +45,7 @@ namespace df {
       public:
         BaseIterator() = default;
 
+        // allow conversion from non-const to const iterator
         BaseIterator(const BaseIterator<Iterable, true>& other)
             requires(IsConst)
             : m_ptr(other.m_ptr) {
@@ -61,58 +62,58 @@ namespace df {
             return *this;
         }
 
-        // clang-format off
-        pointer operator&() const { return m_ptr; }
-        reference operator*() const { return *m_ptr; }
-        pointer operator->() const { return m_ptr; }
-        reference operator[](difference_type n) const { return m_ptr[n]; }
+        pointer operator&() const {
+            return m_ptr;
+        }
+        reference operator*() const {
+            return *m_ptr;
+        }
+        pointer operator->() const {
+            return m_ptr;
+        }
+        reference operator[](difference_type n) const {
+            return m_ptr[n];
+        }
 
-        BaseIterator& operator++() { ++m_ptr; return *this; }
-        BaseIterator operator++(int) { BaseIterator tmp=*this; ++m_ptr; return tmp; }
-        BaseIterator& operator--() { --m_ptr; return *this; }
-        BaseIterator operator--(int) { BaseIterator tmp=*this; --m_ptr; return tmp; }
+        BaseIterator& operator++() {
+            ++m_ptr;
+            return *this;
+        }
+        BaseIterator operator++(int) {
+            BaseIterator tmp = *this;
+            ++m_ptr;
+            return tmp;
+        }
+        BaseIterator& operator--() {
+            --m_ptr;
+            return *this;
+        }
+        BaseIterator operator--(int) {
+            BaseIterator tmp = *this;
+            --m_ptr;
+            return tmp;
+        }
 
-        BaseIterator operator+(difference_type n) const { return BaseIterator(m_ptr+n); }
-        BaseIterator operator-(difference_type n) const { return BaseIterator(m_ptr-n); }
-        BaseIterator& operator+=(difference_type n) { m_ptr+=n; return *this; }
-        BaseIterator& operator-=(difference_type n) { m_ptr-=n; return *this; }
-
-        /*
-        bool operator==(const BaseIterator& other) const { return m_ptr == other.m_ptr; }
-        bool operator!=(const BaseIterator& other) const { return m_ptr != other.m_ptr; }
-        bool operator<(const  BaseIterator& other) const  { return m_ptr < other.m_ptr; }
-        bool operator>(const  BaseIterator& other) const  { return m_ptr > other.m_ptr; }
-        bool operator<=(const BaseIterator& other) const { return m_ptr <= other.m_ptr; }
-        bool operator>=(const BaseIterator& other) const { return m_ptr >= other.m_ptr; }
-
-        // Cross-const comparisons
-        template <bool B> bool operator==(const BaseIterator<Iterable,B>& other) const { return m_ptr == other.m_ptr; }
-        template <bool B> bool operator!=(const BaseIterator<Iterable,B>& other) const { return m_ptr != other.m_ptr; }
-        template <bool B> bool operator<(const  BaseIterator<Iterable,B>& other) const  { return m_ptr < other.m_ptr; }
-        template <bool B> bool operator>(const  BaseIterator<Iterable,B>& other) const  { return m_ptr > other.m_ptr; }
-        template <bool B> bool operator<=(const BaseIterator<Iterable,B>& other) const { return m_ptr <= other.m_ptr; }
-        template <bool B> bool operator>=(const BaseIterator<Iterable,B>& other) const { return m_ptr >= other.m_ptr; }
-        */
+        BaseIterator operator+(difference_type n) const {
+            return BaseIterator(m_ptr + n);
+        }
+        BaseIterator operator-(difference_type n) const {
+            return BaseIterator(m_ptr - n);
+        }
+        BaseIterator& operator+=(difference_type n) {
+            m_ptr += n;
+            return *this;
+        }
+        BaseIterator& operator-=(difference_type n) {
+            m_ptr -= n;
+            return *this;
+        }
 
         auto operator<=>(const BaseIterator& other) const = default;
-        template <bool B> std::strong_ordering operator<=>(const BaseIterator<Iterable,B>& other) const { return m_ptr <=> other.m_ptr; }
-
-        // friend BaseIterator operator+(difference_type lhs, const BaseIterator& rhs) { BaseIterator tmp{rhs}; tmp += lhs; return tmp; }
-        // friend BaseIterator operator+(const BaseIterator& lhs, difference_type rhs) { BaseIterator tmp{lhs}; tmp += rhs; return tmp; }
-        // BaseIterator& operator++() { m_ptr++; return *this; }
-        // BaseIterator operator++(int) { BaseIterator tmp{*this}; ++(*this); return tmp; }
-        // BaseIterator& operator+=(std::size_t off) { m_ptr += off; return *this; }
-
-        // friend difference_type operator-(const BaseIterator& lhs, const BaseIterator& rhs) { return lhs.m_ptr - rhs.m_ptr; }
-        // friend BaseIterator operator-(const BaseIterator& lhs, difference_type rhs) { BaseIterator tmp{lhs}; tmp -= rhs; return tmp; }
-        // BaseIterator& operator--() { m_ptr--; return *this; }
-        // BaseIterator operator--(int) { BaseIterator tmp{*this}; --(*this); return tmp; }
-        // BaseIterator& operator-=(difference_type off) { m_ptr -= off; return *this; }
-
-        // bool operator==(const BaseIterator& other) const { return other.m_ptr == this->m_ptr; }
-        // bool operator!=(const BaseIterator& other) const { return this->m_ptr != other.m_ptr; }
-        // friend bool operator<(const BaseIterator& lhs, const BaseIterator& rhs) { return lhs.m_ptr < rhs.m_ptr; }
-        // friend bool operator>(const BaseIterator& lhs, const BaseIterator& rhs) { return lhs.m_ptr > rhs.m_ptr; }
+        template<bool B>
+        std::strong_ordering operator<=>(const BaseIterator<Iterable, B>& other) const {
+            return m_ptr <=> other.m_ptr;
+        }
         // clang-format on
 
         friend std::ostream& operator<<(std::ostream& os, const BaseIterator& itr) {
