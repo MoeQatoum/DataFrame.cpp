@@ -4,7 +4,7 @@
 #include "df_base_iterator.hpp"
 #include "df_common.hpp"
 #include "df_logger.hpp"
-#include "df_row.hpp"
+#include "df_row_view.hpp"
 
 namespace df {
 

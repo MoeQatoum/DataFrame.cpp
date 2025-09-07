@@ -5,12 +5,12 @@
 
 #include "df_base_iterator.hpp"
 #include "df_cell.hpp"
-#include "df_column.hpp"
 #include "df_column_iterator.hpp"
+#include "df_column_view.hpp"
 #include "df_logger.hpp"
-#include "df_row.hpp"
-#include "df_row_group.hpp"
+#include "df_row_group_view.hpp"
 #include "df_row_iterator.hpp"
+#include "df_row_view.hpp"
 
 namespace df {
 

@@ -1,8 +1,8 @@
 #ifndef DATAFRAME_ROW_ITERATOR_H
 #define DATAFRAME_ROW_ITERATOR_H
 
-#include "df_column.hpp"
-#include "df_row.hpp"
+#include "df_column_view.hpp"
+#include "df_row_view.hpp"
 
 namespace df {
 

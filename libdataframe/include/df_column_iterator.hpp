@@ -1,7 +1,7 @@
 #ifndef DATAFRAME_COLUMN_ITERATOR_H
 #define DATAFRAME_COLUMN_ITERATOR_H
 
-#include "df_column.hpp"
+#include "df_column_view.hpp"
 #include "df_common.hpp"
 
 namespace df {
