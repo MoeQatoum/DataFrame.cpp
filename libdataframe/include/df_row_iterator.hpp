@@ -11,7 +11,7 @@ namespace df {
 
       public:
         using dataframe_iterator = std::conditional_t<IsConst, typename dataframe::const_iterator, typename dataframe::iterator>;
-        using row                = Row<std::conditional_t<IsConst, typename dataframe::const_value_type, typename dataframe::value_type>>;
+        using row                = RowView<std::conditional_t<IsConst, typename dataframe::const_value_type, typename dataframe::value_type>>;
 
         RowIterator(const dataframe_iterator df_begin, std::size_t row_size) : m_df_iter(df_begin), m_row_size(row_size), m_current_row_idx(0) {
         }

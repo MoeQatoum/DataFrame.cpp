@@ -19,16 +19,16 @@ namespace df {
         friend class DataFrame;
 
         template<typename>
-        friend class Row;
+        friend class RowView;
 
         template<typename>
-        friend class Column;
+        friend class ColumnView;
 
         template<typename>
         friend class Series;
 
         template<typename>
-        friend class RowGroup;
+        friend class RowGroupView;
 
         template<typename, bool>
         friend class RowIterator;
@@ -62,58 +62,26 @@ namespace df {
             return *this;
         }
 
-        pointer operator&() const {
-            return m_ptr;
-        }
-        reference operator*() const {
-            return *m_ptr;
-        }
-        pointer operator->() const {
-            return m_ptr;
-        }
-        reference operator[](difference_type n) const {
-            return m_ptr[n];
-        }
+        // clang-format off
+        pointer operator&() const { return m_ptr; }
+        reference operator*() const {return *m_ptr; }
+        pointer operator->() const { return m_ptr; }
 
-        BaseIterator& operator++() {
-            ++m_ptr;
-            return *this;
-        }
-        BaseIterator operator++(int) {
-            BaseIterator tmp = *this;
-            ++m_ptr;
-            return tmp;
-        }
-        BaseIterator& operator--() {
-            --m_ptr;
-            return *this;
-        }
-        BaseIterator operator--(int) {
-            BaseIterator tmp = *this;
-            --m_ptr;
-            return tmp;
-        }
+        reference operator[](difference_type n) const { return m_ptr[n]; }
 
-        BaseIterator operator+(difference_type n) const {
-            return BaseIterator(m_ptr + n);
-        }
-        BaseIterator operator-(difference_type n) const {
-            return BaseIterator(m_ptr - n);
-        }
-        BaseIterator& operator+=(difference_type n) {
-            m_ptr += n;
-            return *this;
-        }
-        BaseIterator& operator-=(difference_type n) {
-            m_ptr -= n;
-            return *this;
-        }
+        BaseIterator& operator++() { ++m_ptr; return *this; }
+        BaseIterator operator++(int) { BaseIterator tmp = *this; ++m_ptr; return tmp; }
+        BaseIterator& operator--() { --m_ptr; return *this; }
+        BaseIterator operator--(int) { BaseIterator tmp = *this; --m_ptr; return tmp; }
+
+        BaseIterator operator+(difference_type n) const { return BaseIterator(m_ptr + n); }
+        BaseIterator operator-(difference_type n) const { return BaseIterator(m_ptr - n); }
+
+        BaseIterator& operator+=(difference_type n) { m_ptr += n; return *this; }
+        BaseIterator& operator-=(difference_type n) { m_ptr -= n; return *this; }
 
         auto operator<=>(const BaseIterator& other) const = default;
-        template<bool B>
-        std::strong_ordering operator<=>(const BaseIterator<Iterable, B>& other) const {
-            return m_ptr <=> other.m_ptr;
-        }
+        template<bool B> std::strong_ordering operator<=>(const BaseIterator<Iterable, B>& other) const { return m_ptr <=> other.m_ptr; }
         // clang-format on
 
         friend std::ostream& operator<<(std::ostream& os, const BaseIterator& itr) {

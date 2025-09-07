@@ -11,19 +11,19 @@ namespace df {
     class DataFrame;
 
     template<typename CellType>
-    class Column {
+    class ColumnView {
       public:
         using data_type    = typename CellType::data_type;
         using value_type   = CellType*;
         using pointer_type = value_type*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
-        using iterator = BaseIterator<Column<CellType>, std::is_const_v<CellType>>;
+        using iterator = BaseIterator<ColumnView<CellType>, std::is_const_v<CellType>>;
 
-        Column() : m_size(0), m_stride(0), m_d(nullptr) {
+        ColumnView() : m_size(0), m_stride(0), m_d(nullptr) {
         }
 
-        Column(dataframe_iterator col_begin, std::size_t col_size, std::size_t stride) {
+        ColumnView(dataframe_iterator col_begin, std::size_t col_size, std::size_t stride) {
             m_size   = col_size;
             m_stride = stride;
             m_d      = new value_type[col_size];
@@ -33,9 +33,9 @@ namespace df {
             }
         }
 
-        Column(const Column& other) = delete;
+        ColumnView(const ColumnView& other) = delete;
 
-        ~Column() {
+        ~ColumnView() {
             delete[] m_d;
         }
 
@@ -74,7 +74,7 @@ namespace df {
             abort();
         }
 
-        Column& operator=(const Column& rhs) {
+        ColumnView& operator=(const ColumnView& rhs) {
             if (this != &rhs) {
                 if (is_null()) {
                     FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
@@ -90,7 +90,7 @@ namespace df {
             return *this;
         }
 
-        Column& operator=(Column&& rhs) {
+        ColumnView& operator=(ColumnView&& rhs) {
             FORCED_ASSERT(m_size == rhs.m_size, "assignment operation on nonmatching size objects");
             m_size  = rhs.m_size;
             m_d     = rhs.m_d;
@@ -98,7 +98,7 @@ namespace df {
             return *this;
         }
 
-        Column& operator=(const Series<data_type>& rhs) {
+        ColumnView& operator=(const Series<data_type>& rhs) {
             FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
             FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
             for (std::size_t i = 0; i < m_size; i++) {
@@ -108,7 +108,7 @@ namespace df {
         }
 
         // comparaison operators
-        Series<bool> operator==(const Column& rhs) const {
+        Series<bool> operator==(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -117,7 +117,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator==(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator==(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -126,11 +126,11 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator==(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator==(const Series<data_type>& lhs, const ColumnView& rhs) {
             return rhs == lhs;
         }
 
-        friend Series<bool> operator==(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator==(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value == rhs);
@@ -138,11 +138,11 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator==(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator==(const data_type& lhs, const ColumnView& rhs) {
             return rhs == lhs;
         }
 
-        Series<bool> operator!=(const Column& rhs) const {
+        Series<bool> operator!=(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -151,7 +151,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator!=(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator!=(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -160,11 +160,11 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator!=(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator!=(const Series<data_type>& lhs, const ColumnView& rhs) {
             return rhs != lhs;
         }
 
-        friend Series<bool> operator!=(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator!=(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value != rhs);
@@ -172,11 +172,11 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator!=(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator!=(const data_type& lhs, const ColumnView& rhs) {
             return rhs != lhs;
         }
 
-        Series<bool> operator>=(const Column& rhs) const {
+        Series<bool> operator>=(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -185,7 +185,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>=(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator>=(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -194,7 +194,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>=(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator>=(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -203,7 +203,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>=(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator>=(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value >= rhs);
@@ -211,7 +211,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>=(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator>=(const data_type& lhs, const ColumnView& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs >= rhs[i]->value);
@@ -219,7 +219,7 @@ namespace df {
             return temp;
         }
 
-        Series<bool> operator<=(const Column& rhs) const {
+        Series<bool> operator<=(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -228,7 +228,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator<=(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -237,7 +237,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator<=(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -246,7 +246,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator<=(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value <= rhs);
@@ -254,7 +254,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator<=(const data_type& lhs, const ColumnView& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs <= rhs[i]->value);
@@ -262,7 +262,7 @@ namespace df {
             return temp;
         }
 
-        Series<bool> operator<(const Column& rhs) const {
+        Series<bool> operator<(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -271,7 +271,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator<(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -280,7 +280,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator<(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -289,7 +289,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator<(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value < rhs);
@@ -297,7 +297,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator<(const data_type& lhs, const ColumnView& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs < rhs[i]->value);
@@ -305,7 +305,7 @@ namespace df {
             return temp;
         }
 
-        Series<bool> operator>(const Column& rhs) const {
+        Series<bool> operator>(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "comparaison operation on nonmatching size objects");
             Series<bool> temp(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -314,7 +314,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<bool> operator>(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -323,7 +323,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<bool> operator>(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "comparaison operation on nonmatching size objects");
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -332,7 +332,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>(const Column& lhs, const data_type& rhs) {
+        friend Series<bool> operator>(const ColumnView& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i]->value > rhs);
@@ -340,7 +340,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator>(const data_type& lhs, const Column& rhs) {
+        friend Series<bool> operator>(const data_type& lhs, const ColumnView& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs > rhs[i]->value);
@@ -349,7 +349,7 @@ namespace df {
         }
 
         // arithmetic operators
-        Series<data_type> operator+(const Column& rhs) const {
+        Series<data_type> operator+(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -358,7 +358,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator+(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<data_type> operator+(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "arithmetic operation on nonmatching size objects");
             Series<data_type> res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -367,7 +367,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator+(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<data_type> operator+(const Series<data_type>& lhs, const ColumnView& rhs) {
             return rhs + lhs;
         }
 
@@ -385,7 +385,7 @@ namespace df {
         //   return *this;
         // }
 
-        Series<data_type> operator*(const Column& rhs) const {
+        Series<data_type> operator*(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -394,7 +394,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator*(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<data_type> operator*(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "arithmetic operation on nonmatching size objects");
             Series<data_type> res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -403,11 +403,11 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator*(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<data_type> operator*(const Series<data_type>& lhs, const ColumnView& rhs) {
             return rhs * lhs;
         }
 
-        Series<data_type> operator-(const Column& rhs) const {
+        Series<data_type> operator-(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -416,7 +416,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator-(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<data_type> operator-(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "arithmetic operation on nonmatching size objects");
             Series<data_type> res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -425,7 +425,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator-(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<data_type> operator-(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.size() == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -448,7 +448,7 @@ namespace df {
         //   return *this;
         // }
 
-        Series<data_type> operator/(const Column& rhs) const {
+        Series<data_type> operator/(const ColumnView& rhs) const {
             FORCED_ASSERT(m_size == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
@@ -457,7 +457,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator/(const Column& lhs, const Series<data_type>& rhs) {
+        friend Series<data_type> operator/(const ColumnView& lhs, const Series<data_type>& rhs) {
             FORCED_ASSERT(lhs.m_size == rhs.size(), "arithmetic operation on nonmatching size objects");
             Series<data_type> res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
@@ -466,7 +466,7 @@ namespace df {
             return res;
         }
 
-        friend Series<data_type> operator/(const Series<data_type>& lhs, const Column& rhs) {
+        friend Series<data_type> operator/(const Series<data_type>& lhs, const ColumnView& rhs) {
             FORCED_ASSERT(lhs.size() == rhs.m_size, "arithmetic operation on nonmatching size objects");
             Series<data_type> res(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
@@ -519,7 +519,7 @@ namespace df {
             return data;
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const Column& col) {
+        friend std::ostream& operator<<(std::ostream& os, const ColumnView& col) {
             os << "Column(addr: " << &col << ", size: " << col.m_size << ", type: " << typeid(data_type).name() << ")";
             return os;
         }

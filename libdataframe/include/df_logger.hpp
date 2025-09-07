@@ -11,19 +11,19 @@ namespace df {
     class DataFrame;
 
     template<typename T>
-    class Column;
+    class ColumnView;
 
     template<typename T>
-    class Row;
+    class RowView;
 
     template<typename T>
-    class RowGroup;
+    class RowGroupView;
 
     template<typename T>
     class LoggingContext {
       public:
         using CellLoggingColorCond = std::function<std::string(const Cell<T>*)>;
-        using RowNameColorCond     = std::function<std::string(const Row<Cell<T>>*)>;
+        using RowNameColorCond     = std::function<std::string(const RowView<Cell<T>>*)>;
         using CellLoggingPrecCond  = std::function<int(const Cell<T>*)>;
 
         LoggingContext& with_exclude_columns(std::vector<std::string> column_names) {
@@ -74,7 +74,7 @@ namespace df {
         }
 
         CellLoggingColorCond     cell_color_condition     = [](const Cell<T>*) { return std::string(DF_COLOR_W); };
-        RowNameColorCond         row_name_color_condition = [](const Row<Cell<T>>*) { return std::string(DF_COLOR_W); };
+        RowNameColorCond         row_name_color_condition = [](const RowView<Cell<T>>*) { return std::string(DF_COLOR_W); };
         CellLoggingPrecCond      cell_precision_condition = [](const Cell<T>*) { return 8; };
         int                      floatPrecision           = 8;
         int                      spacing                  = 5;
@@ -170,15 +170,15 @@ namespace df {
 
     template<typename T>
     class RowGroup_Logger : Logger<T> {
-        friend class RowGroup<Row<Cell<T>>>;
+        friend class RowGroupView<RowView<Cell<T>>>;
 
-        RowGroup_Logger(RowGroup<Row<Cell<T>>>* rg) : Logger<T>(), rg(rg) {
+        RowGroup_Logger(RowGroupView<RowView<Cell<T>>>* rg) : Logger<T>(), rg(rg) {
         }
 
         RowGroup_Logger(const RowGroup_Logger& other) : Logger<T>(other.Logger), rg(other.rg) {
         }
 
-        RowGroup<Row<Cell<T>>>* rg;
+        RowGroupView<RowView<Cell<T>>>* rg;
 
       public:
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>
@@ -215,7 +215,7 @@ namespace df {
             }
 
             for (int idx = range_start; idx < range_end; idx++) {
-                const Row<Cell<T>>& current_row = rg->at(idx);
+                const RowView<Cell<T>>& current_row = rg->at(idx);
                 std::cout << std::left << std::setw(idx_space) << current_row.index() << this->context.row_name_color_condition(&current_row)
                           << std ::left << std::setw(row_name_space) << current_row.name() << DF_COLOR_W;
                 for (const auto& cell : current_row) {

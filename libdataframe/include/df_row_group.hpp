@@ -12,14 +12,14 @@ namespace df {
     class Dataframe;
 
     template<typename T>
-    class RowGroup {
+    class RowGroupView {
       public:
         using value_type     = T;
         using data_type      = typename value_type::data_type;
-        using iterator       = BaseIterator<RowGroup, false>;
-        using const_iterator = BaseIterator<RowGroup, true>;
+        using iterator       = BaseIterator<RowGroupView, false>;
+        using const_iterator = BaseIterator<RowGroupView, true>;
 
-        RowGroup(DataFrame<data_type>* df) : logger(this), logging_context(df->logger.context) {
+        RowGroupView(DataFrame<data_type>* df) : logger(this), logging_context(df->logger.context) {
             m_size     = df->row_count();
             m_d        = new value_type[m_size];
             m_row_size = df->row_size();
@@ -29,7 +29,7 @@ namespace df {
             logger.with_context(logging_context);
         }
 
-        RowGroup(const RowGroup& other)
+        RowGroupView(const RowGroupView& other)
             : logger(this),
               logging_context(other.logging_context),
               m_size(other.m_size),
@@ -41,7 +41,7 @@ namespace df {
             logger.with_context(logging_context);
         }
 
-        RowGroup(RowGroup&& other)
+        RowGroupView(RowGroupView&& other)
             : logger(this),
               logging_context(other.logging_context),
               m_size(other.m_size),
@@ -51,13 +51,13 @@ namespace df {
             other.m_d = nullptr;
         }
 
-        ~RowGroup() {
+        ~RowGroupView() {
             delete[] m_d;
         }
 
-        RowGroup operator=(const RowGroup& other) = delete; // why?
+        RowGroupView operator=(const RowGroupView& other) = delete; // why?
 
-        RowGroup& operator=(RowGroup&& other) {
+        RowGroupView& operator=(RowGroupView&& other) {
             if (this != &other) {
                 logging_context = other.logging_context;
                 m_size          = other.m_size;
@@ -77,7 +77,7 @@ namespace df {
         }
 
         template<typename U = data_type, typename = std::enable_if_t<std::is_arithmetic_v<data_type>, bool>>
-        RowGroup& sort(const std::string& column_name, const bool ascending = false) {
+        RowGroupView& sort(const std::string& column_name, const bool ascending = false) {
             std::size_t col_idx = m_d[0].column_index_of(column_name);
 
             std::sort(m_d, m_d + m_size, [ascending, col_idx](const value_type& a, const value_type& b) {

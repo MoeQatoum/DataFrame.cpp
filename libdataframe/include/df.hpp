@@ -35,13 +35,13 @@ namespace df {
         using iterator       = BaseIterator<DataFrame<data_type>, false>;
         using const_iterator = BaseIterator<DataFrame<data_type>, true>;
 
-        using row_type           = Row<value_type>;
-        using const_row_type     = Row<const value_type>;
+        using row_type           = RowView<value_type>;
+        using const_row_type     = RowView<const value_type>;
         using row_iterator       = RowIterator<DataFrame<data_type>, false>;
         using const_row_iterator = RowIterator<DataFrame<data_type>, true>;
 
-        using column_type           = Column<value_type>;
-        using const_column_type     = Column<const value_type>;
+        using column_type           = ColumnView<value_type>;
+        using const_column_type     = ColumnView<const value_type>;
         using column_iterator       = ColumnIterator<DataFrame<data_type>, false>;
         using const_column_iterator = ColumnIterator<DataFrame<data_type>, true>;
 
@@ -96,7 +96,7 @@ namespace df {
             logger.with_context(logging_context);
         }
 
-        DataFrame(const RowGroup<row_type>& rows) : logger(this), logging_context({}) {
+        DataFrame(const RowGroupView<row_type>& rows) : logger(this), logging_context({}) {
             m_col_count    = rows.row_size();
             m_row_count    = rows.size();
             m_col_size     = m_row_count;
@@ -322,11 +322,11 @@ namespace df {
             return {begin(), get_row_idx(row_name), m_row_size};
         }
 
-        RowGroup<row_type> rows() {
+        RowGroupView<row_type> rows() {
             return {this};
         }
 
-        RowGroup<const_row_type> rows() const {
+        RowGroupView<const_row_type> rows() const {
             return {this};
         }
 
@@ -383,13 +383,13 @@ namespace df {
         }
 
         template<std::enable_if_t<std::is_arithmetic_v<data_type>, bool> = true>
-        RowGroup<row_type> sort(std::string column_name, bool ascending = false) {
-            return RowGroup<row_type>(this).sort(column_name, ascending);
+        RowGroupView<row_type> sort(std::string column_name, bool ascending = false) {
+            return RowGroupView<row_type>(this).sort(column_name, ascending);
         }
 
         template<std::enable_if_t<std::is_arithmetic_v<data_type>, bool> = true>
-        RowGroup<const_row_type> sort(std::string column_name, bool ascending = false) const {
-            return RowGroup<const_row_type>(this).sort(column_name, ascending);
+        RowGroupView<const_row_type> sort(std::string column_name, bool ascending = false) const {
+            return RowGroupView<const_row_type>(this).sort(column_name, ascending);
         }
 
         template<std::enable_if_t<std::is_arithmetic_v<T>, bool> = true>

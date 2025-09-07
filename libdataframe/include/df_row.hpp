@@ -13,19 +13,20 @@ namespace df {
     class DataFrame;
 
     template<typename CellType>
-    class Row {
+    class RowView {
       public:
         using data_type    = typename CellType::data_type;
         using value_type   = CellType*;
         using pointer_type = value_type*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
-        using iterator = BaseIterator<Row<std::remove_const_t<CellType>>, std::is_const_v<CellType>>;
+        using iterator       = BaseIterator<RowView<std::remove_const_t<CellType>>, std::is_const_v<CellType>>;
+        using const_iterator = BaseIterator<RowView<std::remove_const_t<CellType>>, true>;
 
-        Row() : m_size(0), m_d(nullptr) {
+        RowView() : m_size(0), m_d(nullptr) {
         }
 
-        Row(dataframe_iterator df_begin, std::size_t row_idx, std::size_t row_size) {
+        RowView(dataframe_iterator df_begin, std::size_t row_idx, std::size_t row_size) {
             m_size = row_size;
             m_d    = new value_type[m_size];
 
@@ -35,19 +36,19 @@ namespace df {
             }
         }
 
-        Row(const Row& other) : m_size(other.m_size), m_d(new value_type[other.m_size]) {
+        RowView(const RowView& other) : m_size(other.m_size), m_d(new value_type[other.m_size]) {
             // for (std::size_t i = 0; i < m_size; i++) {
             //     m_d[i] = other.m_d[i];
             // }
             std::copy(other.begin(), other.end(), m_d);
         }
 
-        Row(Row&& other) : m_size(other.m_size), m_d(other.m_d) {
+        RowView(RowView&& other) : m_size(other.m_size), m_d(other.m_d) {
             other.m_d    = nullptr;
             other.m_size = 0;
         }
 
-        ~Row() {
+        ~RowView() {
             delete[] m_d;
         }
 
@@ -87,7 +88,7 @@ namespace df {
             abort();
         }
 
-        Row& operator=(const Row& rhs) {
+        RowView& operator=(const RowView& rhs) {
             if (this != &rhs) {
                 if (is_null()) {
                     FORCED_ASSERT(m_d == nullptr, "m_d supposed to be null pointer, something is wrong");
@@ -103,7 +104,7 @@ namespace df {
             return *this;
         }
 
-        Row& operator=(Row&& rhs) {
+        RowView& operator=(RowView&& rhs) {
             if (this != &rhs) {
                 m_size  = rhs.m_size;
                 m_d     = rhs.m_d;
@@ -112,7 +113,7 @@ namespace df {
             return *this;
         }
 
-        Row& operator=(const Series<CellType>& rhs) const {
+        RowView& operator=(const Series<CellType>& rhs) const {
             FORCED_ASSERT(m_d != nullptr, "m_d is not supposed to be null pointer, something is wrong");
             FORCED_ASSERT(m_size == rhs.size(), "assignment operation on nonmatching size objects");
             for (std::size_t i = 0; i < m_size; i++) {
@@ -164,7 +165,7 @@ namespace df {
             abort();
         }
 
-        friend std::ostream& operator<<(std::ostream& os, const Row& row) {
+        friend std::ostream& operator<<(std::ostream& os, const RowView& row) {
             os << "Row(addr: " << &row << ", size: " << row.m_size << ", type: " << typeid(CellType).name() << ")";
             return os;
         }
@@ -181,12 +182,28 @@ namespace df {
             return m_d[0]->idx.row_name;
         }
 
+        iterator begin() {
+            return iterator(m_d);
+        }
+
         iterator begin() const {
             return iterator(m_d);
         }
 
+        const_iterator cbegin() {
+            return const_iterator(m_d);
+        }
+
+        iterator end() {
+            return iterator(m_d + m_size);
+        }
+
         iterator end() const {
             return iterator(m_d + m_size);
+        }
+
+        const_iterator cend() {
+            return const_iterator(m_d + m_size);
         }
 
         bool is_null() const {
