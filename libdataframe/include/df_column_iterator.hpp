@@ -34,8 +34,6 @@ namespace df {
               m_current_col_idx(other.m_current_col_idx) {
         }
 
-        // TODO: move constructor ?
-
         // Implicit conversion to column; use for syntactic convenience (e.g., auto r = *it).
         operator column() {
             return column(m_ptr + m_current_col_idx, m_col_size, m_row_size);

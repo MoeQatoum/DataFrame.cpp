@@ -27,8 +27,6 @@ namespace df {
         RowIterator(const RowIterator& other) : m_ptr(other.m_ptr), m_row_size(other.m_row_size), m_current_row_idx(other.m_current_row_idx) {
         }
 
-        // TODO: move constructor ?
-
         // Implicit conversion to row; use for syntactic convenience (e.g., auto r = *it).
         operator row() {
             return row(m_ptr, m_current_row_idx, m_row_size);

@@ -34,10 +34,8 @@ namespace df {
         }
 
       public:
-        BaseIterator() = default;
-
         // allow conversion from non-const to const iterator
-        BaseIterator(const BaseIterator<Iterable, true>& other)
+        BaseIterator(const BaseIterator<Iterable, false>& other)
             requires(IsConst)
             : m_ptr(other.m_ptr) {
         }
@@ -46,11 +44,6 @@ namespace df {
         }
 
         ~BaseIterator() {
-        }
-
-        BaseIterator& operator=(const BaseIterator& other) {
-            if (this != &other) { m_ptr = other.m_ptr; }
-            return *this;
         }
 
         // clang-format off
