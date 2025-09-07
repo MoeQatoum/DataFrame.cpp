@@ -14,18 +14,26 @@ namespace df {
 
     template<typename CellType>
     class RowView {
+
+        template<typename>
+        friend class DataFrame;
+
+        template<typename>
+        friend class RowGroupView;
+
+        template<typename, bool>
+        friend class RowIterator;
+
       public:
-        using data_type    = typename CellType::data_type;
-        using value_type   = CellType*;
-        using pointer_type = value_type*;
+        using data_type        = typename CellType::data_type;
+        using value_type       = CellType*;
+        using const_value_type = const CellType*;
+        using pointer_type     = value_type*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
-        using iterator       = BaseIterator<RowView<std::remove_const_t<CellType>>, std::is_const_v<CellType>>;
-        using const_iterator = BaseIterator<RowView<std::remove_const_t<CellType>>, true>;
+        using iterator = BaseIterator<RowView<CellType>, std::is_const_v<CellType>>;
 
-        RowView() : m_size(0), m_d(nullptr) {
-        }
-
+      private:
         RowView(dataframe_iterator df_begin, std::size_t row_idx, std::size_t row_size) {
             m_size = row_size;
             m_d    = new value_type[m_size];
@@ -34,6 +42,10 @@ namespace df {
             for (std::size_t idx = 0; idx < row_size; idx++) {
                 m_d[idx] = &(row_begin + idx);
             }
+        }
+
+      public:
+        RowView() : m_size(0), m_d(nullptr) {
         }
 
         RowView(const RowView& other) : m_size(other.m_size), m_d(new value_type[other.m_size]) {
@@ -49,34 +61,11 @@ namespace df {
             delete[] m_d;
         }
 
-        // replace values directly - not recommended
-        // Row& operator()(const Row& other) {
-        //   FORCED_ASSERT(m_size == other.m_size, "assignment operation on nonmatching size objects");
-        //   for (std::size_t i = 0; i < m_size; i++) {
-        //     m_d[i]->value = other.m_d[i]->value;
-        //   }
-        //   return *this;
-        // }
-
         value_type& operator[](const std::size_t& idx) {
             return m_d[idx];
         }
 
-        const value_type& operator[](const std::size_t& idx) const {
-            return m_d[idx];
-        }
-
         value_type& operator[](const std::string& col_name) {
-            for (std::size_t i = 0; i < m_size; i++) {
-                if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
-            }
-
-            std::cerr << "col name not found.";
-            abort();
-        }
-
-        const std::conditional_t<std::is_const_v<value_type>, std::remove_const_t<value_type>, value_type>&
-        operator[](const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -119,16 +108,8 @@ namespace df {
             return *this;
         }
 
-        // Series<T> copy_data() {
-        //   Series<T> data(m_size);
-        //   for (std::size_t i = 0; i < m_size; i++) {
-        //     data[i] = m_d[i]->value;
-        //   }
-        //   return data;
-        // }
-
-        Series<CellType> to_series() const {
-            Series<CellType> data(m_size);
+        Series<data_type> to_series() {
+            Series<data_type> data(m_size);
             for (std::size_t i = 0; i < m_size; i++) {
                 data[i] = m_d[i]->value;
             }
@@ -136,15 +117,6 @@ namespace df {
         }
 
         value_type& at_column(const std::string& col_name) {
-            for (std::size_t i = 0; i < m_size; i++) {
-                if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
-            }
-
-            std::cerr << "col name not found.";
-            abort();
-        }
-
-        const value_type& at_column(const std::string& col_name) const {
             for (std::size_t i = 0; i < m_size; i++) {
                 if (m_d[i]->idx.col_name == col_name) { return m_d[i]; }
             }
@@ -175,32 +147,16 @@ namespace df {
             return m_d[0]->idx.row_idx;
         }
 
-        const std::string name() const {
+        std::string name() const {
             return m_d[0]->idx.row_name;
-        }
-
-        iterator begin() {
-            return iterator(m_d);
         }
 
         iterator begin() const {
             return iterator(m_d);
         }
 
-        const_iterator cbegin() {
-            return const_iterator(m_d);
-        }
-
-        iterator end() {
-            return iterator(m_d + m_size);
-        }
-
         iterator end() const {
             return iterator(m_d + m_size);
-        }
-
-        const_iterator cend() {
-            return const_iterator(m_d + m_size);
         }
 
         bool is_null() const {
