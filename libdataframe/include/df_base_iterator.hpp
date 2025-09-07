@@ -30,15 +30,6 @@ namespace df {
         template<typename>
         friend class RowGroupView;
 
-        template<typename, bool>
-        friend class RowIterator;
-
-        template<typename, bool>
-        friend class ColumnIterator;
-
-        template<typename, bool>
-        friend class ColumnIterator;
-
         explicit BaseIterator(pointer ptr = nullptr) : m_ptr(ptr) {
         }
 
