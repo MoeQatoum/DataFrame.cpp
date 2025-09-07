@@ -34,9 +34,6 @@ namespace df {
         }
 
       public:
-        // RowGroupView() : m_size(0), m_d(nullptr) {
-        // }
-
         RowGroupView(const RowGroupView& other)
             : logger(this),
               logging_context(other.logging_context),
