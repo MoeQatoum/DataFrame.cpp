@@ -252,4 +252,28 @@ TEST(series_operators_tests, division_operators) {
     }
 }
 
+TEST(series_operators_tests, min_function) {
+    df::Series<int> series_1 = make_series<int>({1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+    int result_1 = series_1.min();
+
+    int expected_1 = 1;
+
+    for (std::size_t i = 0; i < series_1.size(); i++) {
+        EXPECT_EQ(result_1, expected_1);
+    }
+}
+
+TEST(series_operators_tests, max_function) {
+    df::Series<int> series_1 = make_series<int>({1, 2, 3, 4, 5, 6, 7, 8, 9});
+
+    int result_1 = series_1.max();
+
+    int expected_1 = 9;
+
+    for (std::size_t i = 0; i < series_1.size(); i++) {
+        EXPECT_EQ(result_1, expected_1);
+    }
+}
+
 #endif // SERIES_TESTS_H
