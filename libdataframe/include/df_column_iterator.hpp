@@ -44,9 +44,9 @@ namespace df {
             return m_current_col_idx;
         }
 
-        // operator column() {
-        //     return column(m_ptr + m_current_col_idx, m_col_size, m_row_size);
-        // }
+        operator column() {
+            return column(m_ptr + m_current_col_idx, m_col_size, m_row_size);
+        }
 
         // operator ConstColumn() const {
         //     return ConstColumn(m_df_begin + m_current_col_idx, m_col_size, m_row_size);
