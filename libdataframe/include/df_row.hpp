@@ -37,9 +37,6 @@ namespace df {
         }
 
         RowView(const RowView& other) : m_size(other.m_size), m_d(new value_type[other.m_size]) {
-            // for (std::size_t i = 0; i < m_size; i++) {
-            //     m_d[i] = other.m_d[i];
-            // }
             std::copy(other.begin(), other.end(), m_d);
         }
 
