@@ -123,7 +123,7 @@ TEST(df_sort, dfRowsAscendingSort) {
 
     std::size_t col_idx = 1;
 
-    RowGroup<DataFrame<int>::row_type> sorted_rows = df.sort("col-2", false);
+    RowGroupView<DataFrame<int>::row_type> sorted_rows = df.sort("col-2", false);
 
     EXPECT_EQ(sorted_rows.size(), df.row_count());
 
