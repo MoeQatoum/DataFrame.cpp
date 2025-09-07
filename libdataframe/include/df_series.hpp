@@ -7,6 +7,7 @@
 namespace df {
     template<typename T>
     class Series {
+
       public:
         using value_type     = T;
         using iterator       = BaseIterator<Series, false>;
@@ -358,34 +359,24 @@ namespace df {
             return true;
         }
 
-        // TODO: this function should return a const iterator.
-        iterator begin() const {
-            return iterator(m_ptr);
-        }
-
         iterator begin() {
-            return {m_ptr};
+            return iterator{m_ptr};
         }
 
-        // TODO: this function should return a const iterator.
-        iterator end() const {
-            return iterator(m_ptr + m_size);
+        const_iterator begin() const {
+            return const_iterator(m_ptr);
         }
 
         iterator end() {
             return {m_ptr + m_size};
         }
 
+        const_iterator end() const {
+            return const_iterator(m_ptr + m_size);
+        }
+
         std::size_t size() const {
             return m_size;
-        }
-
-        T* data() {
-            return m_ptr;
-        }
-
-        const T* data() const {
-            return m_ptr;
         }
 
       private:
