@@ -12,6 +12,13 @@ namespace df {
 
     template<typename CellType>
     class ColumnView {
+
+        template<typename>
+        friend class DataFrame;
+
+        template<typename, bool>
+        friend class ColumnIterator;
+
       public:
         using data_type    = typename CellType::data_type;
         using value_type   = CellType*;
@@ -20,9 +27,7 @@ namespace df {
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
         using iterator = BaseIterator<ColumnView<CellType>, std::is_const_v<CellType>>;
 
-        ColumnView() : m_size(0), m_stride(0), m_d(nullptr) {
-        }
-
+      private:
         ColumnView(dataframe_iterator col_begin, std::size_t col_size, std::size_t stride) {
             m_size   = col_size;
             m_stride = stride;
@@ -33,20 +38,15 @@ namespace df {
             }
         }
 
+      public:
+        ColumnView() : m_size(0), m_stride(0), m_d(nullptr) {
+        }
+
         ColumnView(const ColumnView& other) = delete;
 
         ~ColumnView() {
             delete[] m_d;
         }
-
-        // replace values directly - not recommended
-        // Column& operator()(const Column& other) {
-        //   FORCED_ASSERT(m_size == other.m_size, "assignment operation on nonmatching size objects");
-        //   for (std::size_t i = 0; i < m_size; i++) {
-        //     m_d[i]->value = other.m_d[i]->value;
-        //   }
-        //   return *this;
-        // }
 
         value_type& operator[](const std::size_t idx) {
             return m_d[idx];
@@ -536,7 +536,7 @@ namespace df {
             return m_d[0]->idx.col_idx;
         }
 
-        const std::string name() const {
+        std::string name() const {
             return m_d[0]->idx.col_name;
         }
 

@@ -9,7 +9,7 @@ namespace df {
     template<typename dataframe, bool IsConst>
     class ColumnIterator {
         using dataframe_iterator = std::conditional_t<IsConst, typename dataframe::const_iterator, typename dataframe::iterator>;
-        using column             = ColumnView<std::conditional_t<IsConst, typename dataframe::const_value_type, typename dataframe::value_type>>;
+        using column             = std::conditional_t<IsConst, typename dataframe::const_column_type, typename dataframe::column_type>;
 
       public:
         ColumnIterator(dataframe_iterator df_begin, std::size_t col_size, std::size_t row_size)
