@@ -9,14 +9,15 @@ namespace df {
     class Series {
 
       public:
-        using value_type     = T;
+        using data_type      = T;
+        using value_type     = data_type;
         using iterator       = BaseIterator<Series, false>;
         using const_iterator = BaseIterator<Series, true>;
 
-        explicit Series(const std::size_t& size) : m_d(new T[size]), m_size(size) {
+        explicit Series(const std::size_t& size) : m_d(new data_type[size]), m_size(size) {
         }
 
-        Series(const std::initializer_list<T>& il) : m_d(new T[il.size()]), m_size(il.size()) {
+        Series(const std::initializer_list<T>& il) : m_d(new data_type[il.size()]), m_size(il.size()) {
             std::copy(il.begin(), il.end(), m_d);
         }
 
@@ -30,8 +31,6 @@ namespace df {
             std::copy(other.begin(), other.end(), m_d);
         }
 
-        // TODO: move constructors ??
-
         Series& operator=(const Series& other) {
             FORCED_ASSERT(m_size == other.m_size, "copy assignment operator on nonmatching size objects");
             if (this != &other) {
@@ -42,11 +41,11 @@ namespace df {
             return *this;
         }
 
-        T& operator[](std::size_t idx) {
+        data_type& operator[](std::size_t idx) {
             return *(m_d + idx);
         }
 
-        const T& operator[](std::size_t idx) const {
+        const data_type& operator[](std::size_t idx) const {
             return *(m_d + idx);
         }
 
@@ -60,8 +59,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator==(const Series& lhs, const /* T1 */ T& rhs) {
+        friend Series<bool> operator==(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] == rhs);
@@ -69,8 +67,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator==(const /* T1 */ T& lhs, const Series& rhs) {
+        friend Series<bool> operator==(const data_type& lhs, const Series& rhs) {
             return rhs == lhs;
         }
 
@@ -83,7 +80,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator!=(const Series& lhs, const T& rhs) {
+        friend Series<bool> operator!=(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] != rhs);
@@ -91,7 +88,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator!=(const T& lhs, const Series& rhs) {
+        friend Series<bool> operator!=(const data_type& lhs, const Series& rhs) {
             return rhs != lhs;
         }
 
@@ -104,8 +101,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator>=(const Series& lhs, const /* T1 */ T& rhs) {
+        friend Series<bool> operator>=(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] >= rhs);
@@ -113,8 +109,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator>=(const /* T1 */ T& lhs, const Series& rhs) {
+        friend Series<bool> operator>=(const data_type& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs >= rhs[i]);
@@ -131,7 +126,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const Series& lhs, const T& rhs) {
+        friend Series<bool> operator<=(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] <= rhs);
@@ -139,7 +134,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<=(const T& lhs, const Series& rhs) {
+        friend Series<bool> operator<=(const data_type& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs <= rhs[i]);
@@ -156,7 +151,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const Series& lhs, const T& rhs) {
+        friend Series<bool> operator<(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] < rhs);
@@ -164,7 +159,7 @@ namespace df {
             return temp;
         }
 
-        friend Series<bool> operator<(const T& lhs, const Series& rhs) {
+        friend Series<bool> operator<(const data_type& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs < rhs[i]);
@@ -181,8 +176,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator>(const Series& lhs, const /*TI*/ T& rhs) {
+        friend Series<bool> operator>(const Series& lhs, const data_type& rhs) {
             Series<bool> temp(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 temp[i] = (lhs[i] > rhs);
@@ -190,8 +184,7 @@ namespace df {
             return temp;
         }
 
-        // TODO: is comparable with T1
-        friend Series<bool> operator>(const /*TI*/ T& lhs, const Series& rhs) {
+        friend Series<bool> operator>(const data_type& lhs, const Series& rhs) {
             Series<bool> temp(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 temp[i] = (lhs > rhs[i]);
@@ -209,7 +202,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator+(const Series& lhs, const T& rhs) {
+        friend Series operator+(const Series& lhs, const data_type& rhs) {
             Series res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 res[i] = lhs[i] + rhs;
@@ -217,12 +210,18 @@ namespace df {
             return res;
         }
 
-        friend Series operator+(const T& lhs, const Series& rhs) {
+        friend Series operator+(const data_type& lhs, const Series& rhs) {
             return rhs + lhs;
         }
 
-        // TODO: returns a reference to the current Series
-        Series operator+=(const T& rhs) {
+        Series operator+=(const Series& rhs) {
+            for (std::size_t i = 0; i < m_size; i++) {
+                m_d[i] += rhs[i];
+            }
+            return *this;
+        }
+
+        Series operator+=(const data_type& rhs) {
             for (std::size_t i = 0; i < m_size; i++) {
                 m_d[i] += rhs;
             }
@@ -251,7 +250,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator*(const Series& lhs, const T& rhs) {
+        friend Series operator*(const Series& lhs, const data_type& rhs) {
             Series res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 res[i] = lhs[i] * rhs;
@@ -259,7 +258,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator*(const T& lhs, const Series& rhs) {
+        friend Series operator*(const data_type& lhs, const Series& rhs) {
             return rhs * lhs;
         }
 
@@ -272,7 +271,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator-(const Series& lhs, const T& rhs) {
+        friend Series operator-(const Series& lhs, const data_type& rhs) {
             Series res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 res[i] = lhs[i] - rhs;
@@ -280,7 +279,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator-(const T& lhs, const Series& rhs) {
+        friend Series operator-(const data_type& lhs, const Series& rhs) {
             Series res(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 res[i] = lhs - rhs[i];
@@ -288,7 +287,14 @@ namespace df {
             return res;
         }
 
-        Series operator-=(const T& rhs) {
+        Series operator-=(const Series& rhs) {
+            for (std::size_t i = 0; i < m_size; i++) {
+                m_d[i] -= rhs[i];
+            }
+            return *this;
+        }
+
+        Series operator-=(const data_type& rhs) {
             for (std::size_t i = 0; i < m_size; i++) {
                 m_d[i] -= rhs;
             }
@@ -317,7 +323,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator/(const Series& lhs, const T& rhs) {
+        friend Series operator/(const Series& lhs, const data_type& rhs) {
             Series res(lhs.m_size);
             for (std::size_t i = 0; i < lhs.m_size; i++) {
                 res[i] = lhs[i] / rhs;
@@ -325,7 +331,7 @@ namespace df {
             return res;
         }
 
-        friend Series operator/(const T& lhs, const Series& rhs) {
+        friend Series operator/(const data_type& lhs, const Series& rhs) {
             Series res(rhs.m_size);
             for (std::size_t i = 0; i < rhs.m_size; i++) {
                 res[i] = lhs / rhs[i];
@@ -335,20 +341,12 @@ namespace df {
 
         template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
         T max() const {
-            T temp = m_d[0]->value;
-            for (std::size_t i = 1; i < m_size; ++i) {
-                if (m_d[i]->value > temp) { temp = m_d[i]->value; }
-            }
-            return temp;
+            return *std::max_element(m_d, m_d + m_size);
         }
 
         template<typename U = T, std::enable_if_t<std::is_arithmetic_v<U>, bool> = true>
         T min() const {
-            T temp = m_d[0]->value;
-            for (std::size_t i = 1; i < m_size; ++i) {
-                if (m_d[i]->value < temp) { temp = m_d[i]->value; }
-            }
-            return temp;
+            return *std::min_element(begin(), end());
         }
 
         bool is_equal_with(const Series& other) const {
@@ -368,7 +366,7 @@ namespace df {
         }
 
         iterator end() {
-            return {m_d + m_size};
+            return iterator{m_d + m_size};
         }
 
         const_iterator end() const {
@@ -380,7 +378,7 @@ namespace df {
         }
 
       private:
-        value_type* m_d;
+        data_type*  m_d;
         std::size_t m_size;
     };
 
