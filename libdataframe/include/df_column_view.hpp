@@ -20,9 +20,8 @@ namespace df {
         friend class ColumnIterator;
 
       public:
-        using data_type    = typename CellType::data_type;
-        using value_type   = CellType*;
-        using pointer_type = value_type*;
+        using data_type  = typename CellType::data_type;
+        using value_type = CellType*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
         using iterator = BaseIterator<ColumnView<CellType>, std::is_const_v<CellType>>;

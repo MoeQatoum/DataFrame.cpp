@@ -28,7 +28,6 @@ namespace df {
         using data_type        = typename CellType::data_type;
         using value_type       = CellType*;
         using const_value_type = const CellType*;
-        using pointer_type     = value_type*;
         using dataframe_iterator
         = std::conditional_t<std::is_const_v<CellType>, typename DataFrame<data_type>::const_iterator, typename DataFrame<data_type>::iterator>;
         using iterator = BaseIterator<RowView<CellType>, std::is_const_v<CellType>>;
