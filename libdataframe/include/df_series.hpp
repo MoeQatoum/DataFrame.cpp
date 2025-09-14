@@ -381,6 +381,10 @@ namespace df {
             return m_d;
         }
 
+        const data_type* data() const {
+            return m_d;
+        }
+
       private:
         data_type*  m_d;
         std::size_t m_size;
